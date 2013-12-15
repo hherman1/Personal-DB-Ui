@@ -10,7 +10,7 @@
 #define FALSE	0
 
 #define MAX_SUBJECT_LEN 30
-#define MAX_Body_LEN 130
+#define MAX_BODY_LEN 130
 #define MAX_TiME_LEN 20
 // Globals ---------------------------------
 struct NameValue {
