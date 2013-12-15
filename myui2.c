@@ -6,7 +6,7 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-
+Area SCREEN = {1,120,1,55}
 Area rArea = {1,120,7,45};
 																																	
 struct TemplateString TS[] = {
@@ -63,7 +63,7 @@ int main(void) {
 		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
 		xt_par0(XT_CH_DEFAULT);
 		xt_par0(TS[i].color);
-		printf("%s",TS[i].string);
+		printf("%s,%i",TS[i].string,i);
 	}
 	
 	
