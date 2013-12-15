@@ -117,7 +117,9 @@ void ParseStat(void){
 	ParseInput(input,n_input);
 }
 void ParseRecord(int numRec){
-	ReadMystoreFromChild("display",numRec,NULL,NULL);
+	char str[15];
+	sprintf(str, "%d", numRec);
+	ReadMystoreFromChild("display",str,NULL,NULL);
 	ParseInput(input,n_input);
 }
 // --------------------------- searchinh-----------------------------------
