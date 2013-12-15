@@ -29,8 +29,8 @@ int nSP = sizeof(SP)/sizeof(SP[0]);
 struct RecordList RLBuffer;
 
 int nitems = 0;  //numRecords
-char subject[31];
-char body[141];
+char subject[MAX_SUBJECT_LEN+1];
+char body[MAX_BODY_LEN+1];
 char errmsg[80] = "";
 
 char *cursorPos; // what are the cursor is at
@@ -81,7 +81,7 @@ int main(void) {
 		
 		int row = rArea.top + i - recordDisplayStart;
 		DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
-		DisplayAt(row,rArea.right,XT_CH_GREEN,30,temp->time);
+		DisplayAt(row,rArea.right-MAX_TiME_LEN,XT_CH_GREEN,30,temp->time);
 	}
 	//*/
 	while (TRUE) {

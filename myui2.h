@@ -8,8 +8,10 @@
 
 #define TRUE	1
 #define FALSE	0
-//area divisions
 
+#define MAX_SUBJECT_LEN 30
+#define MAX_Body_LEN 130
+#define MAX_TiME_LEN 20
 // Globals ---------------------------------
 struct NameValue {
 	char *name;
@@ -51,7 +53,6 @@ struct RecordList
 	Record *bottom;
 	int length;
 };
-//not using
 
 // Prototypes -------------------------------------
 int ParseInput(char *in, int n_in);
