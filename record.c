@@ -2,7 +2,7 @@
 #include "record.h"
 
 //--------------------------Display----------------------------
-
+void displayRecords(struct RecordList buffer,Area rArea);
 //--------------------------Operations-------------------------
 void loadRecords(struct RecordList *buffer,int low,int high,int number) {
 	ParseRecord(low);
@@ -51,7 +51,12 @@ void freeRecord(Record *target) {
 	free(target->time);
 	free(target->body);
 	free(target->subject);
-	target->prev->next = target->next;
+	if(target->prev != NULL) {
+		target->prev->next = target->next;
+	}
+	if(target->next != NULL) {
+		target->next->prev = target->prev;
+	}
 	free(target);
 }
 void recordcpy(Record *dest,Record src) {
