@@ -22,17 +22,7 @@ int nTS = sizeof(TS)/sizeof(TS[0]);
 
 struct StringPosition SP[] = {
 	{4,10,70,"message"},
-	{50,25,3,"nitems"},
-	{8,20,20,"first-record"},
-	{9,20,20,"last-record"},
-	{10,9,30,"author"},
-	{11,10,10,"version"},
-	{14,11,3,"record-num"},
-	{15,7,20,"time"},
-	{16,10,30,"subject"},
-	{17,7,140,"body"},
-	{21,11,30,"edit-subject"},
-	{22,11,140,"edit-body"}
+	{50,25,3,"nitems"}
 };
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
@@ -168,19 +158,7 @@ void fill(char *s, int n) {
 	*s='\0';
 }
 
-// ------------------------------------------------ DisplayStat --------------
-void DisplayStat(void) {
-	ParseStat();
-	/*
-	SearchDisplay("nitems","nitems",XT_CH_WHITE);
-	SearchDisplay("first-record","first-time",XT_CH_WHITE);
-	SearchDisplay("last-record","last-time",XT_CH_WHITE);
-	SearchDisplay("author","author",XT_CH_WHITE);
-	SearchDisplay("version","version",XT_CH_WHITE);
-	*/
-	fflush(stdout);
-	//SearchDisplay("message",errmsg,XT_CH_RED);
-}
+
 //---------------------------------parse inputs--------------------------
 void ParseStat(void){
 	ReadMystoreFromChild("stat",NULL,NULL,NULL);
