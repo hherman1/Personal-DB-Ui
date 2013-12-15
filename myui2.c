@@ -68,6 +68,8 @@ int main(void) {
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
 	loadRecords(&RLBuffer,recordDisplayStart,recordDisplayEnd,nitems);
+	
+	
 	//records operation
 	//	int row = rArea.top + i - recordDisplayStart;
 	//	DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
