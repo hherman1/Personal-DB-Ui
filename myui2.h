@@ -28,3 +28,11 @@ struct StringPosition {
 	int length;
 	char *name;
 };
+/*
+typedef struct Record{
+	int num;
+	char *subject;
+	char *body;
+	char *time;
+}Record;
+*/ //not using

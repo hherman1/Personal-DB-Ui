@@ -1,25 +1,26 @@
 #include "myui2.h"
 
-struct NameValue *nvs = NULL;
+struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
 
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
+
 
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
 	{5,1,XT_CH_YELLOW,"Search: ____________________"},
-
+	{48,1,XT_CH_RED,"Note: pls save to commit changes"},
 	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{50,1,XT_CH_GREEN,"Message:"}
+	{50,1,XT_CH_GREEN,"Message: nitems = "}
 };
 int nTS = sizeof(TS)/sizeof(TS[0]);
 
 struct StringPosition SP[] = {
 	{4,10,70,"message"},
-	{7,20,3,"nitems"},
+	{50,25,3,"nitems"},
 	{8,20,20,"first-record"},
 	{9,20,20,"last-record"},
 	{10,9,30,"author"},
@@ -33,12 +34,16 @@ struct StringPosition SP[] = {
 };
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
-int nitems = 0;
+int nitems = 0;  //numRecords
 char subject[31];
 char body[141];
 char errmsg[80] = "";
 
-
+char *cursorPos; // what are the cursor is at
+ 				//title, record1, record2, message, ....
+int recordDisplayStart = 1; //display records 1-20; start to end 
+int recordDisplayEnd = 20;
+int boolShowCurrentRecord = FALSE;
 // ------------------------------------------------ main --------------------
 int main(void) {
 	int i, c;
@@ -57,7 +62,21 @@ int main(void) {
 		printf("%s",TS[i].string);
 	}
 	
-	DisplayStat();
+	
+	//perform operations on stat
+	ParseStat();
+	SearchDisplay("nitems","nitems",XT_CH_WHITE);
+	nitems = searchNvs("nitems");
+
+	//records operation
+	int recordDisplayCounter = 0;
+	for (i = recordDisplayStart; i <= recordDisplayEnd && i <= nitems; i++){
+		ParseRecord(i);
+		int row = i - recordDisplayStart + 7;
+		DisplayAt(row,1,XT_CH_GREEN,30,searchNvs("subject"));
+		DisplayAt(row,50,XT_CH_GREEN,30,searchNvs("time"));
+	}
+
 	while (TRUE) {
 		while ((c = getkey()) == KEY_NOTHING) ;
 		if (c == KEY_F9)  {
@@ -79,8 +98,7 @@ void fill(char *s, int n) {
 
 // ------------------------------------------------ DisplayStat --------------
 void DisplayStat(void) {
-	ReadMystoreFromChild("stat",NULL,NULL,NULL);
-	ParseInput(input,n_input);
+	ParseStat();
 	/*
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	SearchDisplay("first-record","first-time",XT_CH_WHITE);
@@ -91,8 +109,16 @@ void DisplayStat(void) {
 	fflush(stdout);
 	//SearchDisplay("message",errmsg,XT_CH_RED);
 }
-
-// --------------------------- Display -----------------------------------
+//---------------------------------parse inputs--------------------------
+void ParseStat(void){
+	ReadMystoreFromChild("stat",NULL,NULL,NULL);
+	ParseInput(input,n_input);
+}
+void ParseRecord(int numRec){
+	ReadMystoreFromChild("display",numrec,NULL,NULL);
+	ParseInput(input,n_input);
+}
+// --------------------------- searchinh-----------------------------------
 void SearchDisplay(char *prompt, char *name, char *color) {
 	int loc, col, i, j;
 	int instring = TRUE;
@@ -112,6 +138,15 @@ void SearchDisplay(char *prompt, char *name, char *color) {
 	}
 	
 	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
+}
+
+void searchNvs(char *name){
+	int i;
+	for (i = 0; i < n_nvs; ++i) {
+		if (strcmp(nvs[i].name,name) == 0) {
+			return nvs[i].value;
+		}
+	}
 }
 
 // ------------------------------------- DisplayAt -------------------------
