@@ -44,13 +44,6 @@ typedef struct Record
 	char date*
 	Record next*
 }Record;
-/*
-typedef struct Record{
-	int num;
-	char *subject;
-	char *body;
-	char *time;
-}Record;
 */ //not using
 
 // Prototypes -------------------------------------
