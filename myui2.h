@@ -36,6 +36,14 @@ typedef struct Area
 	int top;
 	int down;
 }Area;
+typedef struct Record
+{
+	int num
+	char subject[31]
+	char body[141]
+	char date*
+	Record next*
+}Record;
 /*
 typedef struct Record{
 	int num;
