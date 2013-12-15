@@ -71,14 +71,14 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 
 	//records operation
-	/*
+	
 	int recordDisplayCounter = 0;
 	for (i = recordDisplayStart; i <= recordDisplayEnd && i <= nitems; i++){
 		ParseRecord(i);
 		int row = i - recordDisplayStart + 7;
 		DisplayAt(row,1,XT_CH_GREEN,30,searchNvs("subject"));
 		DisplayAt(row,75,XT_CH_GREEN,30,searchNvs("time"));
-	}*/
+	}
 
 	while (TRUE) {
 		while ((c = getkey()) == KEY_NOTHING) ;
