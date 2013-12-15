@@ -13,7 +13,7 @@ struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
-	{rArea.top - 2,1,XT_CH_YELLOW,"Search: _________________________________"},
+	{5,1,XT_CH_YELLOW,"Search: _________________________________"},
 	{48,1,XT_CH_RED,"Note: pls save to commit changes"},
 	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{50,1,XT_CH_GREEN,"Message: nitems = "}
@@ -74,7 +74,6 @@ int main(void) {
 
 	//records operation
 	
-	int recordDisplayCounter = 0;
 	for (i = recordDisplayStart; i <= recordDisplayEnd && i <= nitems; i++){
 		ParseRecord(i);
 		int row = rArea.top + i - recordDisplayStart;
