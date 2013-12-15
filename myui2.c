@@ -59,7 +59,7 @@ int main(void) {
 		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
 		xt_par0(XT_CH_DEFAULT);
 		xt_par0(TS[i].color);
-		printf("%s,%i",TS[i].string,i);
+		//printf("%s,%i",TS[i].string,i);
 	}
 	
 	
@@ -162,6 +162,12 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 	fflush(stdout);
 }
 
+void scrollPrevious(void){
+
+}
+void scrollNext(void){
+
+}
 // ---------------------------------- 	FindStringPosition ----------------
 int FindStringPosition(char *prompt) { //pos in string array 
 	int i;

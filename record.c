@@ -52,6 +52,7 @@ void freeRecord(Record *target) {
 	free(target->body);
 	free(target->subject);
 	target->prev->next = target->next;
+	//target->next->previous = target->previous
 	free(target);
 }
 void recordcpy(Record *dest,Record src) {
@@ -73,3 +74,18 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 	}
 }
 
+//must parseRecord for this
+void shiftBufferDown(struct RecordList *buffer){
+	Record *newRec = malloc(sizeof(Record));
+	getRecord(newRec)
+	bufferRecord(buffer,newRec);
+	Record *oldTop = buffer->top;
+	buffer->top = buffer->top->next;
+	freeRecord(oldTop);
+}
+void shiftBufferUP(struct RecordList *buffer){ ///work in progress
+	Record *newRec = malloc(sizeof(Record));
+	getRecord(newRec)
+	bufferRecord(buffer,newRec);
+}
+/////
