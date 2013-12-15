@@ -7,11 +7,13 @@ char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
 
+Area rArea = {1,120,7,45};
+																																	
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
-	{5,1,XT_CH_YELLOW,"Search: ____________________"},
+	{rArea.top - 2,1,XT_CH_YELLOW,"Search: _________________________________"},
 	{48,1,XT_CH_RED,"Note: pls save to commit changes"},
 	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{50,1,XT_CH_GREEN,"Message: nitems = "}
@@ -75,9 +77,9 @@ int main(void) {
 	int recordDisplayCounter = 0;
 	for (i = recordDisplayStart; i <= recordDisplayEnd && i <= nitems; i++){
 		ParseRecord(i);
-		int row = i - recordDisplayStart + 7;
-		DisplayAt(row,1,XT_CH_GREEN,30,searchNvs("subject"));
-		DisplayAt(row,75,XT_CH_GREEN,30,searchNvs("time"));
+		int row = rArea.top + i - recordDisplayStart;
+		DisplayAt(row,rArea.left,XT_CH_GREEN,30,searchNvs("subject"));
+		DisplayAt(row,rArea.right,XT_CH_GREEN,30,searchNvs("time"));
 	}
 
 	while (TRUE) {

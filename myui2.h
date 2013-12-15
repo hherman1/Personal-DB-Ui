@@ -8,6 +8,7 @@
 
 #define TRUE	1
 #define FALSE	0
+//area divisions
 
 // Globals ---------------------------------
 struct NameValue {
@@ -28,6 +29,13 @@ struct StringPosition {
 	int length;
 	char *name;
 };
+typedef struct Area
+{	//help define the boundary of areas like display space, title space, 
+	int left;
+	int right;
+	int top;
+	int down;
+}Area;
 /*
 typedef struct Record{
 	int num;
