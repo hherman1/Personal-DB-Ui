@@ -36,6 +36,8 @@ struct StringPosition SP[] = {
 };
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
+struct RecordList RLBuffer;
+
 int nitems = 0;  //numRecords
 char subject[31];
 char body[141];
@@ -73,9 +75,11 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 
 	//records operation
+	ParseRecord(recordDisplayStart);
 	
 	for (i = recordDisplayStart; i <= recordDisplayEnd && i <= nitems; i++){
 		ParseRecord(i);
+		
 		int row = rArea.top + i - recordDisplayStart;
 		DisplayAt(row,rArea.left,XT_CH_GREEN,30,searchNvs("subject"));
 		DisplayAt(row,rArea.right,XT_CH_GREEN,30,searchNvs("time"));
@@ -93,6 +97,9 @@ int main(void) {
 	}
 	
 }
+//--------------------------get Record-------------------------
+
+
 
 // ------------------------------------ fill --------------------------------
 void fill(char *s, int n) {
