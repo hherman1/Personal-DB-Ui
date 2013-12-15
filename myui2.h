@@ -38,11 +38,11 @@ typedef struct Area
 }Area;
 typedef struct Record
 {
-	int num
-	char subject[31]
-	char body[141]
-	char date*
-	Record next*
+	int num;
+	char subject[31];
+	char body[141];
+	char date*;
+	Record next*;
 }Record;
 */ //not using
 
