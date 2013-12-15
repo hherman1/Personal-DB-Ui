@@ -10,7 +10,7 @@
 #define FALSE	0
 
 #define MAX_SUBJECT_LEN 30
-#define MAX_Body_LEN 130
+#define MAX_BODY_LEN 130
 #define MAX_TiME_LEN 20
 // Globals ---------------------------------
 struct NameValue {
@@ -38,21 +38,6 @@ typedef struct Area
 	int top;
 	int down;
 }Area;
-typedef struct Record
-{
-	int num;
-	char *subject;
-	char *body;
-	char *time;
-	struct Record *next;
-	struct Record *prev;
-}Record;
-struct RecordList
-{
-	Record *top;
-	Record *bottom;
-	int length;
-};
 
 // Prototypes -------------------------------------
 int ParseInput(char *in, int n_in);
