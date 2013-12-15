@@ -38,21 +38,6 @@ typedef struct Area
 	int top;
 	int down;
 }Area;
-typedef struct Record
-{
-	int num;
-	char *subject;
-	char *body;
-	char *time;
-	struct Record *next;
-	struct Record *prev;
-}Record;
-struct RecordList
-{
-	Record *top;
-	Record *bottom;
-	int length;
-};
 
 // Prototypes -------------------------------------
 int ParseInput(char *in, int n_in);
