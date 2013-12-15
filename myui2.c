@@ -81,7 +81,13 @@ void fill(char *s, int n) {
 void DisplayStat(void) {
 	ReadMystoreFromChild("stat",NULL,NULL,NULL);
 	ParseInput(input,n_input);
-	//SearchDisplay("nitems","nitems",XT_CH_WHITE);
+	/*
+	SearchDisplay("nitems","nitems",XT_CH_WHITE);
+	SearchDisplay("first-record","first-time",XT_CH_WHITE);
+	SearchDisplay("last-record","last-time",XT_CH_WHITE);
+	SearchDisplay("author","author",XT_CH_WHITE);
+	SearchDisplay("version","version",XT_CH_WHITE);
+	*/
 	fflush(stdout);
 	//SearchDisplay("message",errmsg,XT_CH_RED);
 }
