@@ -6,7 +6,7 @@ myui2:	myui2.o record.o myui2_util.o keyboard.o xterm_control.o
 myui2.o:	myui2.c myui2.h
 	gcc -c myui2.c
 
-record.o:	record.c myui2.h
+record.o:	record.c record.h myui2.h
 	gcc -c record.c
 
 myui2_util.o:	myui2_util.c myui2.h

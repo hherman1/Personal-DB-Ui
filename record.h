@@ -20,3 +20,4 @@ void freeRecord(Record *target);
 Record *findRecord(struct RecordList *buffer,int num);
 void recordcpy(Record *dest,Record src);
 void bufferRecord(struct RecordList *buffer,Record *r);
+void bufferNewRecord(struct RecordList *buffer,Record *r);

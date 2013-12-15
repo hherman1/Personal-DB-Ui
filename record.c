@@ -72,4 +72,10 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 		buffer->top = r;
 	}
 }
-
+void bufferNewRecord(struct RecordList *buffer,Record *r) {
+	if(buffer->top != NULL) {
+		buffer->top = buffer->top->next;
+		freeRecord(buffer->top->prev);
+	}
+	bufferRecord(buffer,r);
+}
