@@ -13,7 +13,7 @@ struct TemplateString TS[] = {
 	{1,5,XT_CH_YELLOW,"Search: ____________________"},
 
 	{1,49,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{1,50,XT_CH_Green,"Message:"}
+	{1,50,XT_CH_GREEN,"Message:"}
 };
 int nTS = sizeof(TS)/sizeof(TS[0]);
 
