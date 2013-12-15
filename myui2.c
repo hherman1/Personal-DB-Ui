@@ -135,13 +135,7 @@ void SearchDisplay(char *prompt, char *name, char *color) {
 	col = SP[loc].col;
 	
 	// search for value
-	value = "";
-	for (j = 0; j < n_nvs; ++j) {
-		if (strcmp(nvs[j].name,name) == 0) {
-			value = nvs[j].value;
-			break;
-		}
-	}
+	value = searchNvs(name);
 	
 	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
 }
