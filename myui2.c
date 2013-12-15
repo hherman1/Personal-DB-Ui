@@ -34,8 +34,8 @@ char subject[MAX_SUBJECT_LEN+1];
 char body[MAX_BODY_LEN+1];
 char errmsg[80] = "";
 
-char *cursorPos; // what are the cursor is at
- 				//title, record1, record2, message, ....
+char *cursorPos; // where the cursor is at
+ 		 //title, record1, record2, message, ....
 int recordDisplayStart = 1; //display records 1-20; start to end 
 int recordDisplayEnd = 20;
 int boolShowCurrentRecord = FALSE;
