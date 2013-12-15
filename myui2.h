@@ -36,3 +36,16 @@ typedef struct Record{
 	char *time;
 }Record;
 */ //not using
+
+// Prototypes -------------------------------------
+int ParseInput(char *in, int n_in);
+int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4);
+void DisplayStat(void);
+void fill(char *s, int n);
+void SearchDisplay(char *prompt, char *name, char *color);
+void DisplayAt(int row, int col, char *color, int maxlength, char *s);
+int FindStringPosition(char *prompt);
+//new
+char *searchNvs(char *name);
+void ParseStat(void);
+void ParseRecord(int numRec);
