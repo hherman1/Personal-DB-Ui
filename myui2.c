@@ -68,16 +68,17 @@ int main(void) {
 	//perform operations on stat
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
-	nitems = searchNvs("nitems");
+	nitems = atoi(searchNvs("nitems"));
 
 	//records operation
+	/*
 	int recordDisplayCounter = 0;
-	for (i = recordDisplayStart; i <= recordDisplayEnd && i < nitems; i++){
+	for (i = recordDisplayStart; i <= recordDisplayEnd && i <= nitems; i++){
 		ParseRecord(i);
 		int row = i - recordDisplayStart + 7;
 		DisplayAt(row,1,XT_CH_GREEN,30,searchNvs("subject"));
 		DisplayAt(row,75,XT_CH_GREEN,30,searchNvs("time"));
-	}
+	}*/
 
 	while (TRUE) {
 		while ((c = getkey()) == KEY_NOTHING) ;
@@ -122,7 +123,7 @@ void ParseRecord(int numRec){
 	ReadMystoreFromChild("display",str,NULL,NULL);
 	ParseInput(input,n_input);
 }
-// --------------------------- searchinh-----------------------------------
+// --------------------------- searching-----------------------------------
 void SearchDisplay(char *prompt, char *name, char *color) {
 	int loc, col, i, j;
 	int instring = TRUE;
@@ -163,7 +164,7 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 		if (value[i] == '\0') 
 			instring = FALSE;
 		printf("%c",instring?value[i]:' ');
-		if (++col == 80) {
+		if (++col == 100) {
 			xt_par2(XT_SET_ROW_COL_POS,row+1,1);
 			col = 1;
 		}
