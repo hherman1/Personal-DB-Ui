@@ -8,12 +8,12 @@ int n_input=0;	// number of chars in the input, not including terminating NULL-b
 
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
-	{1,2,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{32,3,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
-	{1,5,XT_CH_YELLOW,"Search: ____________________"},
+	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
+	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
+	{5,1,XT_CH_YELLOW,"Search: ____________________"},
 
-	{1,49,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{1,50,XT_CH_GREEN,"Message:"}
+	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
+	{50,1,XT_CH_GREEN,"Message:"}
 };
 int nTS = sizeof(TS)/sizeof(TS[0]);
 
