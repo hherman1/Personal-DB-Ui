@@ -117,7 +117,7 @@ void ParseStat(void){
 	ParseInput(input,n_input);
 }
 void ParseRecord(int numRec){
-	ReadMystoreFromChild("display",numrec,NULL,NULL);
+	ReadMystoreFromChild("display",numRec,NULL,NULL);
 	ParseInput(input,n_input);
 }
 // --------------------------- searchinh-----------------------------------
@@ -142,7 +142,7 @@ void SearchDisplay(char *prompt, char *name, char *color) {
 	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
 }
 
-char *searchNvs(char *name){
+char *searchNvs(char name[]){
 	int i;
 	for (i = 0; i < n_nvs; ++i) {
 		if (strcmp(nvs[i].name,name) == 0) {

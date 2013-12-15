@@ -46,6 +46,6 @@ void SearchDisplay(char *prompt, char *name, char *color);
 void DisplayAt(int row, int col, char *color, int maxlength, char *s);
 int FindStringPosition(char *prompt);
 //new
-char *searchNvs(char *name);
+char *searchNvs(char name[]);
 void ParseStat(void);
 void ParseRecord(int numRec);
