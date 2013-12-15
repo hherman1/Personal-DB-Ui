@@ -39,11 +39,11 @@ typedef struct Area
 typedef struct Record
 {
 	int num;
-	char subject[31];
-	char body[141];
-	char *date;
-	Record *next;
-	Record *prev;
+	char *subject;
+	char *body;
+	char *time;
+	struct Record *next;
+	struct Record *prev;
 }Record;
 struct RecordList
 {
@@ -51,7 +51,7 @@ struct RecordList
 	Record *bottom;
 	int length;
 };
-*/ //not using
+//not using
 
 // Prototypes -------------------------------------
 int ParseInput(char *in, int n_in);
@@ -62,6 +62,11 @@ void SearchDisplay(char *prompt, char *name, char *color);
 void DisplayAt(int row, int col, char *color, int maxlength, char *s);
 int FindStringPosition(char *prompt);
 //new
+void getRecord(Record *holder);
+void freeRecord(Record *target);
+Record *findRecord(struct RecordList *buffer,int num);
+void recordcpy(Record *dest,Record src);
+void bufferRecord(struct RecordList *buffer,Record *r);
 char *searchNvs(char name[]);
 void ParseStat(void);
 void ParseRecord(int numRec);
