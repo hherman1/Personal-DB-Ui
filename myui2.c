@@ -44,6 +44,8 @@ char *cursorPos; // what are the cursor is at
 int recordDisplayStart = 1; //display records 1-20; start to end 
 int recordDisplayEnd = 20;
 int boolShowCurrentRecord = FALSE;
+
+
 // ------------------------------------------------ main --------------------
 int main(void) {
 	int i, c;
@@ -140,7 +142,7 @@ void SearchDisplay(char *prompt, char *name, char *color) {
 	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
 }
 
-void searchNvs(char *name){
+char *searchNvs(char *name){
 	int i;
 	for (i = 0; i < n_nvs; ++i) {
 		if (strcmp(nvs[i].name,name) == 0) {
