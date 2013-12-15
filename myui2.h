@@ -63,11 +63,6 @@ void SearchDisplay(char *prompt, char *name, char *color);
 void DisplayAt(int row, int col, char *color, int maxlength, char *s);
 int FindStringPosition(char *prompt);
 //new
-void getRecord(Record *holder);
-void freeRecord(Record *target);
-Record *findRecord(struct RecordList *buffer,int num);
-void recordcpy(Record *dest,Record src);
-void bufferRecord(struct RecordList *buffer,Record *r);
 char *searchNvs(char name[]);
 void ParseStat(void);
 void ParseRecord(int numRec);
