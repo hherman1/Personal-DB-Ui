@@ -77,10 +77,16 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 		buffer->top = r;
 	}
 }
-void bufferNewRecord(struct RecordList *buffer,Record *r) {
-	if(buffer->top != NULL) {
-		buffer->top = buffer->top->next;
-		freeRecord(buffer->top->prev);
-	}
+
+//must parseRecord for this
+void shiftBufferDown(struct RecordList *buffer,Record *r){
+	r->next = buffer->top;
+	buffer->top = r;
+	buffer->bottom = buffer->bottom->prev;
+	freeRecord(buffer->bottom->next);
+}
+void shiftBufferUP(struct RecordList *buffer,Record *r){ ///work in progress
 	bufferRecord(buffer,r);
+	buffer->top = buffer->top->next;
+	freeRecord(buffer->top->prev);
 }
