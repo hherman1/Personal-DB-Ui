@@ -3,6 +3,16 @@
 
 //--------------------------Display----------------------------
 void displayRecords(struct RecordList buffer,Area rArea) {
+	int i = 0;
+	Record *temp = buffer.top;
+	printf("TOP: %s\n",temp->subject);
+	while(temp != NULL){
+		i++;
+		int row = rArea.top + i;
+		DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
+		DisplayAt(row,rArea.right-MAX_TIME_LEN,XT_CH_GREEN,30,temp->time);
+		temp = temp->next;
+	}
 	
 }
 //--------------------------Operations-------------------------
