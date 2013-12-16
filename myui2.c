@@ -101,15 +101,24 @@ int main(void) {
 			}
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
-			if (c == 'r'){
+			if (c == KEY_F1){
 				cursorArea = "record";
 			}else {
 				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
 					if (c == KEY_ENTER){
 						cursorArea = "addBody";
-					}else{ subject[cursorPos++] = c; }
+					}else{ 
+						subject[cursorPos++] = c; 
+					}
 				}else if (cursorPos <= MAX_BODY_LEN){ 
-					body[cursorPos++] = c; 
+					if (c == KEY_ENTER){
+						cursorArea = "record";
+						addRecord(subject,body);
+						fill(subject,30);
+						fill(body,140);
+					}else{ 
+						subject[cursorPos++] = c; 
+					}
 				}
 				redraw = TRUE;
 			}
