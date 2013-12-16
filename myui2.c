@@ -161,5 +161,5 @@ int FindStringPosition(char *prompt) { //pos in string array
 //------------------------ adding ---------------------------------
 void addRecord(char *subject, char* body){
 	ReadMystoreFromChild("add",subject,body,NULL);
-	ParseRecord(nitems++);
+	ParseRecord(++nitems);
 }
