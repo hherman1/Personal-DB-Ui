@@ -131,25 +131,28 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 }
 
 //must parseRecord for this
-void addBufferTop(struct RecordList *buffer,Record *r){ //r = new record
+void addBufferTop(struct RecordList *buffer,Record *r,int maxSize) { //r == new record
 	if(buffer->bottom != NULL) {
 		r->next = buffer->top;
 		buffer->top->prev = r;
 		buffer->top = r;
-		buffer->bottom = buffer->bottom->prev;
-		if(buffer->bottom->next != NULL){
-			freeRecord(buffer->bottom->next);
+		if(bufferLength(*buffer) >= maxSize){
+			buffer->bottom = buffer->bottom->prev;
+			if(buffer->bottom->next != NULL){
+				freeRecord(buffer->bottom->next);
+			}
 		}
 	}else { 
 		printf("%s\n", "can't shiftBufferUp");
 	}
 }
-void addBufferBot(struct RecordList *buffer,Record *r){ 
+void addBufferBot(struct RecordList *buffer,Record *r,int maxSize){ 
 	bufferRecord(buffer,r);
-	buffer->top = buffer->top->next;
-	printf("SCROLLING\n");
-	if(buffer->top->prev != NULL){
-		freeRecord(buffer->top->prev);
+	if(bufferLength(*buffer) >= maxSize) {
+		buffer->top = buffer->top->next;
+		if(buffer->top->prev != NULL){
+			freeRecord(buffer->top->prev);
+		}
 	}
 }
 int bufferLength(struct RecordList buffer) {

@@ -229,7 +229,7 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 void scrollUp(){
 	int nextRecord = RLBuffer.top->num - 1;
 	if(nextRecord >= 1) {
-		addBufferTop(&RLBuffer, getRecord(nextRecord));
+		addBufferTop(&RLBuffer, getRecord(nextRecord),rArea.bot - rArea.top);
 	} else {
 		printf("bottom\n");
 	}
@@ -237,7 +237,7 @@ void scrollUp(){
 void scrollDown(){
 	int nextRecord = RLBuffer.bottom->num + 1;
 	if(nextRecord <= nitems) {
-		addBufferBot(&RLBuffer, getRecord(nextRecord));
+		addBufferBot(&RLBuffer, getRecord(nextRecord),rArea.bot - rArea.top);
 	} else {
 		printf("bottom\n");
 	}
