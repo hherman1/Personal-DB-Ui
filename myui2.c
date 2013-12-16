@@ -65,18 +65,9 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 	loadRecords(&RLBuffer,recordDisplayStart,recordDisplayEnd,nitems);
 	
-	
+	displayRecords(RLBuffer,rArea);
 	//records operation
 	//current->prev = '\0';
-	Record *temp = RLBuffer.top;
-	printf("TOP: %s\n",temp->subject);
-	while(temp != NULL){
-		i++;
-		int row = rArea.top + i - recordDisplayStart;
-		DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
-		DisplayAt(row,rArea.right-MAX_TiME_LEN,XT_CH_GREEN,30,temp->time);
-		temp = temp->next;
-	}
 	while (TRUE) {
 		while ((c = getkey()) == KEY_NOTHING) ;
 		if (c == KEY_F9)  {
