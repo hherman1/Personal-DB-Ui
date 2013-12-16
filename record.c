@@ -4,7 +4,7 @@
 //--------------------------Display----------------------------
 void displayRecords(struct RecordList buffer,Area rArea) {
 	Record *temp = buffer.top;
-	int row = rArea.top
+	int row = rArea.top;
 	//printf("TOP: %s\n",temp->subject);
 	while(temp != NULL && row < rArea.bot){
 		DisplayAt(row,rArea.left,XT_CH_GREEN,MAX_SUBJECT_LEN,temp->subject);
