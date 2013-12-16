@@ -44,6 +44,12 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 	}
+	while(temp != NULL){
+		if(temp != buffer.bottom && temp != buffer.top) {
+			freeRecord(temp);
+		}
+		temp = temp->next;
+	}
 }
 void wrapText(int width, char *text) {
 	int i = 0;
