@@ -2,6 +2,7 @@
 #define MAX_BODY_LEN 140
 #define MAX_TIME_LEN 20
 
+#define MAX_RECORDS_TO_DISPLAY 30
 typedef struct Record
 {
 	int num;

@@ -36,8 +36,7 @@ char errmsg[80] = "";
 
 char *cursorPos; // what are the cursor is at
  				//title, record1, record2, message, ....
-int recordDisplayStart = 1; //display records 1-20; start to end 
-int recordDisplayEnd = 20;
+
 int boolShowCurrentRecord = FALSE;
 
 
@@ -63,7 +62,7 @@ int main(void) {
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
-	loadRecords(&RLBuffer,recordDisplayStart,recordDisplayEnd,nitems);
+	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY,nitems);
 	
 	displayRecords(RLBuffer,rArea);
 	//records operation
@@ -142,12 +141,6 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 	fflush(stdout);
 }
 
-void scrollPrevious(void){
-
-}
-void scrollNext(void){
-	//buffer
-}
 // ---------------------------------- 	FindStringPosition ----------------
 int FindStringPosition(char *prompt) { //pos in string array 
 	int i;
