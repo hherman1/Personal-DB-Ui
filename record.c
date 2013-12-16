@@ -152,3 +152,6 @@ void addBufferBot(struct RecordList *buffer,Record *r){
 		freeRecord(buffer->top->prev);
 	}
 }
+int bufferLength(struct RecordList buffer) {
+	return buffer.bottom->num - buffer.top->num;
+}

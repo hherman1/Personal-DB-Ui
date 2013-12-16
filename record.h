@@ -37,3 +37,4 @@ void freeRecord(Record *target);
 void bufferRecord(struct RecordList *buffer,Record *r);
 void addBufferTop(struct RecordList *buffer,Record *r);
 void addBufferBot(struct RecordList *buffer,Record *r);
+int bufferLength(struct RecordList buffer);
