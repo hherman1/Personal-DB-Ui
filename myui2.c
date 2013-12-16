@@ -7,10 +7,10 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-Area rArea = {7,8 + MAX_RECORDS_TO_DISPLAY,1,120,"",TRUE};
-Area SCREEN = {1,55,1,120,"",TRUE};
-Area newSubjectArea = {44,44,15,120,"",TRUE};
-Area newBodyArea = {45,47,12,120,"",TRUE};																												
+Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
+Area SCREEN = {1,120,1,55,"",TRUE};
+Area newSubjectArea = {15,120,44,44,"",TRUE};
+Area newBodyArea = {12,120,45,47,"",TRUE};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
