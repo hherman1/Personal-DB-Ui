@@ -28,6 +28,7 @@ struct StringPosition SP[] = {
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
 struct RecordList RLBuffer;
+Record hovered;
 
 int nitems = 0;  //numRecords
 char subject[MAX_SUBJECT_LEN+1];
@@ -53,7 +54,7 @@ int main(void) {
 		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
 		xt_par0(XT_CH_DEFAULT);
 		xt_par0(TS[i].color);
-		//printf("%s,%i",TS[i].string,i);
+		printf("%s",TS[i].string);
 	}
 	
 	
@@ -63,22 +64,65 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY,nitems);
 	
-	displayRecords(8,RLBuffer,rArea);
+	hovered = *(RLBuffer.top);
+	
+	displayRecords(hovered,RLBuffer,rArea);
 	//records operation
+	
 	//current->prev = '\0';
 	while (TRUE) {
+		int redraw = 0;
 		while ((c = getkey()) == KEY_NOTHING) ;
-		if (c == KEY_F9)  {
+		if (c == 'q')  {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
 			xt_par2(XT_SET_ROW_COL_POS,1,1);
 			getkey_terminate();
 			exit(0);
 		}
+		if (c == KEY_ENTER) {
+			selectRecord(hovered,RLBuffer,rArea);
+			redraw = 1;
+		}
+		if (c == KEY_DOWN) {
+			if(hovered.next != NULL) {
+				hovered = *(hovered.next);
+				redraw = 1;
+			} 
+		}
+		if (c == KEY_UP) {
+			if(hovered.prev != NULL) {
+				hovered = *(hovered.prev);
+				redraw = 1;
+			}
+		}
+		if(redraw)
+			draw();
 	}
 }
+// -------------------------------------draw---------------------------------
+void draw() {
+	printf("redrawing");
+	int i = 0;
+	xt_par0(XT_CLEAR_SCREEN);
+	
+	// display template
+ 	for (i = 0; i < nTS; ++i) {
+		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
+		xt_par0(XT_CH_DEFAULT);
+		xt_par0(TS[i].color);
+		printf("%s",TS[i].string);
+	}
+	
+	
+	//perform operations on stat
+	ParseStat();
+	SearchDisplay("nitems","nitems",XT_CH_WHITE);
+	nitems = atoi(searchNvs("nitems"));
+	
+	displayRecords(hovered,RLBuffer,rArea);
 
-
+}
 // ------------------------------------ fill --------------------------------
 void fill(char *s, int n) {
 	while (n--) *s++=' ';

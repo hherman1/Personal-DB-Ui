@@ -3,6 +3,7 @@
 #define R_HOVERED_TEXT_COLOR XT_CH_WHITE
 #define R_SELECTED_BG_COLOR XT_BG_YELLOW
 #define R_SELECTED_TEXT_COLOR XT_CH_RED
+#define R_SELECTED_BODY_COLOR XT_CH_MAGENTA
 #define R_SELECTED_TEXT_STYLE XT_CH_BOLD
 #define R_SELECTED_HOVERED_TEXT_COLOR XT_CH_MAGENTA
 #define MAX_SUBJECT_LEN 30
@@ -25,9 +26,9 @@ struct RecordList
 	Record *bottom;
 	int length;
 };
-void displayRecords(int cursorRow,struct RecordList buffer,Area rArea);
+void displayRecords(Record hovered,struct RecordList buffer,Area rArea);
+void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
-int getHoveredRNum(int cursorRow,struct RecordList buffer,Area rArea);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
 Record *getRecord(int n);
 Record *findRecord(struct RecordList *buffer,int num);

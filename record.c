@@ -1,26 +1,26 @@
 #include "myui2.h"
 #include "record.h"
 
-int recordSelected = 8;
+int recordSelected = 2;
 //--------------------------Display----------------------------
-void displayRecords(int cursorRow,struct RecordList buffer,Area rArea) {
+void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 	int i = 0;
 	int width = rArea.left - rArea.right;
 	char *color;
 	Record *temp = buffer.top;
 	while(temp != NULL && i + rArea.top < rArea.bot){
 		i++;
-		int row = rArea.top + i;
 		color = R_TEXT_COLOR;
-		if(row == cursorRow) {
+		int row = i + rArea.top;
+		if(temp->num == hovered.num) {
 			xt_par0(R_HOVERED_BG_COLOR);
 			color = R_HOVERED_TEXT_COLOR;
 		}
-		if(row == recordSelected) {
+		if(temp->num == recordSelected) {
 			xt_par0(R_SELECTED_BG_COLOR);
 			xt_par0(R_SELECTED_TEXT_STYLE);
 			color = R_SELECTED_TEXT_COLOR;
-			if(row == cursorRow) {
+			if(temp->num == hovered.num) {
 				color = R_SELECTED_HOVERED_TEXT_COLOR;
 			}
 			DisplayAt(row,rArea.left,color,30,temp->subject);
@@ -30,6 +30,7 @@ void displayRecords(int cursorRow,struct RecordList buffer,Area rArea) {
 			int spaceNeeded = strlen(sTemp) / width + 1;
 			i += spaceNeeded;
 			xt_par2(XT_SET_COL_POS,row+2,rArea.left);
+			xt_par0(R_SELECTED_BODY_COLOR);
 			wrapText(width,sTemp);
 			free(sTemp);
 			xt_par0(XT_CH_NORMAL);
@@ -54,14 +55,8 @@ void wrapText(int width, char *text) {
 	}
 	
 }
-int getHoveredRNum(int cursorRow,struct RecordList buffer,Area rArea) {
-	int ans = 0;
-	int topR = buffer.top->num;
-	ans = topR + cursorRow - rArea.top;
-	return ans;
-}
-void selectRecord(int cursorRow,struct RecordList buffer,Area rArea) {
-	int rNum = getHoveredRNum(cursorRow,buffer,rArea);
+void selectRecord(Record record,struct RecordList buffer,Area rArea) {
+	int rNum = record.num;
 	if(rNum == recordSelected) {
 		recordSelected = 0;
 	} else {
