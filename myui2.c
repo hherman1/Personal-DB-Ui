@@ -7,10 +7,10 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-Area rArea = {7,8 + MAX_RECORDS_TO_DISPLAY,1,120,"",TRUE};
-Area SCREEN = {1,55,1,120,"",TRUE};
-Area newSubjectArea = {44,44,15,120,"",TRUE};
-Area newBodyArea = {45,47,12,120,"",TRUE};																												
+Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
+Area SCREEN = {1,120,1,55,"",TRUE};
+Area newSubjectArea = {15,120,44,44,"",TRUE};
+Area newBodyArea = {12,120,45,47,"",TRUE};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
@@ -101,35 +101,35 @@ int main(void) {
                                 cursorArea = "addSubject";
                         }
 		}
-		if (cursorArea == "addSubject" || cursorArea == "addBody"){
-			if (c == KEY_F1){
+		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
+			if (c == KEY_F2){
 				cursorArea = "record";
 			}else {
 				if(c == KEY_LEFT){
 					if(cursorPos > 0) cursorPos--;
-
 				}
 				if (c == KEY_RIGHT){
 					cursorPos++;
 				}
-				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
-					if (c == KEY_ENTER){
+				if (c == KEY_ENTER){
+					if (cursorArea == "addSubject"){
 						cursorArea = "addBody";
-					}else{ 
-						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
-						subject[cursorPos++] = c; 
-					}
-				}else if (cursorPos <= MAX_BODY_LEN){ 
-					if (c == KEY_ENTER){
+						cursorPos = 0;
+					}else if (cursorArea = "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
 						fill(subject,30);
 						fill(body,140);
 						cursorPos = 0;
-					}else{ 
-						if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
-						subject[cursorPos++] = c; 
 					}
+				}
+				//to do: check if c a letter
+				else if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
+					if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
+					subject[cursorPos++] = c; 
+				}else if (cursorArea == "addBody" && cursorPos <= MAX_BODY_LEN){ 
+					if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
+					body[cursorPos++] = c; 
 				}
 			}
 			redraw = TRUE;

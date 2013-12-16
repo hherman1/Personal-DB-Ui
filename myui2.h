@@ -30,10 +30,10 @@ struct StringPosition {
 };
 typedef struct Area
 {	//help define the boundary of areas like display space, title space, 
-	int top;
-	int bot;
 	int left;
 	int right;
+	int top;
+	int bot;
 	char* text;
 	int toDisplay;
 }Area;
