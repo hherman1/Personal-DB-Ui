@@ -38,6 +38,7 @@ typedef struct Area
 	int top;
 	int bot;
 	char* text;
+	int toDisplay;
 }Area;
 
 // Prototypes -------------------------------------
