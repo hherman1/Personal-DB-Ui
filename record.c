@@ -23,8 +23,8 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 			if(temp->num == hovered.num) {
 				color = R_SELECTED_HOVERED_TEXT_COLOR;
 			}
-			DisplayAt(row,rArea.left,color,30,temp->subject);
-			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,30,temp->time);
+			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
+			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 			char *sTemp = malloc(141 * sizeof(char));
 			strcpy(sTemp,temp->body);
 			int spaceNeeded = strlen(sTemp) / width + 1;
@@ -36,8 +36,8 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 			xt_par0(XT_CH_NORMAL);
 		}
 		else {
-			DisplayAt(row,rArea.left,color,30,temp->subject);
-			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,30,temp->time);
+			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
+			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 		}
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);

@@ -185,10 +185,10 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 }
 
 //RLBuffer must exist for scroll
-void scrollPrevious(void){
+void scrollUp(void){
 	addBufferTop(&RLBuffer, getRecord(RLBuffer.top->num + 1));
 }
-void scrollNext(void){
+void scrollDown(void){
 	addBufferBot(&RLBuffer, getRecord(RLBuffer.top->num + 1));
 }
 // ---------------------------------- 	FindStringPosition ----------------
