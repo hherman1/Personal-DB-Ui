@@ -29,15 +29,17 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			strcpy(sTemp,temp->body);
 			int spaceNeeded = strlen(sTemp) / width + 1;
 			i += spaceNeeded;
-			xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
-			xt_par0(R_SELECTED_BODY_STYLE);
-			xt_par0(R_SELECTED_BG_COLOR);
-			xt_par0(R_SELECTED_BODY_COLOR);
-			wrapText(width,sTemp);
+			if(i + rArea.top < rArea.bot) {
+				xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
+				xt_par0(R_SELECTED_BODY_STYLE);
+				xt_par0(R_SELECTED_BG_COLOR);
+				xt_par0(R_SELECTED_BODY_COLOR);
+				wrapText(width,sTemp);
+			}
 			free(sTemp);
 			xt_par0(XT_CH_NORMAL);
 		}
-		else {
+		else if(i + rArea.top < rArea.bot) {
 			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 		}
