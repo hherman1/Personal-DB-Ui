@@ -30,10 +30,10 @@ struct StringPosition {
 };
 typedef struct Area
 {	//help define the boundary of areas like display space, title space, 
-	int left;
-	int right;
 	int top;
 	int bot;
+	int left;
+	int right;
 	char* text;
 	int toDisplay;
 }Area;
@@ -51,5 +51,5 @@ void draw();
 char *searchNvs(char name[]);
 void ParseStat(void);
 void ParseRecord(int numRec);
-void scrollPrevious();
-void scrollNext();
+void scrollUp(void);
+void scrollDown(void);

@@ -7,15 +7,18 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-Area SCREEN = {1,120,1,55,"",TRUE};
 Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
-																																	
+Area SCREEN = {1,55,1,120,"",TRUE};
+Area rArea = {7,45,1,120,"",TRUE};
+Area addArea = {44,47,1,100,"",TRUE};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
 	{5,1,XT_CH_YELLOW,"Search: _________________________________"},
-	{48,1,XT_CH_RED,"Note: pls save to commit changes.    F9 to quit"},
+	{44,1,XT_CH_RED,"new Subject: "},																				
+	{45,1,XT_CH_RED,"new Body: "},
+	{48,1,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
 	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{50,1,XT_CH_GREEN,"Message: nitems = "}
 };
@@ -31,7 +34,7 @@ struct RecordList RLBuffer;
 Record hovered;
 
 int nitems = 0;  //numRecords
-char subject[MAX_SUBJECT_LEN+1];
+char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
 char errmsg[80] = "";
 
@@ -42,26 +45,15 @@ int boolShowCurrentRecord = FALSE;
 
 // ------------------------------------------------ main --------------------
 int main(void) {
-	int i, c;
+	int c;
 	
 	fill(subject,30);
 	fill(body,140);
 	
 	xt_par0(XT_CLEAR_SCREEN);
 	
-	// display template
- 	for (i = 0; i < nTS; ++i) {
-		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
-		xt_par0(XT_CH_DEFAULT);
-		xt_par0(TS[i].color);
-		printf("%s",TS[i].string);
-	}
-	
-	
-	//perform operations on stat
-	ParseStat();
-	SearchDisplay("nitems","nitems",XT_CH_WHITE);
-	nitems = atoi(searchNvs("nitems"));
+	draw();
+
 	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY,nitems);
 	
 	hovered = *(RLBuffer.top);
@@ -71,7 +63,7 @@ int main(void) {
 	
 	//current->prev = '\0';
 	while (TRUE) {
-		int redraw = 0;
+		int redraw = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
 		if (c == 'q')  {
 			xt_par0(XT_CLEAR_SCREEN);
@@ -82,7 +74,7 @@ int main(void) {
 		}
 		if (c == KEY_ENTER) {
 			selectRecord(hovered,RLBuffer,rArea);
-			redraw = 1;
+			redraw = TRUE;
 		}
 		if (c == KEY_DOWN) {
 			if(hovered.next != NULL) {
@@ -91,7 +83,8 @@ int main(void) {
 				scrollNext();
 				hovered = *(RLBuffer.bottom);
 			}
-			redraw = 1;
+			redraw = TRUE;
+		} 
 		}
 		if (c == KEY_UP) {
 			if(hovered.prev != NULL) {
@@ -100,7 +93,7 @@ int main(void) {
 				scrollPrevious();
 				hovered = *(RLBuffer.top);
 			}
-			redraw = 1;
+			redraw = TRUE;
 		}
 		if(redraw)
 			draw();
@@ -124,6 +117,10 @@ void draw() {
 	//perform operations on stat
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
+	//new subject and body
+	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
+	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
+
 	nitems = atoi(searchNvs("nitems"));
 	
 	displayRecords(hovered,RLBuffer,rArea);
