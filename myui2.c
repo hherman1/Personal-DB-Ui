@@ -7,7 +7,7 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-Area SCREEN = {1,120,1,55,""TRUE};
+Area SCREEN = {1,120,1,55,"",TRUE};
 Area rArea = {1,120,7,45,"",TRUE};
 																																	
 struct TemplateString TS[] = {
