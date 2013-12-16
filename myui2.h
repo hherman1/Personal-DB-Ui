@@ -51,5 +51,5 @@ void draw();
 char *searchNvs(char name[]);
 void ParseStat(void);
 void ParseRecord(int numRec);
-void scrollUp(void);
-void scrollDown(void);
+void scrollUp();
+void scrollDown();
