@@ -91,7 +91,7 @@ int main(void) {
 				}
 			}
 			else if (c == 'a') {
-				cursorArea = "newSubjectArea"
+				cursorArea = "newSubjectArea";
 			}
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
