@@ -64,8 +64,9 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY,nitems);
 	
-	displayRecords(RLBuffer,rArea);
 	//records operation
+	displayRecords(RLBuffer,rArea);
+	
 	//current->prev = '\0';
 	while (TRUE) {
 		while ((c = getkey()) == KEY_NOTHING) ;
