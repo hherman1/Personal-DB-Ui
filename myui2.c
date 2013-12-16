@@ -9,7 +9,8 @@ int n_input=0;	// number of chars in the input, not including terminating NULL-b
 
 Area rArea = {7,8 + MAX_RECORDS_TO_DISPLAY,1,120,"",TRUE};
 Area SCREEN = {1,55,1,120,"",TRUE};
-Area addArea = {44,47,1,100,"",TRUE};																												
+Area newSubjectArea = {44,44,15,120,"",TRUE};
+Area newBodyArea = {45,47,12,120,"",TRUE};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
@@ -37,9 +38,9 @@ char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
 char errmsg[80] = "";
 
-char *cursorPos; // what are the cursor is at
- 				//title, record1, record2, message, ....
-
+char *cursorArea = "record"; // what are the cursor is at
+ 				//title, record,addSubject, message, ....
+int cursorPos = 0; // cuurently only for adding subject and body
 int boolShowCurrentRecord = FALSE;
 
 // ------------------------------------------------ main --------------------
@@ -64,13 +65,15 @@ int main(void) {
 	while (TRUE) {
 		int redraw = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
-		if (c == 'q')  {
+
+		if (c == KEY_F9)  {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
 			xt_par2(XT_SET_ROW_COL_POS,1,1);
 			getkey_terminate();
 			exit(0);
 		}
+<<<<<<< HEAD
 		if (c == KEY_ENTER) {
 			selectRecord(hovered,RLBuffer,rArea);
 			redraw = TRUE;
@@ -91,6 +94,36 @@ int main(void) {
 			} else {
 				scrollPrevious();
 				hovered = *(RLBuffer.top);
+=======
+		if(cursorArea == "record"){
+			if (c == KEY_ENTER) {
+				selectRecord(hovered,RLBuffer,rArea);
+				redraw = TRUE;
+			}
+			else if (c == KEY_DOWN) {
+				if(hovered.next != NULL) {
+					hovered = *(hovered.next);
+					redraw = TRUE;
+				} 
+			}
+			else if (c == KEY_UP) {
+				if(hovered.prev != NULL) {
+					hovered = *(hovered.prev);
+					redraw = TRUE;
+				}
+			}
+		}
+		if (cursorArea == "addSubject" || cursorArea == "addBody"){
+			if (c == 'r'){
+				cursorArea = "record";
+			}else {
+				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
+					subject[cursorPos++] = c;
+				}else if (cursorPos <= MAX_BODY_LEN){ 
+					body[cursorPos++] = c; 
+				}
+				redraw = TRUE;
+>>>>>>> bbd30d8fad17f6664c193d081d0edb9844782bdb
 			}
 			redraw = TRUE;
 		}
@@ -117,8 +150,8 @@ void draw() {
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	//new subject and body
-	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
-	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
+	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
+	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 
 	nitems = atoi(searchNvs("nitems"));
 	
@@ -178,7 +211,7 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 		if (value[i] == '\0') 
 			instring = FALSE;
 		printf("%c",instring?value[i]:' ');
-		if (++col == 100) {
+		if (++col == SCREEN.right) {
 			xt_par2(XT_SET_ROW_COL_POS,row+1,1);
 			col = 1;
 		}
