@@ -1,7 +1,7 @@
 #include "myui2.h"
 #include "record.h"
 
-int recordSelected = 10;
+int recordSelected = 8;
 //--------------------------Display----------------------------
 void displayRecords(int cursorRow,struct RecordList buffer,Area rArea) {
 	int i = 0;
@@ -16,16 +16,27 @@ void displayRecords(int cursorRow,struct RecordList buffer,Area rArea) {
 			xt_par0(R_HOVERED_BG_COLOR);
 			color = R_HOVERED_TEXT_COLOR;
 		}
-		DisplayAt(row,rArea.left,color,30,temp->subject);
-		DisplayAt(row,rArea.right-MAX_TIME_LEN,color,30,temp->time);
 		if(row == recordSelected) {
+			xt_par0(R_SELECTED_BG_COLOR);
+			xt_par0(R_SELECTED_TEXT_STYLE);
+			color = R_SELECTED_TEXT_COLOR;
+			if(row == cursorRow) {
+				color = R_SELECTED_HOVERED_TEXT_COLOR;
+			}
+			DisplayAt(row,rArea.left,color,30,temp->subject);
+			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,30,temp->time);
 			char *sTemp = malloc(141 * sizeof(char));
 			strcpy(sTemp,temp->body);
 			int spaceNeeded = strlen(sTemp) / width + 1;
 			i += spaceNeeded;
-			xt_par2(XT_SET_COL_POS,row+1,rArea.left);
+			xt_par2(XT_SET_COL_POS,row+2,rArea.left);
 			wrapText(width,sTemp);
 			free(sTemp);
+			xt_par0(XT_CH_NORMAL);
+		}
+		else {
+			DisplayAt(row,rArea.left,color,30,temp->subject);
+			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,30,temp->time);
 		}
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
@@ -132,7 +143,7 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 }
 
 //must parseRecord for this
-void shiftBufferUp(struct RecordList *buffer,Record *r){
+void addBufferTop(struct RecordList *buffer,Record *r){ //r = new record
 	if(buffer->bottom != NULL) {
 	r->next = buffer->top;
 	buffer->top = r;
@@ -140,7 +151,7 @@ void shiftBufferUp(struct RecordList *buffer,Record *r){
 	freeRecord(buffer->bottom->next);
 	}else { printf("%s\n", "can't shiftBufferUp");}
 }
-void shiftBufferDown(struct RecordList *buffer,Record *r){ ///work in progress
+void addBufferBot(struct RecordList *buffer,Record *r){ 
 	bufferRecord(buffer,r);
 	buffer->top = buffer->top->next;
 	freeRecord(buffer->top->prev);

@@ -1,6 +1,15 @@
 #define R_TEXT_COLOR XT_CH_GREEN
-#define R_HOVERED_BG_COLOR XT_BG_MAGENTA
-#define R_HOVERED_TEXT_COLOR XT_BG_BLUE
+#define R_HOVERED_BG_COLOR XT_BG_GREEN
+#define R_HOVERED_TEXT_COLOR XT_CH_WHITE
+#define R_SELECTED_BG_COLOR XT_BG_YELLOW
+#define R_SELECTED_TEXT_COLOR XT_CH_RED
+#define R_SELECTED_TEXT_STYLE XT_CH_BOLD
+#define R_SELECTED_HOVERED_TEXT_COLOR XT_CH_MAGENTA
+#define MAX_SUBJECT_LEN 30
+#define MAX_BODY_LEN 140
+#define MAX_TIME_LEN 20
+
+#define MAX_RECORDS_TO_DISPLAY 30
 typedef struct Record
 {
 	int num;
@@ -25,4 +34,5 @@ Record *findRecord(struct RecordList *buffer,int num);
 void freeRecord(Record *target);
 void recordcpy(Record *dest,Record src);
 void bufferRecord(struct RecordList *buffer,Record *r);
-void bufferNewRecord(struct RecordList *buffer,Record *r);
+void addBufferTop(struct RecordList *buffer,Record *r);
+void addBufferbot(struct RecordList *buffer,Record *r);
