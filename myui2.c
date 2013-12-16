@@ -97,7 +97,7 @@ int main(void) {
 				redraw = TRUE;
 			}
 			else if (c == 'a') {
-				cursorArea = "newSubjectArea";
+				cursorArea = "addSubject";
 			}
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
