@@ -16,8 +16,8 @@ struct TemplateString TS[] = {
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
 	{5,1,XT_CH_YELLOW,"Search: _________________________________"},
-	{44,1,XT_CH_RED,"new Subject: "},																				
-	{45,1,XT_CH_RED,"new Body: "},
+	{44,1,XT_CH_YELLOW,"new Subject: "},																				
+	{45,1,XT_CH_YELLOW,"new Body: "},
 	{48,1,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
 	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{50,1,XT_CH_GREEN,"Message: nitems = "}
@@ -96,13 +96,18 @@ int main(void) {
 				}
 				redraw = TRUE;
 			}
+			else if (c == 'a') {
+				cursorArea = "newSubjectArea";
+			}
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
 			if (c == 'r'){
 				cursorArea = "record";
 			}else {
 				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
-					subject[cursorPos++] = c;
+					if (c == KEY_ENTER){
+						cursorArea = "addBody";
+					}else{ subject[cursorPos++] = c; }
 				}else if (cursorPos <= MAX_BODY_LEN){ 
 					body[cursorPos++] = c; 
 				}
