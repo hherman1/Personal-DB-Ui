@@ -114,6 +114,7 @@ int main(void) {
 				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
 					if (c == KEY_ENTER){
 						cursorArea = "addBody";
+						cursorPos = 0;
 					}else{ 
 						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
 						subject[cursorPos++] = c; 
