@@ -7,9 +7,8 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
+Area rArea = {7,8 + MAX_RECORDS_TO_DISPLAY,1,120,"",TRUE};
 Area SCREEN = {1,55,1,120,"",TRUE};
-Area rArea = {7,45,1,120,"",TRUE};
 Area addArea = {44,47,1,100,"",TRUE};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
