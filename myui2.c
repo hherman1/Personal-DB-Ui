@@ -111,25 +111,25 @@ int main(void) {
 				if (c == KEY_RIGHT){
 					cursorPos++;
 				}
-				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
-					if (c == KEY_ENTER){
+				if (c == KEY_ENTER){
+					if (cursorArea == "addSubject"){
 						cursorArea = "addBody";
 						cursorPos = 0;
-					}else{ 
-						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
-						subject[cursorPos++] = c; 
-					}
-				}else if (cursorArea = "addBody" && cursorPos <= MAX_BODY_LEN){ 
-					if (c == KEY_ENTER){
+					}else if (cursorArea = "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
 						fill(subject,30);
 						fill(body,140);
 						cursorPos = 0;
-					}else{ 
-						if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
-						body[cursorPos++] = c; 
 					}
+				}
+				//to do: check if c a letter
+				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
+					if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
+					subject[cursorPos++] = c; 
+				}else if (cursorArea = "addBody" && cursorPos <= MAX_BODY_LEN){ 
+					if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
+					body[cursorPos++] = c; 
 				}
 			}
 			redraw = TRUE;
