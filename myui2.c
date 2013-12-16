@@ -54,7 +54,7 @@ int main(void) {
 		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
 		xt_par0(XT_CH_DEFAULT);
 		xt_par0(TS[i].color);
-		printf("%s,%i",TS[i].string,i);
+		printf("%s",TS[i].string);
 	}
 	
 	
