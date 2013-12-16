@@ -8,7 +8,7 @@ char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
 Area SCREEN = {1,120,1,55,"",TRUE};
-Area rArea = {1,120,7,45,"",TRUE};
+Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
 																																	
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
@@ -87,17 +87,19 @@ int main(void) {
 		if (c == KEY_DOWN) {
 			if(hovered.next != NULL) {
 				hovered = *(hovered.next);
-				redraw = 1;
-			} 
+			} else {
+				scrollNext();
+				hovered = *(RLBuffer.bottom);
+			}
+			redraw = 1;
 		}
 		if (c == KEY_UP) {
 			if(hovered.prev != NULL) {
 				hovered = *(hovered.prev);
-				redraw = 1;
+			} else {
+				scrollPrevious();
+				hovered = *(RLBuffer.top);
 			}
-		}
-		if (c == 's') {
-			scrollNext();
 			redraw = 1;
 		}
 		if(redraw)
@@ -189,11 +191,21 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 }
 
 //RLBuffer must exist for scroll
-void scrollPrevious(void){
-	addBufferTop(&RLBuffer, getRecord(RLBuffer.top->num + 1));
+void scrollPrevious(){
+	int nextRecord = RLBuffer.top->num - 1;
+	if(nextRecord >= 1) {
+		addBufferTop(&RLBuffer, getRecord(nextRecord));
+	} else {
+		printf("bottom\n");
+	}
 }
-void scrollNext(void){
-	addBufferBot(&RLBuffer, getRecord(RLBuffer.top->num + 1));
+void scrollNext(){
+	int nextRecord = RLBuffer.bottom->num + 1;
+	if(nextRecord <= nitems) {
+		addBufferBot(&RLBuffer, getRecord(nextRecord));
+	} else {
+		printf("bottom\n");
+	}
 }
 // ---------------------------------- 	FindStringPosition ----------------
 int FindStringPosition(char *prompt) { //pos in string array 

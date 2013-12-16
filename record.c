@@ -44,9 +44,6 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 	}
-	if(hovered.num == temp->num) {
-		scrollNext();
-	}
 }
 void wrapText(int width, char *text) {
 	int i = 0;
@@ -131,7 +128,7 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 	if(r == NULL) {
 		printf("ERROR: Record does not exist\n");
 	}
-	if(buffer->bottom != NULL) {
+	else if(buffer->bottom != NULL) {
 		r->prev = buffer->bottom;
 		buffer->bottom->next = r;
 		buffer->bottom = buffer->bottom->next;
@@ -144,14 +141,22 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 //must parseRecord for this
 void addBufferTop(struct RecordList *buffer,Record *r){ //r = new record
 	if(buffer->bottom != NULL) {
-	r->next = buffer->top;
-	buffer->top = r;
-	buffer->bottom = buffer->bottom->prev;
-	freeRecord(buffer->bottom->next);
-	}else { printf("%s\n", "can't shiftBufferUp");}
+		r->next = buffer->top;
+		buffer->top->prev = r;
+		buffer->top = r;
+		buffer->bottom = buffer->bottom->prev;
+		if(buffer->bottom->next != NULL){
+			freeRecord(buffer->bottom->next);
+		}
+	}else { 
+		printf("%s\n", "can't shiftBufferUp");
+	}
 }
 void addBufferBot(struct RecordList *buffer,Record *r){ 
 	bufferRecord(buffer,r);
 	buffer->top = buffer->top->next;
-	freeRecord(buffer->top->prev);
+	printf("SCROLLING\n");
+	if(buffer->top->prev != NULL){
+		freeRecord(buffer->top->prev);
+	}
 }

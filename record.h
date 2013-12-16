@@ -11,7 +11,7 @@
 #define MAX_BODY_LEN 140
 #define MAX_TIME_LEN 20
 
-#define MAX_RECORDS_TO_DISPLAY 30
+#define MAX_RECORDS_TO_DISPLAY 4
 typedef struct Record
 {
 	int num;
@@ -37,4 +37,4 @@ void freeRecord(Record *target);
 void recordcpy(Record *dest,Record src);
 void bufferRecord(struct RecordList *buffer,Record *r);
 void addBufferTop(struct RecordList *buffer,Record *r);
-void addBufferbot(struct RecordList *buffer,Record *r);
+void addBufferBot(struct RecordList *buffer,Record *r);
