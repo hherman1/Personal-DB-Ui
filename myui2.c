@@ -100,7 +100,7 @@ int main(void) {
                                 cursorArea = "addSubject";
                         }
 		}
-		if (cursorArea == "addSubject" || cursorArea == "addBody"){
+		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
 			if (c == KEY_F2){
 				cursorArea = "record";
 			}else {
