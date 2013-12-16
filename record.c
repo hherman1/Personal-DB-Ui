@@ -29,7 +29,7 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 			strcpy(sTemp,temp->body);
 			int spaceNeeded = strlen(sTemp) / width + 1;
 			i += spaceNeeded;
-			xt_par2(XT_SET_COL_POS,row+2,rArea.left);
+			xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
 			xt_par0(R_SELECTED_BODY_STYLE);
 			xt_par0(R_SELECTED_BG_COLOR);
 			xt_par0(R_SELECTED_BODY_COLOR);

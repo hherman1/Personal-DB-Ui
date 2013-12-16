@@ -66,7 +66,7 @@ int main(void) {
 		int redraw = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
 
-		if (c == KEY_F9)  {
+		if (c == KEY_F9 || c == 'q')  {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
 			xt_par2(XT_SET_ROW_COL_POS,1,1);
@@ -78,17 +78,23 @@ int main(void) {
 				selectRecord(hovered,RLBuffer,rArea);
 				redraw = TRUE;
 			}
-			else if (c == KEY_DOWN) {
+			if (c == KEY_DOWN) {
 				if(hovered.next != NULL) {
 					hovered = *(hovered.next);
-					redraw = TRUE;
-				} 
-			}
-			else if (c == KEY_UP) {
+				} else {
+					scrollDown();
+					hovered = *(RLBuffer.bottom);
+				}
+				redraw = TRUE;
+			} 
+			if (c == KEY_UP) {
 				if(hovered.prev != NULL) {
 					hovered = *(hovered.prev);
-					redraw = TRUE;
+				} else {
+					scrollUp();
+					hovered = *(RLBuffer.top);
 				}
+				redraw = TRUE;
 			}
 			else if (c == 'a') {
 				cursorArea = "newSubjectArea";
@@ -211,7 +217,7 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 }
 
 //RLBuffer must exist for scroll
-void scrollPrevious(){
+void scrollUp(){
 	int nextRecord = RLBuffer.top->num - 1;
 	if(nextRecord >= 1) {
 		addBufferTop(&RLBuffer, getRecord(nextRecord));
@@ -219,7 +225,7 @@ void scrollPrevious(){
 		printf("bottom\n");
 	}
 }
-void scrollNext(){
+void scrollDown(){
 	int nextRecord = RLBuffer.bottom->num + 1;
 	if(nextRecord <= nitems) {
 		addBufferBot(&RLBuffer, getRecord(nextRecord));
