@@ -104,10 +104,18 @@ int main(void) {
 			if (c == KEY_F1){
 				cursorArea = "record";
 			}else {
+				if(c == KEY_LEFT){
+					if(cursorPos > 0) cursorPos--;
+
+				}
+				if (c == KEY_RIGHT){
+					cursorPos++;
+				}
 				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
 					if (c == KEY_ENTER){
 						cursorArea = "addBody";
 					}else{ 
+						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
 						subject[cursorPos++] = c; 
 					}
 				}else if (cursorPos <= MAX_BODY_LEN){ 
@@ -116,11 +124,12 @@ int main(void) {
 						addRecord(subject,body);
 						fill(subject,30);
 						fill(body,140);
+						cursorPos = 0;
 					}else{ 
+						if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
 						subject[cursorPos++] = c; 
 					}
 				}
-				redraw = TRUE;
 			}
 			redraw = TRUE;
 		}
