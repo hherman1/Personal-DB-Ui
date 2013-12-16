@@ -3,11 +3,11 @@
 
 int recordSelected = 2;
 //--------------------------Display----------------------------
-void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
+void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
 	char *color;
-	Record *temp = buffer.top;
+	Record *temp = buffer->top;
 	while(temp != NULL && i + rArea.top < rArea.bot){
 		i++;
 		color = R_TEXT_COLOR;
@@ -44,11 +44,18 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 	}
+	
 	while(temp != NULL){
-		if(temp != buffer.bottom && temp != buffer.top) {
-			freeRecord(temp);
+		if(temp == buffer->bottom) {
+			temp = temp->next;
+			buffer->bottom = buffer->bottom->prev;	//CAUTION:: MAY NOT WORK IF BOTTOM HAS NO PREVIOUS/ POSSIBLE SCENARIO
+			freeRecord(buffer->bottom->next);
 		}
-		temp = temp->next;
+		else if(temp != buffer->bottom && temp != buffer->top) {
+			temp = temp->prev;
+			freeRecord(temp->next);
+			temp = temp->next;
+		}
 	}
 }
 void wrapText(int width, char *text) {
@@ -137,28 +144,24 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 }
 
 //must parseRecord for this
-void addBufferTop(struct RecordList *buffer,Record *r,int maxSize) { //r == new record
+void addBufferTop(struct RecordList *buffer,Record *r) { //r == new record
 	if(buffer->bottom != NULL) {
 		r->next = buffer->top;
 		buffer->top->prev = r;
 		buffer->top = r;
-		if(bufferLength(*buffer) >= maxSize){
-			buffer->bottom = buffer->bottom->prev;
-			if(buffer->bottom->next != NULL){
-				freeRecord(buffer->bottom->next);
-			}
+		buffer->bottom = buffer->bottom->prev;
+		if(buffer->bottom->next != NULL){
+			freeRecord(buffer->bottom->next);
 		}
 	}else { 
 		printf("%s\n", "can't shiftBufferUp");
 	}
 }
-void addBufferBot(struct RecordList *buffer,Record *r,int maxSize){ 
+void addBufferBot(struct RecordList *buffer,Record *r){ 
 	bufferRecord(buffer,r);
-	if(bufferLength(*buffer) >= maxSize) {
-		buffer->top = buffer->top->next;
-		if(buffer->top->prev != NULL){
-			freeRecord(buffer->top->prev);
-		}
+	buffer->top = buffer->top->next;
+	if(buffer->top->prev != NULL){
+		freeRecord(buffer->top->prev);
 	}
 }
 int bufferLength(struct RecordList buffer) {

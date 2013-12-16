@@ -58,7 +58,7 @@ int main(void) {
 	
 	hovered = *(RLBuffer.top);
 	
-	displayRecords(hovered,RLBuffer,rArea);
+	displayRecords(hovered,&RLBuffer,rArea);
 	//records operation
 	
 	//current->prev = '\0';
@@ -80,6 +80,7 @@ int main(void) {
                         }
                         if (c == KEY_DOWN) {
                                 if(hovered.next != NULL) {
+					printf("Bottom Subject: %s\n",RLBuffer.bottom->subject);
                                         hovered = *(hovered.next);
                                 } else {
                                         scrollDown();
@@ -97,7 +98,7 @@ int main(void) {
                                 redraw = TRUE;
                         }
                         else if (c == 'a') {
-                                cursorArea = "newSubjectArea";
+                                cursorArea = "addSubject";
                         }
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
@@ -161,7 +162,7 @@ void draw() {
 
 	nitems = atoi(searchNvs("nitems"));
 	
-	displayRecords(hovered,RLBuffer,rArea);
+	displayRecords(hovered,&RLBuffer,rArea);
 
 }
 // ------------------------------------ fill --------------------------------
@@ -229,7 +230,7 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 void scrollUp(){
 	int nextRecord = RLBuffer.top->num - 1;
 	if(nextRecord >= 1) {
-		addBufferTop(&RLBuffer, getRecord(nextRecord),rArea.bot - rArea.top);
+		addBufferTop(&RLBuffer, getRecord(nextRecord));
 	} else {
 		printf("bottom\n");
 	}
@@ -237,7 +238,7 @@ void scrollUp(){
 void scrollDown(){
 	int nextRecord = RLBuffer.bottom->num + 1;
 	if(nextRecord <= nitems) {
-		addBufferBot(&RLBuffer, getRecord(nextRecord),rArea.bot - rArea.top);
+		addBufferBot(&RLBuffer, getRecord(nextRecord));
 	} else {
 		printf("bottom\n");
 	}

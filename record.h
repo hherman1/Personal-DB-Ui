@@ -27,7 +27,7 @@ struct RecordList
 	Record *bottom;
 	int length;
 };
-void displayRecords(Record hovered,struct RecordList buffer,Area rArea);
+void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
@@ -35,6 +35,6 @@ Record *getRecord(int n);
 Record *findRecord(struct RecordList *buffer,int num);
 void freeRecord(Record *target);
 void bufferRecord(struct RecordList *buffer,Record *r);
-void addBufferTop(struct RecordList *buffer,Record *r,int maxSize);
-void addBufferBot(struct RecordList *buffer,Record *r,int maxSize);
+void addBufferTop(struct RecordList *buffer,Record *r);
+void addBufferBot(struct RecordList *buffer,Record *r);
 int bufferLength(struct RecordList buffer);
