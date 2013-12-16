@@ -118,6 +118,7 @@ int main(void) {
 					}else if (cursorArea = "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
+						scrollDown();
 						fill(subject,30);
 						fill(body,140);
 						cursorPos = 0;
