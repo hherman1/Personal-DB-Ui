@@ -43,16 +43,12 @@ int boolShowCurrentRecord = FALSE;
 
 // ------------------------------------------------ main --------------------
 int main(void) {
-	printf("hello world\n");
-	
-	printf("starting...\n");
 	int i, c;
 	
 	fill(subject,30);
 	fill(body,140);
 	
 	xt_par0(XT_CLEAR_SCREEN);
-	printf("testSTetseresrdfas\n");
 	
 	// display template
  	for (i = 0; i < nTS; ++i) {
@@ -71,23 +67,16 @@ int main(void) {
 	
 	
 	//records operation
-	ParseRecord(recordDisplayStart);
-	Record *temp = malloc(sizeof(Record));
-	getRecord(temp);
-	bufferRecord(&RLBuffer,temp);
-	Record *current = RLBuffer.top;
 	//current->prev = '\0';
-	for (i = recordDisplayStart+1; i <= recordDisplayEnd && i <= nitems; i++){
-		ParseRecord(i);
-		temp = malloc(sizeof(Record));
-		getRecord(temp);
-		bufferRecord(&RLBuffer,temp);
-		
+	Record *temp = RLBuffer.top;
+	printf("TOP: %s\n",temp->subject);
+	while(temp != NULL){
+		i++;
 		int row = rArea.top + i - recordDisplayStart;
 		DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
 		DisplayAt(row,rArea.right-MAX_TiME_LEN,XT_CH_GREEN,30,temp->time);
+		temp = temp->next;
 	}
-	//*/
 	while (TRUE) {
 		while ((c = getkey()) == KEY_NOTHING) ;
 		if (c == KEY_F9)  {

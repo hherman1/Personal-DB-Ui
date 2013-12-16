@@ -2,41 +2,39 @@
 #include "record.h"
 
 //--------------------------Display----------------------------
-void displayRecords(struct RecordList buffer,Area rArea);
+void displayRecords(struct RecordList buffer,Area rArea) {
+	
+}
 //--------------------------Operations-------------------------
 void loadRecords(struct RecordList *buffer,int low,int high,int number) {
-	ParseRecord(low);
-	Record *temp = malloc(sizeof(Record));
-	getRecord(temp);
+	Record *temp = getRecord(low);
 	bufferRecord(buffer,temp);
-	while(low++ < high && low< number) {
-		ParseRecord(low);
-		temp = malloc(sizeof(Record));
-		getRecord(temp);
+	while(++low < high && low <= number) {
+		temp = getRecord(low);
 		bufferRecord(buffer,temp);
 	}	
 	
 }
-void getRecord(Record *holder) {
+Record *getRecord(int r) {
+	ParseRecord(r);
+	Record *ans = malloc(sizeof(Record));
 	char *temp;
-	char *temp2 = malloc(sizeof(char) * 141);
+	ans->subject = malloc(sizeof(char) * 31);
 	temp = searchNvs("subject");
-	strcpy(temp2,temp);
-	holder->subject = temp2;
+	strcpy(ans->subject,temp);
 	
 	temp = searchNvs("body");
-	temp2 = malloc(sizeof(char) * 141);
-	strcpy(temp2,temp);
-	holder->body = temp2;
+	ans->body = malloc(sizeof(char) * 141);
+	strcpy(ans->body,temp);
 	
 	temp = searchNvs("time");
-	temp2 = malloc(sizeof(char) * 141);
-	strcpy(temp2,temp);
-	holder->time = temp2;
+	ans->time = malloc(sizeof(char) * 141);
+	strcpy(ans->time,temp);
 	
-	holder->num = atoi(searchNvs("item"));
-	holder->prev = NULL;
-	holder->next = NULL;
+	ans->num = atoi(searchNvs("item"));
+	ans->prev = NULL;
+	ans->next = NULL;
+	return ans;
 }
 Record *findRecord(struct RecordList *buffer,int num) {
 	Record *cur = buffer->top;
@@ -68,10 +66,13 @@ void recordcpy(Record *dest,Record src) {
 	dest->prev = src.prev;
 }
 void bufferRecord(struct RecordList *buffer,Record *r) {
+	if(r == NULL) {
+		printf("ERROR: Record does not exist\n");
+	}
 	if(buffer->bottom != NULL) {
 		r->prev = buffer->bottom;
 		buffer->bottom->next = r;
-		buffer->bottom = r;
+		buffer->bottom = buffer->bottom->next;
 	} else {
 		buffer->bottom = r;
 		buffer->top = r;
