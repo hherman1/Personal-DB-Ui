@@ -69,15 +69,9 @@ int main(void) {
 	//records operation
 	//current->prev = '\0';
 	Record *temp = RLBuffer.top;
-	printf("Buffer top == Buffer Bottom? %i\n",RLBuffer.top->prev == NULL);
-	i = 0;
-	while(temp != NULL && ++i && temp->next != temp) {
-		printf("SUBJECT: %s\n",temp->subject);
-		temp = temp->next;
-	}
-	printf("Items in buffer: %i",i);
-	temp = RLBuffer.top;
+	printf("TOP: %s\n",temp->subject);
 	while(temp != NULL){
+		i++;
 		int row = rArea.top + i - recordDisplayStart;
 		DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
 		DisplayAt(row,rArea.right-MAX_TiME_LEN,XT_CH_GREEN,30,temp->time);
