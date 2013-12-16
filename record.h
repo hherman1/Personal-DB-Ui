@@ -34,7 +34,6 @@ void loadRecords(struct RecordList *buffer,int low,int high,int number);
 Record *getRecord(int n);
 Record *findRecord(struct RecordList *buffer,int num);
 void freeRecord(Record *target);
-void recordcpy(Record *dest,Record src);
 void bufferRecord(struct RecordList *buffer,Record *r);
 void addBufferTop(struct RecordList *buffer,Record *r);
 void addBufferBot(struct RecordList *buffer,Record *r);

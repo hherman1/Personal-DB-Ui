@@ -116,14 +116,6 @@ void freeRecord(Record *target) {
 	}
 	free(target);
 }
-void recordcpy(Record *dest,Record src) {
-	dest->body = src.body;
-	dest->subject = src.subject;
-	dest->time = src.time;
-	dest->num = src.num;
-	dest->next = src.next;
-	dest->prev = src.prev;
-}
 void bufferRecord(struct RecordList *buffer,Record *r) {
 	if(r == NULL) {
 		printf("ERROR: Record does not exist\n");
