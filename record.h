@@ -1,11 +1,12 @@
 #define R_TEXT_COLOR XT_CH_GREEN
 #define R_HOVERED_BG_COLOR XT_BG_GREEN
 #define R_HOVERED_TEXT_COLOR XT_CH_WHITE
-#define R_SELECTED_BG_COLOR XT_BG_YELLOW
-#define R_SELECTED_TEXT_COLOR XT_CH_RED
-#define R_SELECTED_BODY_COLOR XT_CH_MAGENTA
+#define R_SELECTED_BG_COLOR XT_BG_CYAN
+#define R_SELECTED_TEXT_COLOR XT_CH_BLUE
+#define R_SELECTED_BODY_COLOR XT_CH_BLUE
 #define R_SELECTED_TEXT_STYLE XT_CH_BOLD
-#define R_SELECTED_HOVERED_TEXT_COLOR XT_CH_MAGENTA
+#define R_SELECTED_BODY_STYLE XT_CH_NORMAL
+#define R_SELECTED_HOVERED_TEXT_COLOR XT_CH_RED
 #define MAX_SUBJECT_LEN 30
 #define MAX_BODY_LEN 140
 #define MAX_TIME_LEN 20
@@ -26,7 +27,7 @@ struct RecordList
 	Record *bottom;
 	int length;
 };
-void displayRecords(Record hovered,struct RecordList buffer,Area rArea);
+Record *displayRecords(Record hovered,struct RecordList buffer,Area rArea);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);

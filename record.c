@@ -5,7 +5,7 @@ int recordSelected = 2;
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 	int i = 0;
-	int width = rArea.left - rArea.right;
+	int width = rArea.right - rArea.left;
 	char *color;
 	Record *temp = buffer.top;
 	while(temp != NULL && i + rArea.top < rArea.bot){
@@ -30,6 +30,8 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 			int spaceNeeded = strlen(sTemp) / width + 1;
 			i += spaceNeeded;
 			xt_par2(XT_SET_COL_POS,row+2,rArea.left);
+			xt_par0(R_SELECTED_BODY_STYLE);
+			xt_par0(R_SELECTED_BG_COLOR);
 			xt_par0(R_SELECTED_BODY_COLOR);
 			wrapText(width,sTemp);
 			free(sTemp);
@@ -42,7 +44,9 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 	}
-	
+	if(hovered == temp) {
+		scrollNext();
+	}
 }
 void wrapText(int width, char *text) {
 	int i = 0;

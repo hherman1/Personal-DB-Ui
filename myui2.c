@@ -96,6 +96,10 @@ int main(void) {
 				redraw = 1;
 			}
 		}
+		if (c == 's') {
+			scrollNext();
+			redraw = 1;
+		}
 		if(redraw)
 			draw();
 	}
