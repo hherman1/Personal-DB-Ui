@@ -37,6 +37,7 @@ typedef struct Area
 	int right;
 	int top;
 	int down;
+	char* text;
 }Area;
 
 // Prototypes -------------------------------------
@@ -51,3 +52,5 @@ int FindStringPosition(char *prompt);
 char *searchNvs(char name[]);
 void ParseStat(void);
 void ParseRecord(int numRec);
+void scrollPrevious(void);
+void scrollNext(void);
