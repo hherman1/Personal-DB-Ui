@@ -73,28 +73,6 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
-<<<<<<< HEAD
-		if (c == KEY_ENTER) {
-			selectRecord(hovered,RLBuffer,rArea);
-			redraw = TRUE;
-		}
-		if (c == KEY_DOWN) {
-			if(hovered.next != NULL) {
-				hovered = *(hovered.next);
-			} else {
-				scrollNext();
-				hovered = *(RLBuffer.bottom);
-			}
-			redraw = TRUE;
-		} 
-		}
-		if (c == KEY_UP) {
-			if(hovered.prev != NULL) {
-				hovered = *(hovered.prev);
-			} else {
-				scrollPrevious();
-				hovered = *(RLBuffer.top);
-=======
 		if(cursorArea == "record"){
 			if (c == KEY_ENTER) {
 				selectRecord(hovered,RLBuffer,rArea);
@@ -128,7 +106,6 @@ int main(void) {
 					body[cursorPos++] = c; 
 				}
 				redraw = TRUE;
->>>>>>> bbd30d8fad17f6664c193d081d0edb9844782bdb
 			}
 			redraw = TRUE;
 		}
