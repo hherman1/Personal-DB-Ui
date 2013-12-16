@@ -44,7 +44,7 @@ void displayRecords(Record hovered,struct RecordList buffer,Area rArea) {
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 	}
-	if(hovered == temp) {
+	if(hovered.num == temp->num) {
 		scrollNext();
 	}
 }

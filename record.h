@@ -27,7 +27,7 @@ struct RecordList
 	Record *bottom;
 	int length;
 };
-Record *displayRecords(Record hovered,struct RecordList buffer,Area rArea);
+void displayRecords(Record hovered,struct RecordList buffer,Area rArea);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
