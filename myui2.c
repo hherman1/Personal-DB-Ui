@@ -126,7 +126,7 @@ int main(void) {
 				else if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
 					if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
 					subject[cursorPos++] = c; 
-				}else if (cursorArea = "addBody" && cursorPos <= MAX_BODY_LEN){ 
+				}else if (cursorArea == "addBody" && cursorPos <= MAX_BODY_LEN){ 
 					if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
 					body[cursorPos++] = c; 
 				}
