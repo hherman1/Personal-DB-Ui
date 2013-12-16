@@ -15,7 +15,7 @@ struct TemplateString TS[] = {
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
 	{5,1,XT_CH_YELLOW,"Search: _________________________________"},
-	{48,1,XT_CH_RED,"Note: pls save to commit changes"},
+	{48,1,XT_CH_RED,"Note: pls save to commit changes.    F9 to quit"},
 	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{50,1,XT_CH_GREEN,"Message: nitems = "}
 };
