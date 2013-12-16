@@ -118,7 +118,7 @@ int main(void) {
 						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
 						subject[cursorPos++] = c; 
 					}
-				}else if (cursorPos <= MAX_BODY_LEN){ 
+				}else if (cursorArea = "addBody" && cursorPos <= MAX_BODY_LEN){ 
 					if (c == KEY_ENTER){
 						cursorArea = "record";
 						addRecord(subject,body);
