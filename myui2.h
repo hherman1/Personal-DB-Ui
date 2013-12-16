@@ -36,7 +36,7 @@ typedef struct Area
 	int left;
 	int right;
 	int top;
-	int down;
+	int bot;
 	char* text;
 }Area;
 

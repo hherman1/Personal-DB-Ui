@@ -40,7 +40,6 @@ int recordDisplayStart = 1; //display records 1-20; start to end
 int recordDisplayEnd = 20;
 int boolShowCurrentRecord = FALSE;
 
-
 // ------------------------------------------------ main --------------------
 int main(void) {
 	int i, c;
@@ -65,7 +64,7 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 	loadRecords(&RLBuffer,recordDisplayStart,recordDisplayEnd,nitems);
 	
-	displayRecords(RLBuffer,rArea);
+	displayRecords(8,RLBuffer,rArea);
 	//records operation
 	//current->prev = '\0';
 	while (TRUE) {

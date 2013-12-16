@@ -1,19 +1,61 @@
 #include "myui2.h"
 #include "record.h"
 
+int recordSelected = 10;
 //--------------------------Display----------------------------
-void displayRecords(struct RecordList buffer,Area rArea) {
+void displayRecords(int cursorRow,struct RecordList buffer,Area rArea) {
 	int i = 0;
+	int width = rArea.left - rArea.right;
+	char *color;
 	Record *temp = buffer.top;
-	printf("TOP: %s\n",temp->subject);
-	while(temp != NULL && i + rArea.top < rArea.bottom){
+	while(temp != NULL && i + rArea.top < rArea.bot){
 		i++;
 		int row = rArea.top + i;
-		DisplayAt(row,rArea.left,XT_CH_GREEN,30,temp->subject);
-		DisplayAt(row,rArea.right-MAX_TIME_LEN,XT_CH_GREEN,30,temp->time);
+		color = R_TEXT_COLOR;
+		if(row == cursorRow) {
+			xt_par0(R_HOVERED_BG_COLOR);
+			color = R_HOVERED_TEXT_COLOR;
+		}
+		DisplayAt(row,rArea.left,color,30,temp->subject);
+		DisplayAt(row,rArea.right-MAX_TIME_LEN,color,30,temp->time);
+		if(row == recordSelected) {
+			char *sTemp = malloc(141 * sizeof(char));
+			strcpy(sTemp,temp->body);
+			int spaceNeeded = strlen(sTemp) / width + 1;
+			i += spaceNeeded;
+			xt_par2(XT_SET_COL_POS,row+1,rArea.left);
+			wrapText(width,sTemp);
+			free(sTemp);
+		}
 		temp = temp->next;
+		xt_par0(XT_BG_DEFAULT);
 	}
 	
+}
+void wrapText(int width, char *text) {
+	int i = 0;
+	while(text[i] != '\0') {
+		if(i%width == 0) {
+			putchar('\n');
+		}
+		putchar(text[i]);
+		i++;
+	}
+	
+}
+int getHoveredRNum(int cursorRow,struct RecordList buffer,Area rArea) {
+	int ans = 0;
+	int topR = buffer.top->num;
+	ans = topR + cursorRow - rArea.top;
+	return ans;
+}
+void selectRecord(int cursorRow,struct RecordList buffer,Area rArea) {
+	int rNum = getHoveredRNum(cursorRow,buffer,rArea);
+	if(rNum == recordSelected) {
+		recordSelected = 0;
+	} else {
+		recordSelected = rNum;
+	}
 }
 //--------------------------Operations-------------------------
 void loadRecords(struct RecordList *buffer,int low,int high,int number) {
