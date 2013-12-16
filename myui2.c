@@ -9,8 +9,8 @@ int n_input=0;	// number of chars in the input, not including terminating NULL-b
 
 Area SCREEN = {1,55,1,120,"",TRUE};
 Area rArea = {7,45,1,120,"",TRUE};
-Area newSubjectArea = {44,44,15,SCREEN.right,"",TRUE};
-Area newBodyArea = {45,47,12,SCREEN.right,"",TRUE};																												
+Area newSubjectArea = {44,44,15,120,"",TRUE};
+Area newBodyArea = {45,47,12,120,"",TRUE};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
@@ -93,7 +93,7 @@ int main(void) {
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
 			if (c == 'r'){
-				cursorArea = "record"
+				cursorArea = "record";
 			}else {
 				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
 					subject[cursorPos++] = c;
@@ -126,8 +126,8 @@ void draw() {
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	//new subject and body
-	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,value);
-	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,value);
+	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
+	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 
 	nitems = atoi(searchNvs("nitems"));
 	
