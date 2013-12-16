@@ -127,7 +127,7 @@ int main(void) {
 						cursorPos = 0;
 					}else{ 
 						if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
-						subject[cursorPos++] = c; 
+						body[cursorPos++] = c; 
 					}
 				}
 			}
