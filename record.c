@@ -88,7 +88,7 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 }
 
 //must parseRecord for this
-void shiftBufferUp(struct RecordList *buffer,Record *r){
+void addBufferTop(struct RecordList *buffer,Record *r){ //r = new record
 	if(buffer->bottom != NULL) {
 	r->next = buffer->top;
 	buffer->top = r;
@@ -96,7 +96,7 @@ void shiftBufferUp(struct RecordList *buffer,Record *r){
 	freeRecord(buffer->bottom->next);
 	}else { printf("%s\n", "can't shiftBufferUp");}
 }
-void shiftBufferDown(struct RecordList *buffer,Record *r){ ///work in progress
+void addBufferBot(struct RecordList *buffer,Record *r){ 
 	bufferRecord(buffer,r);
 	buffer->top = buffer->top->next;
 	freeRecord(buffer->top->prev);
