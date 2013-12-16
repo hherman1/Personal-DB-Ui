@@ -7,8 +7,8 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
+Area rArea = {7,8 + MAX_RECORDS_TO_DISPLAY,1,120,"",TRUE};
 Area SCREEN = {1,55,1,120,"",TRUE};
-Area rArea = {7,45,1,120,"",TRUE};
 Area newSubjectArea = {44,44,15,120,"",TRUE};
 Area newBodyArea = {45,47,12,120,"",TRUE};																												
 struct TemplateString TS[] = {
@@ -73,6 +73,28 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
+<<<<<<< HEAD
+		if (c == KEY_ENTER) {
+			selectRecord(hovered,RLBuffer,rArea);
+			redraw = TRUE;
+		}
+		if (c == KEY_DOWN) {
+			if(hovered.next != NULL) {
+				hovered = *(hovered.next);
+			} else {
+				scrollNext();
+				hovered = *(RLBuffer.bottom);
+			}
+			redraw = TRUE;
+		} 
+		}
+		if (c == KEY_UP) {
+			if(hovered.prev != NULL) {
+				hovered = *(hovered.prev);
+			} else {
+				scrollPrevious();
+				hovered = *(RLBuffer.top);
+=======
 		if(cursorArea == "record"){
 			if (c == KEY_ENTER) {
 				selectRecord(hovered,RLBuffer,rArea);
@@ -106,7 +128,9 @@ int main(void) {
 					body[cursorPos++] = c; 
 				}
 				redraw = TRUE;
+>>>>>>> bbd30d8fad17f6664c193d081d0edb9844782bdb
 			}
+			redraw = TRUE;
 		}
 		if(redraw)
 			draw();
@@ -201,11 +225,21 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 }
 
 //RLBuffer must exist for scroll
-void scrollUp(void){
-	addBufferTop(&RLBuffer, getRecord(RLBuffer.top->num + 1));
+void scrollPrevious(){
+	int nextRecord = RLBuffer.top->num - 1;
+	if(nextRecord >= 1) {
+		addBufferTop(&RLBuffer, getRecord(nextRecord));
+	} else {
+		printf("bottom\n");
+	}
 }
-void scrollDown(void){
-	addBufferBot(&RLBuffer, getRecord(RLBuffer.top->num + 1));
+void scrollNext(){
+	int nextRecord = RLBuffer.bottom->num + 1;
+	if(nextRecord <= nitems) {
+		addBufferBot(&RLBuffer, getRecord(nextRecord));
+	} else {
+		printf("bottom\n");
+	}
 }
 // ---------------------------------- 	FindStringPosition ----------------
 int FindStringPosition(char *prompt) { //pos in string array 
