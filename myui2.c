@@ -101,12 +101,11 @@ int main(void) {
                         }
 		}
 		if (cursorArea == "addSubject" || cursorArea == "addBody"){
-			if (c == KEY_F1){
+			if (c == KEY_F2){
 				cursorArea = "record";
 			}else {
 				if(c == KEY_LEFT){
 					if(cursorPos > 0) cursorPos--;
-
 				}
 				if (c == KEY_RIGHT){
 					cursorPos++;
@@ -124,7 +123,7 @@ int main(void) {
 					}
 				}
 				//to do: check if c a letter
-				if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
+				else if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
 					if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
 					subject[cursorPos++] = c; 
 				}else if (cursorArea = "addBody" && cursorPos <= MAX_BODY_LEN){ 
