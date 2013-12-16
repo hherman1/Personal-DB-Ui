@@ -71,7 +71,7 @@ int main(void) {
 	
 	//current->prev = '\0';
 	while (TRUE) {
-		int redraw = 0;
+		int redraw = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
 		if (c == 'q')  {
 			xt_par0(XT_CLEAR_SCREEN);
@@ -82,18 +82,18 @@ int main(void) {
 		}
 		if (c == KEY_ENTER) {
 			selectRecord(hovered,RLBuffer,rArea);
-			redraw = 1;
+			redraw = TRUE;
 		}
 		if (c == KEY_DOWN) {
 			if(hovered.next != NULL) {
 				hovered = *(hovered.next);
-				redraw = 1;
+				redraw = TRUE;
 			} 
 		}
 		if (c == KEY_UP) {
 			if(hovered.prev != NULL) {
 				hovered = *(hovered.prev);
-				redraw = 1;
+				redraw = TRUE;
 			}
 		}
 		if(redraw)
