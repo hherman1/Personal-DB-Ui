@@ -1,3 +1,4 @@
+make and run myui2
 -opens at record display.
 -F9 at all times to quit. Or q
 -can scroll through records with up and  down arrows
@@ -12,3 +13,8 @@
 
 to do:
 doesn't specify what keys u can type when adding record.
+
+
+BUGS!!
+-the bottom most subject's body doesn't display. It's cut off
+-add another subject-body to view last one.

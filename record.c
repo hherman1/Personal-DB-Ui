@@ -1,7 +1,22 @@
 #include "myui2.h"
 #include "record.h"
 
+
+//---for single MutiBodyRecord
+int *allBodies = malloc(5 * sizeof(int));  
+char input[1000];
+int n_input=0;	// number of chars in the input, not including terminating NULL-byte
+struct NameValue *nvs = NULL; //namevalues storage i think
+int n_nvs = 0;
+
+//---hunter
 int recordSelected = 2;
+
+//------for MutibodyRecordList
+int *processedSubjects;
+int nextSubjectLoc = 1; // nextSubjectLoc must not be in allBodies
+int numSubjects = 0;
+
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	int i = 0;
@@ -83,20 +98,32 @@ void selectRecord(Record record,struct RecordList buffer,Area rArea) {
 //----within record operations-------------------
 
 void addBody(char *body){
-	//to do: expand size when not enough space
+	//to do: dyanmatic arraylist of integers 
 }
+
 
 //--------------------------Operations-------------------------
-
-void loadRecords(struct RecordList *buffer,int low,int high,int number) {
-	Record *temp = getRecord(low);
-	bufferRecord(buffer,temp);
-	while(++low < high && low <= number) {
-		temp = getRecord(low);
-		bufferRecord(buffer,temp);
-	}	
+void loadRecords(struct MultiBodyRecordList *buffer, int maxItems) {
+	nextSubjectLoc = 1; //to be sure
+	while(nextSubjectLoc <= maxItems) {
+		loadNextSubject();
+	}
 	
 }
+
+void loadNextSubject(){
+
+	numSubjects++;
+}
+
+void ParseRecord(int numRec){
+	char str[15];
+	sprintf(str, "%d", numRec);
+	ReadMystoreFromChild("display",str,NULL,NULL);
+	ParseInput(input,n_input);
+}
+
+//--------------------------
 Record *getRecord(int r) {
 	ParseRecord(r);
 	Record *ans = malloc(sizeof(Record));

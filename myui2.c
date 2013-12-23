@@ -178,12 +178,7 @@ void ParseStat(void){
 	ReadMystoreFromChild("stat",NULL,NULL,NULL);
 	ParseInput(input,n_input);
 }
-void ParseRecord(int numRec){
-	char str[15];
-	sprintf(str, "%d", numRec);
-	ReadMystoreFromChild("display",str,NULL,NULL);
-	ParseInput(input,n_input);
-}
+
 // --------------------------- searching-----------------------------------
 void SearchDisplay(char *prompt, char *name, char *color) {
 	int loc, col, i, j;
@@ -254,7 +249,9 @@ int FindStringPosition(char *prompt) { //pos in string array
 	}
 	return 0;
 }
-//------------------------ adding ---------------------------------
+
+
+//------------adding
 void addRecord(char *subject, char* body){
 	ReadMystoreFromChild("add",subject,body,NULL);
 	ParseRecord(++nitems);
