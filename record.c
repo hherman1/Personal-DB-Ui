@@ -2,20 +2,18 @@
 #include "record.h"
 
 
-//---for single MutiBodyRecord
-int *allBodies = malloc(5 * sizeof(int));  
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
+int nitems = 0;  //numRecords in mystore
+
+MultiBodyRecordList buffer;
+
+//------for MultiBodyRecordList
 
 //---hunter
 int recordSelected = 2;
-
-//------for MutibodyRecordList
-int *processedSubjects;
-int nextSubjectLoc = 1; // nextSubjectLoc must not be in allBodies
-int numSubjects = 0;
 
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
@@ -63,12 +61,12 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	}
 	
 	while(temp != NULL){
-		if(temp == buffer->bottom) {
+		if(temp == buffer->bot) {
 			temp = temp->next;
-			buffer->bottom = buffer->bottom->prev;	//CAUTION:: MAY NOT WORK IF BOTTOM HAS NO PREVIOUS/ POSSIBLE SCENARIO
-			freeRecord(buffer->bottom->next);
+			buffer->bot = buffer->bot->prev;	//CAUTION:: MAY NOT WORK IF bot HAS NO PREVIOUS/ POSSIBLE SCENARIO
+			freeRecord(buffer->bot->next);
 		}
-		else if(temp != buffer->bottom && temp != buffer->top) {
+		else if(temp != buffer->bot && temp != buffer->top) {
 			temp = temp->prev;
 			freeRecord(temp->next);
 			temp = temp->next;
@@ -97,23 +95,76 @@ void selectRecord(Record record,struct RecordList buffer,Area rArea) {
 
 //----within record operations-------------------
 
-void addBody(char *body){
+void addBody(BodyList *bodies, int newBody, char* time){
 	//to do: dyanmatic arraylist of integers 
+
 }
+//---------------------------------------------------
+void loadRecords() { //first function to be called in this process
+	//new buffer
+	if(buffer = malloc(sizeof MultiBodyRecordList) != NULL || failToMalloc());
+	buffer.top = buffer.bot = NULL;
+	buffer.numSubjects = 0; 
+	//buffer.processedSubjects = malloc(5 * sizeof(int));
+	buffer.nextRecordLoc = 1; 
 
 
-//--------------------------Operations-------------------------
-void loadRecords(struct MultiBodyRecordList *buffer, int maxItems) {
-	nextSubjectLoc = 1; //to be sure
-	while(nextSubjectLoc <= maxItems) {
+	ParseStat();
+	nitems = atoi(searchNvs("nitems"));
+	while(buffer.nextRecordLoc++ <= maxItems) {
 		loadNextSubject();
 	}
 	
 }
 
-void loadNextSubject(){
+void loadNextSubject(void){
+	parseRecord(buffer.nextRecordLoc);
+	char *subject = searchNvs("subject");
+	int itemNum = atoi(searchNvs("item"));
+	newRecord(subject);
+	//search for identical subjects
 
-	numSubjects++;
+	char *body = searchNvs("body");
+	buffer.numSubjects++;
+}
+
+
+MultiBodyRecord newRecord(char* subject){
+	if(buffer.top == NULL){
+		if(buffer.top = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
+		if(buffer.top.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
+		buffer.top.subject = subject;
+		buffer.top.next = buffer.bot;
+		buffer.top.prev = NULL;
+	}else if(buffer.bot == NULL){
+		if(buffer.bot = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
+		if(buffer.bot.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
+		buffer.bot.subject = subject;
+		buffer.bot.prev = buffer.top;
+		buffer.bot.next = NULL;
+	}else{
+		MultiBodyRecord temp;
+		if(temp = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
+		if(buffer.temp.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
+		buffer.temp.subject = subject;
+		buffer.bot.next = temp;
+		buffer.temp.prev = buffer.bot;
+		buffer.temp.next = NULL;
+		buffer.bot = temp;
+		
+	}
+
+}
+
+int failToMalloc(void){
+	printf("%s\n", "A buffer that a NULL. Fail to malloc?");
+	exit(EXIT_FAILURE);
+	return 0;
+}
+//---------------------------------parse inputs--------------------------
+void ParseStat(void){
+	ReadMystoreFromChild("stat",NULL,NULL,NULL);
+	ParseInput(input,n_input);
 }
 
 void ParseRecord(int numRec){
@@ -123,7 +174,16 @@ void ParseRecord(int numRec){
 	ParseInput(input,n_input);
 }
 
-//--------------------------
+char *searchNvs(char name[]){
+	int i;
+	for (i = 0; i < n_nvs; ++i) {
+		if (strcmp(nvs[i].name,name) == 0) {
+			return nvs[i].value;
+		}
+	}
+}
+
+//--------------------------///subject to deletion!!!!!!!!
 Record *getRecord(int r) {
 	ParseRecord(r);
 	Record *ans = malloc(sizeof(Record));
@@ -149,7 +209,7 @@ Record *findRecord(struct RecordList *buffer,int num) {
 	Record *cur = buffer->top;
 	while(cur->num != num && (cur = cur->next) && cur != NULL);
 	if(cur == NULL) {
-		printf("ERROR: Record #%i could not be found in the buffer starting at %i and ending at %i\n",num,buffer->top->num,buffer->bottom->num);
+		printf("ERROR: Record #%i could not be found in the buffer starting at %i and ending at %i\n",num,buffer->top->num,buffer->bot->num);
 		exit(EXIT_FAILURE);
 	}
 	return cur;
@@ -170,25 +230,25 @@ void bufferRecord(struct RecordList *buffer,Record *r) {
 	if(r == NULL) {
 		printf("ERROR: Record does not exist\n");
 	}
-	else if(buffer->bottom != NULL) {
-		r->prev = buffer->bottom;
-		buffer->bottom->next = r;
-		buffer->bottom = buffer->bottom->next;
+	else if(buffer->bot != NULL) {
+		r->prev = buffer->bot;
+		buffer->bot->next = r;
+		buffer->bot = buffer->bot->next;
 	} else {
-		buffer->bottom = r;
+		buffer->bot = r;
 		buffer->top = r;
 	}
 }
 
 //must parseRecord for this
 void addBufferTop(struct RecordList *buffer,Record *r) { //r == new record
-	if(buffer->bottom != NULL) {
+	if(buffer->bot != NULL) {
 		r->next = buffer->top;
 		buffer->top->prev = r;
 		buffer->top = r;
-		buffer->bottom = buffer->bottom->prev;
-		if(buffer->bottom->next != NULL){
-			freeRecord(buffer->bottom->next);
+		buffer->bot = buffer->bot->prev;
+		if(buffer->bot->next != NULL){
+			freeRecord(buffer->bot->next);
 		}
 	}else { 
 		printf("%s\n", "can't shiftBufferUp");
@@ -202,5 +262,5 @@ void addBufferBot(struct RecordList *buffer,Record *r){
 	}
 }
 int bufferLength(struct RecordList buffer) {
-	return buffer.bottom->num - buffer.top->num;
+	return buffer.bot->num - buffer.top->num;
 }

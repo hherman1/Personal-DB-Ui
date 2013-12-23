@@ -1,11 +1,6 @@
 #include "myui2.h"
 #include "record.h"
 
-struct NameValue *nvs = NULL; //namevalues storage i think
-int n_nvs = 0;
-
-char input[1000];
-int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
 Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
 Area SCREEN = {1,120,1,55,"",TRUE};
@@ -30,10 +25,9 @@ struct StringPosition SP[] = {
 };
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
-struct RecordList RLBuffer;
+
 Record hovered;
 
-int nitems = 0;  //numRecords
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
 char errmsg[80] = "";
@@ -161,7 +155,7 @@ void draw() {
 	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 
-	nitems = atoi(searchNvs("nitems"));
+	
 	
 	displayRecords(hovered,&RLBuffer,rArea);
 
@@ -173,11 +167,7 @@ void fill(char *s, int n) {
 }
 
 
-//---------------------------------parse inputs--------------------------
-void ParseStat(void){
-	ReadMystoreFromChild("stat",NULL,NULL,NULL);
-	ParseInput(input,n_input);
-}
+
 
 // --------------------------- searching-----------------------------------
 void SearchDisplay(char *prompt, char *name, char *color) {
@@ -195,14 +185,7 @@ void SearchDisplay(char *prompt, char *name, char *color) {
 	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
 }
 
-char *searchNvs(char name[]){
-	int i;
-	for (i = 0; i < n_nvs; ++i) {
-		if (strcmp(nvs[i].name,name) == 0) {
-			return nvs[i].value;
-		}
-	}
-}
+
 
 // ------------------------------------- DisplayAt -------------------------
 void DisplayAt(int row, int col, char *color, int maxlength, char *value) {

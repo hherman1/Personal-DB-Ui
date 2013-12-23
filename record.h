@@ -16,27 +16,51 @@
 /*MultiBodyRecord pairs a single subject with all the bodies with that subject name
 bodies are represented by the integer number that appear in mystore storage
 */
+typedef struct Body
+{
+	int loc;
+	char* time;
+	Body *next;
+	Body *prev;
+}Body;
+typedef struct BodyList
+{
+	Body *top;
+	Body *bot;
+	int numBodies;
+}BodyList;
 
 typedef struct MultiBodyRecord
 {
 	//int num; not needed
 	char *subject;
-	int *body; 
-	char *time;
-	struct Record *next;
-	struct Record *prev;
+	BodyList *bodies; //includes time
+	MultiBodyRecord *next;
+	MultiBodyRecord *prev; 
 }Record;
 typedef struct MultiBodyRecordList
 {
 	MultiBodyRecord *top;
-	MultiBodyRecord *bottom;
-	int length;
+	MultiBodyRecord *bot;
+	int numSubjects;
+	int *processedSubjects;
+	int nextRecordLoc;
 }MultiBodyRecordList;
 
-//within mutiBodyRecordList 
-void ParseRecord(int numRec);
 
+//within single mutiBodyRecord
+void addBody(BodyList *bodies, int newBody, char* time);
+//within mutiBodyRecordList 
+MultiBodyRecord newRecord(char* subject);
+void loadNextSubject(void);
 // general
+void ParseRecord(int numRec);
+void ParseStat(void);
+
+//from myui2_util
+int ParseInput(char *in, int n_in);
+int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4);
+
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
