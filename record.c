@@ -79,7 +79,15 @@ void selectRecord(Record record,struct RecordList buffer,Area rArea) {
 		recordSelected = rNum;
 	}
 }
+
+//----within record operations-------------------
+
+void addBody(char *body){
+	//to do: expand size when not enough space
+}
+
 //--------------------------Operations-------------------------
+
 void loadRecords(struct RecordList *buffer,int low,int high,int number) {
 	Record *temp = getRecord(low);
 	bufferRecord(buffer,temp);

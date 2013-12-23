@@ -12,21 +12,27 @@
 #define MAX_TIME_LEN 20
 
 #define MAX_RECORDS_TO_DISPLAY 10
-typedef struct Record
+typedef struct MultiBodyRecord
 {
-	int num;
+	//int num; not needed
 	char *subject;
-	char *body;
+	int *body; //list of the locations of the bodies in mystore that have the subject name 
 	char *time;
 	struct Record *next;
 	struct Record *prev;
 }Record;
-struct RecordList
+struct MultiBodyRecordList
 {
-	Record *top;
-	Record *bottom;
+	MultiBodyRecord *top;
+	MultiBodyRecord *bottom;
 	int length;
 };
+
+//within record operations
+void addBody(char *body);
+
+
+// record operations
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);

@@ -1,13 +1,18 @@
-// mystore:  manages a linked-list database (called "mystore.dat") of little items
+/* mystore:  manages a linked-list database (called "mystore.dat") of little items
 
+V 0.92: fixes bug in month output
+V 0.90: implements edit
+
+*/
 /* Implements commands:
 	add
 	stat
 	display
 	delete
+	edit
 */
 
-#define version "0.91"
+#define version "0.92"
 #define author "PBrooks"
 
 #include <stdio.h>
@@ -355,10 +360,10 @@ void stat(void) {
 	if (nitems == 0) return;
 	tp = localtime(&(first->theData.theTime));
 	printf("|first-time: %d-%02d-%02d %02d:%02d:%02d|\n",
-		tp->tm_year+1900,tp->tm_mon,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 	tp = localtime(&(last->theData.theTime));
 	printf("|last-time: %d-%02d-%02d %02d:%02d:%02d|\n",
-		tp->tm_year+1900,tp->tm_mon,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 
 	//printf("|first-time: %s|\n", rstrip(ctime(&(first->theData.theTime))));
 	//printf("|last-time: %s|\n", rstrip(ctime(&(last->theData.theTime))));
@@ -396,7 +401,7 @@ int display(char *sn) {
 	printf("|item: %d|\n",n);
 	tp = localtime(&this_data.theTime);
 	printf("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
-		tp->tm_year+1900,tp->tm_mon,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 	//printf("|time: %s|\n",rstrip(ctime(&this_data.theTime)));
 	printf("|subject: %s|\n",this_data.theSubject);
 	printf("|body: %s|\n",this_data.theBody);
