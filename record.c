@@ -2,7 +2,7 @@
 #include "record.h"
 
 
-
+//parsing and myui2_util
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 struct NameValue *nvs = NULL; //namevalues storage i think
@@ -12,7 +12,7 @@ int nitems = 0;  //numRecords in mystore
 
 //------for MBRArray
 MultiBodyRecord *MBRArray;
-int nextRecordLoc;
+int nextRecordLoc = 1;
 int numMBRecords = 0;
 //---hunter
 int recordSelected = 2;
@@ -97,8 +97,8 @@ void selectRecord(Record record,struct RecordList MBRArray,Area rArea) {
 
 //----within record operations-------------------
 
-void addBody(BodyList *bodies, int newBody, char* time){
-	//to do: dyanmatic arraylist of integers 
+void addBody(BodyList *bodies, int newBody, int itemNum, char* time){
+	//to do: linklist 
 
 }
 //---------------------------------------------------
@@ -106,10 +106,10 @@ void loadRecords() { //first function to be called in this process
 	ParseStat();
 	nitems = atoi(searchNvs("nitems"));
 	//new MBRArray
-	if(MBRArray = malloc(sizeof MultiBodyRecord * (nitems + MAX_EXTRA_RECORDS) != NULL || failToMalloc());
+	if(MBRArray = malloc(sizeof MultiBodyRecord * (nitems + MAX_EXTRA_RECORDS)) != NULL || failToMalloc());
 	MBRArray.top = MBRArray.bot = NULL;
-	MBRArray.numSubjects = 0; 
 	nextRecordLoc = 1; 
+	numMBRecords = 0; 
 	while(nextRecordLoc++ <= maxItems) {
 		loadNextSubject();
 	}
@@ -117,16 +117,30 @@ void loadRecords() { //first function to be called in this process
 
 void loadNextSubject(void){
 	parseRecord(nextRecordLoc);
-	char *subject = searchNvs("subject");
 	int itemNum = atoi(searchNvs("item"));
-	newRecord(subject);
+	char *newTime = searchNvs("time");
+	char *newSubject = searchNvs("subject");
+	char *newBody = searchNvs("body");
+
+
 	//search for identical subjects
 	int i, anySameSubjects = 0;
 	for (i = 0; i < numMBRecords; i++){
-
-	}
-	char *body = searchNvs("body");
-	MBRArray.numSubjects++;
+		if(strcmp(MBRArray[i].subject,newSubject) == 0){
+			anySameSubjects = 1;
+		}
+	} //same subject location = i;
+	if(!anySameSubjects){
+		//new Record
+		MultiBodyRecord temp;
+		if( (temp  = MBRArray[numMBRecords] = malloc(sizeof MultiBodyRecord)) != NULL || failToMalloc());
+		if( (temp.bodies  = malloc(sizeof BodyList)) != NULL || failToMalloc());
+		temp.subject = newSubject;
+		temp.bodies.top = temp.bodies.bot = NULL;
+		temp.numBodies = 0;
+		i = numMBRecords++;
+	}//i = same subject location or numMRecord for newrecords;
+	addBody(MBRArray[i].bodies, newBody, itemNum, newTime);
 	//nextRecordLoc++;
 }
 
