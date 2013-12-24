@@ -19,7 +19,7 @@ bodies are represented by the integer number that appear in mystore storage
 typedef struct Body
 {
 	int itemNum;
-	char *time;
+	//char *time; not using
 	char *body;
 	Body *next;
 	Body *prev;
@@ -45,9 +45,10 @@ void ParseStat(void);
 char *searchNvs(char name[]);
 //within mutiBodyRecordList 
 void loadRecords();
-void loadNextSubject(void);
+void loadNextRecord(void);
+void addRecord(char *subject, char* body);
 //within single mutiBodyRecord
-void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime);
+void addBody(BodyList *bodies, int newBody, int itemNum);
 
 
 //from myui2_util

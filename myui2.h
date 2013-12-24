@@ -34,8 +34,8 @@ typedef struct Area
 	int right;
 	int top;
 	int bot;
-	char* text;
-	int toDisplay;
+	//char* text;
+	//int toDisplay;
 }Area;
 
 // Prototypes -------------------------------------
@@ -56,4 +56,3 @@ void scrollUp(void);
 void scrollDown(void);
 
 
-void addRecord(char *subject, char* body);

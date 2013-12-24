@@ -105,15 +105,15 @@ void loadRecords() { //first function to be called in this process
 	MBRArray.top = MBRArray.bot = NULL;
 	nextRecordLoc = 1; 
 	numMBRecords = 0; 
-	while(nextRecordLoc++ <= maxItems) {
+	while(nextRecordLoc <= maxItems) { //nextRecordLoc incremented in loadNextSubject
 		loadNextSubject();
 	}
 }//complete
 
-void loadNextSubject(void){
-	parseRecord(nextRecordLoc);
+void loadNextRecord(void){
+	parseRecord(nextRecordLoc++); //increment in while loop in loadrecords
 	int itemNum = atoi(searchNvs("item"));
-	char *newTime = searchNvs("time");
+	//char *newTime = searchNvs("time");
 	char *newSubject = searchNvs("subject");
 	char *newBody = searchNvs("body");
 
@@ -135,13 +135,19 @@ void loadNextSubject(void){
 		temp.numBodies = 0;
 		i = numMBRecords++;
 	}//i = same subject location or numMRecord for newrecords;
-	addBody(MBRArray[i].bodies, newBody, itemNum, newTime);
-	//nextRecordLoc++;
+	addBody(MBRArray[i].bodies, newBody, itemNum);
 }
+
+//------------adding
+void addRecord(char *newSubject, char* newBody){
+	ReadMystoreFromChild("add",newSubject,newBody,NULL);
+	loadNextRecord();
+}
+
 //----within record operations-------------------
 
-void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime){
-	//to do: linklist 
+void addBody(BodyList *bodies, int newBody, int itemNum){
+	//linklist 
 	Body temp;
 	if(bodies->top == NULL){
 		if( (temp = bodies->top = malloc(sizeof Body) != NULL) || failToMalloc());
@@ -160,7 +166,7 @@ void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime){
 	}
 	temp->body = newBody;
 	temp->itemNum = itemNum;
-	temp->time = newTime;
+	//temp->time = newTime;
 }
 int failToMalloc(void){
 	printf("%s\n", "A MBRArray that a NULL. Fail to malloc?");

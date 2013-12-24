@@ -2,10 +2,10 @@
 #include "record.h"
 
 
-Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
-Area SCREEN = {1,120,1,55,"",TRUE};
-Area newSubjectArea = {15,120,44,44,"",TRUE};
-Area newBodyArea = {12,120,45,47,"",TRUE};																												
+Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY};
+Area SCREEN = {1,120,1,55};
+Area newSubjectArea = {15,120,44,44};
+Area newBodyArea = {12,120,45,47};																												
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
@@ -44,11 +44,9 @@ int main(void) {
 	fill(subject,30);
 	fill(body,140);
 	
-	xt_par0(XT_CLEAR_SCREEN);
-	
+	//xt_par0(XT_CLEAR_SCREEN);
+	loadRecords();
 	draw();
-
-	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY,nitems);
 	
 	hovered = *(RLBuffer.top);
 	
@@ -147,10 +145,6 @@ void draw() {
 		printf("%s",TS[i].string);
 	}
 	
-	
-	//perform operations on stat
-	ParseStat();
-	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	//new subject and body
 	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
@@ -158,7 +152,6 @@ void draw() {
 	
 	
 	displayRecords(hovered,&RLBuffer,rArea);
-
 }
 // ------------------------------------ fill --------------------------------
 void fill(char *s, int n) {
@@ -234,8 +227,3 @@ int FindStringPosition(char *prompt) { //pos in string array
 }
 
 
-//------------adding
-void addRecord(char *subject, char* body){
-	ReadMystoreFromChild("add",subject,body,NULL);
-	ParseRecord(++nitems);
-}
