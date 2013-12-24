@@ -19,7 +19,8 @@ bodies are represented by the integer number that appear in mystore storage
 typedef struct Body
 {
 	int itemNum;
-	char* time;
+	char *time;
+	char *body;
 	Body *next;
 	Body *prev;
 }Body;

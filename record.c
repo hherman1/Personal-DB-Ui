@@ -97,9 +97,27 @@ void selectRecord(Record record,struct RecordList MBRArray,Area rArea) {
 
 //----within record operations-------------------
 
-void addBody(BodyList *bodies, int newBody, int itemNum, char* time){
+void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime){
 	//to do: linklist 
-
+	Body temp;
+	if(bodies->top == NULL){
+		if( (temp = bodies->top = malloc(sizeof Body) != NULL) || failToMalloc());
+		temp->next = NULL;
+		temp->prev = NULL;
+	}else if(bodies.bot == NULL){
+		if( (temp = bodies->bot = malloc(sizeof Body)) != NULL || failToMalloc());
+		temp->prev = bodies->top;
+		temp->next = NULL;
+	}else{
+		if(temp = malloc(sizeof Body) != NULL || failToMalloc());
+		bodies->bot.next = temp;
+		bodies->temp.prev = bodies->bot;
+		bodies->temp.next = NULL;
+		bodies->bot = temp;
+	}
+	temp->body = newBody;
+	temp->itemNum = itemNum;
+	temp->time = newTime;
 }
 //---------------------------------------------------
 void loadRecords() { //first function to be called in this process
@@ -144,36 +162,6 @@ void loadNextSubject(void){
 	//nextRecordLoc++;
 }
 
-
-MultiBodyRecord newRecord(char* subject){ //subject to deletion
-	/*
-	if(MBRArray.top == NULL){
-		if(MBRArray.top = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
-		if(MBRArray.top.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
-		MBRArray.top.subject = subject;
-		MBRArray.top.next = MBRArray.bot;
-		MBRArray.top.prev = NULL;
-	}else if(MBRArray.bot == NULL){
-		if(MBRArray.bot = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
-		if(MBRArray.bot.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
-		MBRArray.bot.subject = subject;
-		MBRArray.bot.prev = MBRArray.top;
-		MBRArray.bot.next = NULL;
-	}else{
-		MultiBodyRecord temp;
-		if(temp = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
-		if(MBRArray.temp.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
-		MBRArray.temp.subject = subject;
-		MBRArray.bot.next = temp;
-		MBRArray.temp.prev = MBRArray.bot;
-		MBRArray.temp.next = NULL;
-		MBRArray.bot = temp;
-		
-	}
-	*/
-
-}
-
 int failToMalloc(void){
 	printf("%s\n", "A MBRArray that a NULL. Fail to malloc?");
 	exit(EXIT_FAILURE);
@@ -201,6 +189,9 @@ char *searchNvs(char name[]){
 	}
 }
 
+
+
+//----OLD
 //--------------------------///subject to deletion!!!!!!!!
 Record *getRecord(int r) {
 	ParseRecord(r);
