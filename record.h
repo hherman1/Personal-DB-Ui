@@ -12,13 +12,13 @@
 #define MAX_TIME_LEN 20
 
 #define MAX_RECORDS_TO_DISPLAY 10
-
+#define MAX_EXTRA_RECORDS 100;
 /*MultiBodyRecord pairs a single subject with all the bodies with that subject name
 bodies are represented by the integer number that appear in mystore storage
 */
 typedef struct Body
 {
-	int loc;
+	int itemNum;
 	char* time;
 	Body *next;
 	Body *prev;
@@ -34,19 +34,8 @@ typedef struct MultiBodyRecord
 {
 	//int num; not needed
 	char *subject;
-	BodyList *bodies; //includes time
-	MultiBodyRecord *next;
-	MultiBodyRecord *prev; 
+	BodyList *bodies; 
 }Record;
-typedef struct MultiBodyRecordList
-{
-	MultiBodyRecord *top;
-	MultiBodyRecord *bot;
-	int numSubjects;
-	int *processedSubjects;
-	int nextRecordLoc;
-}MultiBodyRecordList;
-
 
 //within single mutiBodyRecord
 void addBody(BodyList *bodies, int newBody, char* time);

@@ -2,25 +2,27 @@
 #include "record.h"
 
 
+
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
 int nitems = 0;  //numRecords in mystore
 
-MultiBodyRecordList buffer;
 
-//------for MultiBodyRecordList
-
+//------for MBRArray
+MultiBodyRecord *MBRArray;
+int nextRecordLoc;
+int numMBRecords = 0;
 //---hunter
 int recordSelected = 2;
 
 //--------------------------Display----------------------------
-void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
+void displayRecords(Record hovered,struct RecordList *MBRArray,Area rArea) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
 	char *color;
-	Record *temp = buffer->top;
+	Record *temp = MBRArray->top;
 	while(temp != NULL && i + rArea.top < rArea.bot){
 		i++;
 		color = R_TEXT_COLOR;
@@ -61,12 +63,12 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	}
 	
 	while(temp != NULL){
-		if(temp == buffer->bot) {
+		if(temp == MBRArray->bot) {
 			temp = temp->next;
-			buffer->bot = buffer->bot->prev;	//CAUTION:: MAY NOT WORK IF bot HAS NO PREVIOUS/ POSSIBLE SCENARIO
-			freeRecord(buffer->bot->next);
+			MBRArray->bot = MBRArray->bot->prev;	//CAUTION:: MAY NOT WORK IF bot HAS NO PREVIOUS/ POSSIBLE SCENARIO
+			freeRecord(MBRArray->bot->next);
 		}
-		else if(temp != buffer->bot && temp != buffer->top) {
+		else if(temp != MBRArray->bot && temp != MBRArray->top) {
 			temp = temp->prev;
 			freeRecord(temp->next);
 			temp = temp->next;
@@ -84,7 +86,7 @@ void wrapText(int width, char *text) {
 	}
 	
 }
-void selectRecord(Record record,struct RecordList buffer,Area rArea) {
+void selectRecord(Record record,struct RecordList MBRArray,Area rArea) {
 	int rNum = record.num;
 	if(rNum == recordSelected) {
 		recordSelected = 0;
@@ -101,63 +103,65 @@ void addBody(BodyList *bodies, int newBody, char* time){
 }
 //---------------------------------------------------
 void loadRecords() { //first function to be called in this process
-	//new buffer
-	if(buffer = malloc(sizeof MultiBodyRecordList) != NULL || failToMalloc());
-	buffer.top = buffer.bot = NULL;
-	buffer.numSubjects = 0; 
-	//buffer.processedSubjects = malloc(5 * sizeof(int));
-	buffer.nextRecordLoc = 1; 
-
-
 	ParseStat();
 	nitems = atoi(searchNvs("nitems"));
-	while(buffer.nextRecordLoc++ <= maxItems) {
+	//new MBRArray
+	if(MBRArray = malloc(sizeof MultiBodyRecord * (nitems + MAX_EXTRA_RECORDS) != NULL || failToMalloc());
+	MBRArray.top = MBRArray.bot = NULL;
+	MBRArray.numSubjects = 0; 
+	nextRecordLoc = 1; 
+	while(nextRecordLoc++ <= maxItems) {
 		loadNextSubject();
 	}
-	
-}
+}//complete
 
 void loadNextSubject(void){
-	parseRecord(buffer.nextRecordLoc);
+	parseRecord(nextRecordLoc);
 	char *subject = searchNvs("subject");
 	int itemNum = atoi(searchNvs("item"));
 	newRecord(subject);
 	//search for identical subjects
+	int i, anySameSubjects = 0;
+	for (i = 0; i < numMBRecords; i++){
 
+	}
 	char *body = searchNvs("body");
-	buffer.numSubjects++;
+	MBRArray.numSubjects++;
+	//nextRecordLoc++;
 }
 
 
-MultiBodyRecord newRecord(char* subject){
-	if(buffer.top == NULL){
-		if(buffer.top = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
-		if(buffer.top.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
-		buffer.top.subject = subject;
-		buffer.top.next = buffer.bot;
-		buffer.top.prev = NULL;
-	}else if(buffer.bot == NULL){
-		if(buffer.bot = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
-		if(buffer.bot.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
-		buffer.bot.subject = subject;
-		buffer.bot.prev = buffer.top;
-		buffer.bot.next = NULL;
+MultiBodyRecord newRecord(char* subject){ //subject to deletion
+	/*
+	if(MBRArray.top == NULL){
+		if(MBRArray.top = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
+		if(MBRArray.top.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
+		MBRArray.top.subject = subject;
+		MBRArray.top.next = MBRArray.bot;
+		MBRArray.top.prev = NULL;
+	}else if(MBRArray.bot == NULL){
+		if(MBRArray.bot = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
+		if(MBRArray.bot.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
+		MBRArray.bot.subject = subject;
+		MBRArray.bot.prev = MBRArray.top;
+		MBRArray.bot.next = NULL;
 	}else{
 		MultiBodyRecord temp;
 		if(temp = malloc(sizeof MultiBodyRecord) != NULL || failToMalloc());
-		if(buffer.temp.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
-		buffer.temp.subject = subject;
-		buffer.bot.next = temp;
-		buffer.temp.prev = buffer.bot;
-		buffer.temp.next = NULL;
-		buffer.bot = temp;
+		if(MBRArray.temp.bodies = malloc(sizeof BodyList) != NULL || failToMalloc());
+		MBRArray.temp.subject = subject;
+		MBRArray.bot.next = temp;
+		MBRArray.temp.prev = MBRArray.bot;
+		MBRArray.temp.next = NULL;
+		MBRArray.bot = temp;
 		
 	}
+	*/
 
 }
 
 int failToMalloc(void){
-	printf("%s\n", "A buffer that a NULL. Fail to malloc?");
+	printf("%s\n", "A MBRArray that a NULL. Fail to malloc?");
 	exit(EXIT_FAILURE);
 	return 0;
 }
@@ -205,11 +209,11 @@ Record *getRecord(int r) {
 	ans->next = NULL;
 	return ans;
 }
-Record *findRecord(struct RecordList *buffer,int num) {
-	Record *cur = buffer->top;
+Record *findRecord(struct RecordList *MBRArray,int num) {
+	Record *cur = MBRArray->top;
 	while(cur->num != num && (cur = cur->next) && cur != NULL);
 	if(cur == NULL) {
-		printf("ERROR: Record #%i could not be found in the buffer starting at %i and ending at %i\n",num,buffer->top->num,buffer->bot->num);
+		printf("ERROR: Record #%i could not be found in the MBRArray starting at %i and ending at %i\n",num,MBRArray->top->num,MBRArray->bot->num);
 		exit(EXIT_FAILURE);
 	}
 	return cur;
@@ -226,41 +230,41 @@ void freeRecord(Record *target) {
 	}
 	free(target);
 }
-void bufferRecord(struct RecordList *buffer,Record *r) {
+void MBRArrayRecord(struct RecordList *MBRArray,Record *r) {
 	if(r == NULL) {
 		printf("ERROR: Record does not exist\n");
 	}
-	else if(buffer->bot != NULL) {
-		r->prev = buffer->bot;
-		buffer->bot->next = r;
-		buffer->bot = buffer->bot->next;
+	else if(MBRArray->bot != NULL) {
+		r->prev = MBRArray->bot;
+		MBRArray->bot->next = r;
+		MBRArray->bot = MBRArray->bot->next;
 	} else {
-		buffer->bot = r;
-		buffer->top = r;
+		MBRArray->bot = r;
+		MBRArray->top = r;
 	}
 }
 
 //must parseRecord for this
-void addBufferTop(struct RecordList *buffer,Record *r) { //r == new record
-	if(buffer->bot != NULL) {
-		r->next = buffer->top;
-		buffer->top->prev = r;
-		buffer->top = r;
-		buffer->bot = buffer->bot->prev;
-		if(buffer->bot->next != NULL){
-			freeRecord(buffer->bot->next);
+void addMBRArrayTop(struct RecordList *MBRArray,Record *r) { //r == new record
+	if(MBRArray->bot != NULL) {
+		r->next = MBRArray->top;
+		MBRArray->top->prev = r;
+		MBRArray->top = r;
+		MBRArray->bot = MBRArray->bot->prev;
+		if(MBRArray->bot->next != NULL){
+			freeRecord(MBRArray->bot->next);
 		}
 	}else { 
-		printf("%s\n", "can't shiftBufferUp");
+		printf("%s\n", "can't shiftMBRArrayUp");
 	}
 }
-void addBufferBot(struct RecordList *buffer,Record *r){ 
-	bufferRecord(buffer,r);
-	buffer->top = buffer->top->next;
-	if(buffer->top->prev != NULL){
-		freeRecord(buffer->top->prev);
+void addMBRArrayBot(struct RecordList *MBRArray,Record *r){ 
+	MBRArrayRecord(MBRArray,r);
+	MBRArray->top = MBRArray->top->next;
+	if(MBRArray->top->prev != NULL){
+		freeRecord(MBRArray->top->prev);
 	}
 }
-int bufferLength(struct RecordList buffer) {
-	return buffer.bot->num - buffer.top->num;
+int MBRArrayLength(struct RecordList MBRArray) {
+	return MBRArray.bot->num - MBRArray.top->num;
 }
