@@ -38,14 +38,17 @@ typedef struct MultiBodyRecord
 	BodyList *bodies; 
 }Record;
 
-//within single mutiBodyRecord
-void addBody(BodyList *bodies, int newBody, char* time);
-//within mutiBodyRecordList 
-MultiBodyRecord newRecord(char* subject);
-void loadNextSubject(void);
 // general
+int failToMalloc(void);
 void ParseRecord(int numRec);
 void ParseStat(void);
+char *searchNvs(char name[]);
+//within mutiBodyRecordList 
+void loadRecords();
+void loadNextSubject(void);
+//within single mutiBodyRecord
+void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime);
+
 
 //from myui2_util
 int ParseInput(char *in, int n_in);

@@ -95,30 +95,7 @@ void selectRecord(Record record,struct RecordList MBRArray,Area rArea) {
 	}
 }
 
-//----within record operations-------------------
 
-void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime){
-	//to do: linklist 
-	Body temp;
-	if(bodies->top == NULL){
-		if( (temp = bodies->top = malloc(sizeof Body) != NULL) || failToMalloc());
-		temp->next = NULL;
-		temp->prev = NULL;
-	}else if(bodies.bot == NULL){
-		if( (temp = bodies->bot = malloc(sizeof Body)) != NULL || failToMalloc());
-		temp->prev = bodies->top;
-		temp->next = NULL;
-	}else{
-		if(temp = malloc(sizeof Body) != NULL || failToMalloc());
-		bodies->bot.next = temp;
-		bodies->temp.prev = bodies->bot;
-		bodies->temp.next = NULL;
-		bodies->bot = temp;
-	}
-	temp->body = newBody;
-	temp->itemNum = itemNum;
-	temp->time = newTime;
-}
 //---------------------------------------------------
 void loadRecords() { //first function to be called in this process
 	ParseStat();
@@ -161,7 +138,30 @@ void loadNextSubject(void){
 	addBody(MBRArray[i].bodies, newBody, itemNum, newTime);
 	//nextRecordLoc++;
 }
+//----within record operations-------------------
 
+void addBody(BodyList *bodies, int newBody, int itemNum, char* newTime){
+	//to do: linklist 
+	Body temp;
+	if(bodies->top == NULL){
+		if( (temp = bodies->top = malloc(sizeof Body) != NULL) || failToMalloc());
+		temp->next = NULL;
+		temp->prev = NULL;
+	}else if(bodies.bot == NULL){
+		if( (temp = bodies->bot = malloc(sizeof Body)) != NULL || failToMalloc());
+		temp->prev = bodies->top;
+		temp->next = NULL;
+	}else{
+		if(temp = malloc(sizeof Body) != NULL || failToMalloc());
+		bodies->bot.next = temp;
+		bodies->temp.prev = bodies->bot;
+		bodies->temp.next = NULL;
+		bodies->bot = temp;
+	}
+	temp->body = newBody;
+	temp->itemNum = itemNum;
+	temp->time = newTime;
+}
 int failToMalloc(void){
 	printf("%s\n", "A MBRArray that a NULL. Fail to malloc?");
 	exit(EXIT_FAILURE);
