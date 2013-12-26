@@ -7,7 +7,7 @@ int n_nvs = 0;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
-Area rArea = {1,120,7,8 + MAX_RECORDS_TO_DISPLAY,"",TRUE};
+Area rArea = {1,120,7,7 + MAX_RECORDS_TO_DISPLAY - 1,"",TRUE};
 Area SCREEN = {1,120,1,55,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
 Area newBodyArea = {12,120,45,47,"",TRUE};																												
@@ -118,7 +118,6 @@ int main(void) {
 					}else if (cursorArea = "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
-						scrollDown();
 						fill(subject,30);
 						fill(body,140);
 						cursorPos = 0;
@@ -202,11 +201,14 @@ void SearchDisplay(char *prompt, char *name, char *color) {
 
 char *searchNvs(char name[]){
 	int i;
+	char *ans = NULL;
 	for (i = 0; i < n_nvs; ++i) {
 		if (strcmp(nvs[i].name,name) == 0) {
-			return nvs[i].value;
+			ans = nvs[i].value;
+			break;
 		}
 	}
+	return ans;
 }
 
 // ------------------------------------- DisplayAt -------------------------

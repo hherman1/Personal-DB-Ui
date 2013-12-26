@@ -10,11 +10,13 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	
 	Record *temp = buffer->top;
 	if(temp != NULL) {
+		printf("starting cleanup\n");
 		Record *bot = fillBufferForArea(buffer,rArea);
+		printf("trimming buffer\n");
 		trimBuffer(buffer,bot);
+		printf("clean\n");
 	}
 	while(temp){// && i + rArea.top < rArea.bot){
-		i++;
 		color = R_TEXT_COLOR;
 		int row = i + rArea.top;
 		if(temp->num == hovered.num) {
@@ -41,12 +43,13 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			}
 			xt_par0(XT_CH_NORMAL);
 		}
-		else if(row < rArea.bot) {
+		else if(row <= rArea.bot) {
 			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 		}
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
+		i++;
 	}
 	/*
 	while(temp != NULL){
@@ -79,10 +82,26 @@ Record* fillBufferForArea(struct RecordList *buffer, Area rArea) {
 		availableSpace--;
 		current = current->next;
 	}
-	while(availableSpace--) {
+	printf("refilling\n");
+	while(availableSpace-- > 0) {
+		printf("about to access\n");
 		Record *temp = getRecord(current->num + 1);
-		bufferRecord(buffer,temp);
-		current = temp; /// POSIBLY ERROR: not sure if bufferRecord updates the proper memory addresses w/ refs
+		printf("retrieved new record\n");
+		if(temp) {
+			printf("prepare for insertion\n");
+			if(temp->num == recordSelected){
+				printf("inserting a selected record\n");
+				int openSpace = requiredSpace(*temp,rArea.right - rArea.left);
+				availableSpace -= openSpace;
+			}
+			if(availableSpace >= 0) {
+				bufferRecord(buffer,temp);
+				current = temp; /// POSIBLY ERROR: not sure if bufferRecord updates the proper memory addresses w/ refs
+			}
+		}
+		else {
+			availableSpace = 0;
+		}
 	}
 	return current;
 }
@@ -120,23 +139,30 @@ void loadRecords(struct RecordList *buffer,int low,int high,int number) {
 }
 Record *getRecord(int r) {
 	ParseRecord(r);
-	Record *ans = malloc(sizeof(Record));
+	
+	Record *ans = NULL;
 	char *temp;
-	ans->subject = malloc(sizeof(char) * 31);
 	temp = searchNvs("subject");
-	strcpy(ans->subject,temp);
-	
-	temp = searchNvs("body");
-	ans->body = malloc(sizeof(char) * 141);
-	strcpy(ans->body,temp);
-	
-	temp = searchNvs("time");
-	ans->time = malloc(sizeof(char) * 141);
-	strcpy(ans->time,temp);
-	
-	ans->num = atoi(searchNvs("item"));
-	ans->prev = NULL;
-	ans->next = NULL;
+		printf("working on %p\n",temp);
+	if(temp) {
+		printf("working in %s\n",temp);
+		
+		ans = malloc(sizeof(Record));
+		ans->subject = malloc(sizeof(char) * 31);
+		strcpy(ans->subject,temp);
+		temp = searchNvs("body");
+		ans->body = malloc(sizeof(char) * 141);
+		strcpy(ans->body,temp);
+		
+		temp = searchNvs("time");
+		ans->time = malloc(sizeof(char) * 141);
+		strcpy(ans->time,temp);
+		
+		ans->num = atoi(searchNvs("item"));
+		ans->prev = NULL;
+		ans->next = NULL;
+	}
+	printf("working\n");
 	return ans;
 }
 Record *findRecord(struct RecordList *buffer,int num) {
