@@ -12,49 +12,21 @@
 #define MAX_TIME_LEN 20
 
 #define MAX_RECORDS_TO_DISPLAY 10
-#define MAX_EXTRA_RECORDS 100;
-/*MultiBodyRecord pairs a single subject with all the bodies with that subject name
-bodies are represented by the integer number that appear in mystore storage
-*/
-typedef struct Body
+typedef struct Record
 {
-	int itemNum;
-	//char *time; not using
-	char *body;
-	Body *next;
-	Body *prev;
-}Body;
-typedef struct BodyList
-{
-	Body *top;
-	Body *bot;
-	int numBodies;
-}BodyList;
-
-typedef struct MultiBodyRecord
-{
-	//int num; not needed
+	int num;
 	char *subject;
-	BodyList *bodies; 
+	char *body;
+	char *time;
+	struct Record *next;
+	struct Record *prev;
 }Record;
-
-// general
-int failToMalloc(void);
-void ParseRecord(int numRec);
-void ParseStat(void);
-char *searchNvs(char name[]);
-//within mutiBodyRecordList 
-void loadRecords();
-void loadNextRecord(void);
-void addRecord(char *subject, char* body);
-//within single mutiBodyRecord
-void addBody(BodyList *bodies, int newBody, int itemNum);
-
-
-//from myui2_util
-int ParseInput(char *in, int n_in);
-int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4);
-
+struct RecordList
+{
+	Record *top;
+	Record *bottom;
+	int length;
+};
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
