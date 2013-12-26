@@ -47,8 +47,8 @@ int boolShowCurrentRecord = FALSE;
 int main(void) {
 	int c;
 	
-	fill(subject,30);
-	fill(body,140);
+	fill(subject,30,'\0');
+	fill(body,140,'\0');
 	
 	xt_par0(XT_CLEAR_SCREEN);
 	
@@ -118,18 +118,20 @@ int main(void) {
 					}else if (cursorArea = "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
-						fill(subject,30);
-						fill(body,140);
+						fill(subject,30,'\0');
+						fill(body,140,'\0');
 						cursorPos = 0;
 					}
 				}
 				//to do: check if c a letter
-				else if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
-					if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
-					subject[cursorPos++] = c; 
-				}else if (cursorArea == "addBody" && cursorPos <= MAX_BODY_LEN){ 
-					if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
-					body[cursorPos++] = c; 
+				if(c >= ' ' && c <= '~') {
+					if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
+						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
+						subject[cursorPos++] = c; 
+					}else if (cursorArea == "addBody" && cursorPos <= MAX_BODY_LEN){ 
+						if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
+						body[cursorPos++] = c; 
+					}
 				}
 			}
 			redraw = TRUE;
@@ -166,8 +168,8 @@ void draw() {
 
 }
 // ------------------------------------ fill --------------------------------
-void fill(char *s, int n) {
-	while (n--) *s++=' ';
+void fill(char *s, int n, char c) {
+	while (n--) *s++=c;
 	*s='\0';
 }
 
