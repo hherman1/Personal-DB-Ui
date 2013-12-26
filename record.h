@@ -28,6 +28,9 @@ struct RecordList
 	int length;
 };
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
+void trimBuffer(struct RecordList *buffer, Record *newBot);
+Record* fillBufferForArea(struct RecordList *buffer, Area rArea);
+int requiredSpace(Record r,int width);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);

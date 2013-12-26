@@ -7,8 +7,13 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
 	char *color;
+	
 	Record *temp = buffer->top;
-	while(temp != NULL && i + rArea.top < rArea.bot){
+	if(temp != NULL) {
+		Record *bot = fillBufferForArea(buffer,rArea);
+		trimBuffer(buffer,bot);
+	}
+	while(temp){// && i + rArea.top < rArea.bot){
 		i++;
 		color = R_TEXT_COLOR;
 		int row = i + rArea.top;
@@ -25,28 +30,25 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			}
 			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
-			char *sTemp = malloc(141 * sizeof(char));
-			strcpy(sTemp,temp->body);
-			int spaceNeeded = strlen(sTemp) / width + 1;
+			int spaceNeeded = requiredSpace(*temp,width);//strlen(sTemp) / width + 1;
 			i += spaceNeeded;
 			if(i + rArea.top < rArea.bot) {
 				xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
 				xt_par0(R_SELECTED_BODY_STYLE);
 				xt_par0(R_SELECTED_BG_COLOR);
 				xt_par0(R_SELECTED_BODY_COLOR);
-				wrapText(width,sTemp);
+				wrapText(width,temp->body);
 			}
-			free(sTemp);
 			xt_par0(XT_CH_NORMAL);
 		}
-		else if(i + rArea.top < rArea.bot) {
+		else if(row < rArea.bot) {
 			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 		}
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 	}
-	
+	/*
 	while(temp != NULL){
 		if(temp == buffer->bottom) {
 			temp = temp->next;
@@ -58,7 +60,34 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			freeRecord(temp->next);
 			temp = temp->next;
 		}
+	}*/
+}
+void trimBuffer(struct RecordList *buffer, Record *newBot) {
+	buffer->bottom = newBot;
+	while(newBot->next != NULL) {
+		freeRecord(newBot->next);
 	}
+}
+Record* fillBufferForArea(struct RecordList *buffer, Area rArea) {
+	int availableSpace = rArea.bot - rArea.top;
+	Record *current = buffer->top;
+	while(availableSpace && current->next) {
+		if(current->num == recordSelected){
+			int openSpace = requiredSpace(*current,rArea.right - rArea.left);
+			availableSpace -= openSpace;
+		}
+		availableSpace--;
+		current = current->next;
+	}
+	while(availableSpace--) {
+		Record *temp = getRecord(current->num + 1);
+		bufferRecord(buffer,temp);
+		current = temp; /// POSIBLY ERROR: not sure if bufferRecord updates the proper memory addresses w/ refs
+	}
+	return current;
+}
+int requiredSpace(Record r,int width) {
+	return strlen(r.body) / (width) + 1;
 }
 void wrapText(int width, char *text) {
 	int i = 0;
