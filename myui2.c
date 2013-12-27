@@ -73,6 +73,15 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
+		if (c == '=' || c == '-') {
+			int change = 0;
+			if(c == '=')
+				change++;
+			else
+				change--;
+			rArea.bot += change;
+			redraw = TRUE;
+		}
 		if(cursorArea == "record"){
 			if (c == KEY_ENTER) {
                                 selectRecord(hovered,RLBuffer,rArea);
@@ -80,7 +89,6 @@ int main(void) {
                         }
                         if (c == KEY_DOWN) {
                                 if(hovered.next != NULL) {
-					printf("Bottom Subject: %s\n",RLBuffer.bottom->subject);
                                         hovered = *(hovered.next);
                                 } else {
                                         scrollDown();
@@ -237,7 +245,7 @@ void scrollUp(){
 	if(nextRecord >= 1) {
 		addBufferTop(&RLBuffer, getRecord(nextRecord));
 	} else {
-		printf("bottom\n");
+		printf("top\n");
 	}
 }
 void scrollDown(){

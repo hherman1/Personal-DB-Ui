@@ -10,15 +10,14 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	
 	Record *temp = buffer->top;
 	if(temp != NULL) {
-		printf("starting cleanup\n");
 		Record *bot = fillBufferForArea(buffer,rArea);
-		printf("trimming buffer\n");
 		trimBuffer(buffer,bot);
-		printf("clean\n");
 	}
 	while(temp){// && i + rArea.top < rArea.bot){
 		color = R_TEXT_COLOR;
 		int row = i + rArea.top;
+		char *num = malloc(RECORD_NUM_SPACE * sizeof(char));
+		sprintf(num,"%i.",temp->num);
 		if(temp->num == hovered.num) {
 			xt_par0(R_HOVERED_BG_COLOR);
 			color = R_HOVERED_TEXT_COLOR;
@@ -30,7 +29,8 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			if(temp->num == hovered.num) {
 				color = R_SELECTED_HOVERED_TEXT_COLOR;
 			}
-			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
+			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,num);
+			DisplayAt(row,rArea.left+RECORD_NUM_SPACE,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 			int spaceNeeded = requiredSpace(*temp,width);//strlen(sTemp) / width + 1;
 			i += spaceNeeded;
@@ -39,14 +39,16 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 				xt_par0(R_SELECTED_BODY_STYLE);
 				xt_par0(R_SELECTED_BG_COLOR);
 				xt_par0(R_SELECTED_BODY_COLOR);
-				wrapText(width,temp->body);
+				wrapText(RECORD_NUM_SPACE,width,temp->body);
 			}
 			xt_par0(XT_CH_NORMAL);
 		}
 		else if(row <= rArea.bot) {
-			DisplayAt(row,rArea.left,color,MAX_SUBJECT_LEN,temp->subject);
+			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,num);
+			DisplayAt(row,rArea.left+RECORD_NUM_SPACE,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 		}
+		free(num);
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
 		i++;
@@ -82,15 +84,10 @@ Record* fillBufferForArea(struct RecordList *buffer, Area rArea) {
 		availableSpace--;
 		current = current->next;
 	}
-	printf("refilling\n");
 	while(availableSpace-- > 0) {
-		printf("about to access\n");
 		Record *temp = getRecord(current->num + 1);
-		printf("retrieved new record\n");
 		if(temp) {
-			printf("prepare for insertion\n");
 			if(temp->num == recordSelected){
-				printf("inserting a selected record\n");
 				int openSpace = requiredSpace(*temp,rArea.right - rArea.left);
 				availableSpace -= openSpace;
 			}
@@ -108,11 +105,15 @@ Record* fillBufferForArea(struct RecordList *buffer, Area rArea) {
 int requiredSpace(Record r,int width) {
 	return strlen(r.body) / (width) + 1;
 }
-void wrapText(int width, char *text) {
+void wrapText(int left,int width, char *text) {
 	int i = 0;
 	while(text[i] != '\0') {
 		if(i%width == 0) {
 			putchar('\n');
+			int q = 0;
+			while(q++ < left) {
+				putchar(' ');
+			}
 		}
 		putchar(text[i]);
 		i++;
@@ -143,10 +144,7 @@ Record *getRecord(int r) {
 	Record *ans = NULL;
 	char *temp;
 	temp = searchNvs("subject");
-		printf("working on %p\n",temp);
 	if(temp) {
-		printf("working in %s\n",temp);
-		
 		ans = malloc(sizeof(Record));
 		ans->subject = malloc(sizeof(char) * 31);
 		strcpy(ans->subject,temp);
@@ -162,7 +160,6 @@ Record *getRecord(int r) {
 		ans->prev = NULL;
 		ans->next = NULL;
 	}
-	printf("working\n");
 	return ans;
 }
 Record *findRecord(struct RecordList *buffer,int num) {

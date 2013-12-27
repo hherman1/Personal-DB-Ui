@@ -12,6 +12,9 @@
 #define MAX_TIME_LEN 20
 
 #define MAX_RECORDS_TO_DISPLAY 10
+
+#define RECORD_NUM_SPACE 5
+
 typedef struct Record
 {
 	int num;
@@ -32,7 +35,7 @@ void trimBuffer(struct RecordList *buffer, Record *newBot);
 Record* fillBufferForArea(struct RecordList *buffer, Area rArea);
 int requiredSpace(Record r,int width);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
-void wrapText(int width, char *text);
+void wrapText(int left,int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
 Record *getRecord(int n);
 Record *findRecord(struct RecordList *buffer,int num);
