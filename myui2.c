@@ -36,7 +36,7 @@ Record hovered;
 int nitems = 0;  //numRecords
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
-char errmsg[80] = "";
+char errmsg[ERROR_MESSAGE_BUFFER_LENGTH] = "";
 
 char *cursorArea = "record"; // what are the cursor is at
  				//title, record,addSubject, message, ....
@@ -161,20 +161,20 @@ void draw() {
 		xt_par0(TS[i].color);
 		printf("%s",TS[i].string);
 	}
-	
-	
+	message("%s","test");
 	//perform operations on stat
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	//new subject and body
 	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
-
+	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	nitems = atoi(searchNvs("nitems"));
 	
 	displayRecords(hovered,&RLBuffer,rArea);
 
 }
+
 // ------------------------------------ fill --------------------------------
 void fill(char *s, int n, char c) {
 	while (n--) *s++=c;
@@ -266,8 +266,15 @@ int FindStringPosition(char *prompt) { //pos in string array
 	}
 	return 0;
 }
-//------------------------ adding ---------------------------------
+//------------------------ adding ----------------------------------------
 void addRecord(char *subject, char* body){
 	ReadMystoreFromChild("add",subject,body,NULL);
 	ParseRecord(++nitems);
+}
+//------------------------ errors -----------------------------------------
+void message(char *msg, ...) {
+	va_list args;
+	va_start(args,msg);
+	vsnprintf(errmsg,80,msg,args);
+	va_end(args);
 }

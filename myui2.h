@@ -2,12 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "xterm_control.h"
 #include "keyboard.h"
 
 #define TRUE	1
 #define FALSE	0
+
+#define ERROR_MESSAGE_BUFFER_LENGTH 80
 
 // Globals ---------------------------------
 struct NameValue {
@@ -55,3 +58,5 @@ void ParseRecord(int numRec);
 void scrollUp(void);
 void scrollDown(void);
 void addRecord(char *subject, char* body);
+
+void message(char *msg, ...);

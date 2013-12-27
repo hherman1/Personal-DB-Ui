@@ -10,7 +10,7 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	
 	Record *temp = buffer->top;
 	if(temp != NULL) {
-		Record *bot = fillBufferForArea(buffer,rArea);
+		Record *bot = adjustBufferForArea(buffer,rArea);
 		trimBuffer(buffer,bot);
 	}
 	while(temp){// && i + rArea.top < rArea.bot){
@@ -53,19 +53,6 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 		xt_par0(XT_BG_DEFAULT);
 		i++;
 	}
-	/*
-	while(temp != NULL){
-		if(temp == buffer->bottom) {
-			temp = temp->next;
-			buffer->bottom = buffer->bottom->prev;	//CAUTION:: MAY NOT WORK IF BOTTOM HAS NO PREVIOUS/ POSSIBLE SCENARIO
-			freeRecord(buffer->bottom->next);
-		}
-		else if(temp != buffer->bottom && temp != buffer->top) {
-			temp = temp->prev;
-			freeRecord(temp->next);
-			temp = temp->next;
-		}
-	}*/
 }
 void trimBuffer(struct RecordList *buffer, Record *newBot) {
 	buffer->bottom = newBot;
@@ -73,7 +60,7 @@ void trimBuffer(struct RecordList *buffer, Record *newBot) {
 		freeRecord(newBot->next);
 	}
 }
-Record* fillBufferForArea(struct RecordList *buffer, Area rArea) {
+Record* adjustBufferForArea(struct RecordList *buffer, Area rArea) {
 	int availableSpace = rArea.bot - rArea.top;
 	Record *current = buffer->top;
 	while(availableSpace && current->next) {
@@ -99,7 +86,12 @@ Record* fillBufferForArea(struct RecordList *buffer, Area rArea) {
 		else {
 			availableSpace = 0;
 		}
-	}
+	}/*
+	while(availableSpace < 0) {
+		buffer->top = buffer->top->next;
+		freeRecord(buffer->top->prev);
+		availableSpace++;
+	}*/
 	return current;
 }
 int requiredSpace(Record r,int width) {
