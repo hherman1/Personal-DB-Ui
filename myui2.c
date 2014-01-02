@@ -161,18 +161,17 @@ void draw() {
 		xt_par0(TS[i].color);
 		printf("%s",TS[i].string);
 	}
-	message("%s","test");
 	//perform operations on stat
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	//new subject and body
 	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
-	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	nitems = atoi(searchNvs("nitems"));
 	
 	displayRecords(hovered,&RLBuffer,rArea);
 
+	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 }
 
 // ------------------------------------ fill --------------------------------

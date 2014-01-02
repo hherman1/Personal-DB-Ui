@@ -7,12 +7,13 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
 	char *color;
-	
 	Record *temp = buffer->top;
+	
 	if(temp != NULL) {
 		Record *bot = adjustBufferForArea(buffer,rArea);
 		trimBuffer(buffer,bot);
 	}
+	temp = buffer->top;
 	while(temp){// && i + rArea.top < rArea.bot){
 		color = R_TEXT_COLOR;
 		int row = i + rArea.top;
@@ -34,13 +35,11 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 			int spaceNeeded = requiredSpace(*temp,width);//strlen(sTemp) / width + 1;
 			i += spaceNeeded;
-			if(i + rArea.top < rArea.bot) {
 				xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
 				xt_par0(R_SELECTED_BODY_STYLE);
 				xt_par0(R_SELECTED_BG_COLOR);
 				xt_par0(R_SELECTED_BODY_COLOR);
 				wrapText(RECORD_NUM_SPACE,width,temp->body);
-			}
 			xt_par0(XT_CH_NORMAL);
 		}
 		else if(row <= rArea.bot) {
@@ -63,35 +62,41 @@ void trimBuffer(struct RecordList *buffer, Record *newBot) {
 Record* adjustBufferForArea(struct RecordList *buffer, Area rArea) {
 	int availableSpace = rArea.bot - rArea.top;
 	Record *current = buffer->top;
-	while(availableSpace && current->next) {
-		if(current->num == recordSelected){
-			int openSpace = requiredSpace(*current,rArea.right - rArea.left);
-			availableSpace -= openSpace;
-		}
-		availableSpace--;
-		current = current->next;
+	message("RECORD SELECTED: %i",recordSelected);
+	char *method;
+	if(current->num == recordSelected){ 
+		int openSpace = requiredSpace(*current,rArea.right - rArea.left);
+		availableSpace -= openSpace;
+		message("%s: %i bot: %i","current->next",availableSpace,recordSelected);
 	}
 	while(availableSpace-- > 0) {
-		Record *temp = getRecord(current->num + 1);
-		if(temp) {
-			if(temp->num == recordSelected){
-				int openSpace = requiredSpace(*temp,rArea.right - rArea.left);
-				availableSpace -= openSpace;
-			}
-			if(availableSpace >= 0) {
-				bufferRecord(buffer,temp);
-				current = temp; /// POSIBLY ERROR: not sure if bufferRecord updates the proper memory addresses w/ refs
-			}
+		if(current->next){
+			current = current->next;
 		}
 		else {
-			availableSpace = 0;
+			Record *temp = getRecord(current->num + 1);
+			if(temp) {
+				bufferRecord(buffer,temp);
+				current = temp; 
+				method = "new record";
+			}
+			else {
+				availableSpace = 0;
+			}
 		}
-	}/*
-	while(availableSpace < 0) {
-		buffer->top = buffer->top->next;
-		freeRecord(buffer->top->prev);
-		availableSpace++;
-	}*/
+		if(current->num == recordSelected){ 
+			int openSpace = requiredSpace(*current,rArea.right - rArea.left);
+			availableSpace -= openSpace;
+			message("%s: %i bot: %i","current->next",availableSpace,recordSelected);
+			while(availableSpace < 0) {
+				buffer->top = buffer->top->next;
+				freeRecord(buffer->top->prev);
+				availableSpace++;
+			}
+		}
+	}
+	printf("done: %p\n",current);
+	availableSpace++;
 	return current;
 }
 int requiredSpace(Record r,int width) {
