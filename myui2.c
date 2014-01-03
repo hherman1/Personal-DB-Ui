@@ -19,8 +19,8 @@ struct TemplateString TS[] = {
 	{44,1,XT_CH_YELLOW,"new Subject: "},																				
 	{45,1,XT_CH_YELLOW,"new Body: "},
 	{48,1,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
-	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{50,1,XT_CH_GREEN,"Message: nitems = "}
+	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"}//,
+	//{50,1,XT_CH_GREEN,"Message: nitems = "}
 };
 int nTS = sizeof(TS)/sizeof(TS[0]);
 
@@ -31,7 +31,7 @@ struct StringPosition SP[] = {
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
 struct RecordList RLBuffer;
-Record hovered;
+Record *hovered;
 
 int nitems = 0;  //numRecords
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
@@ -42,6 +42,7 @@ char *cursorArea = "record"; // what are the cursor is at
  				//title, record,addSubject, message, ....
 int cursorPos = 0; // cuurently only for adding subject and body
 int boolShowCurrentRecord = FALSE;
+int DEBUG = 1;
 
 // ------------------------------------------------ main --------------------
 int main(void) {
@@ -52,13 +53,12 @@ int main(void) {
 	
 	xt_par0(XT_CLEAR_SCREEN);
 	
-	draw();
 
-	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY,nitems);
+	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
 	
-	hovered = *(RLBuffer.top);
+	hovered = RLBuffer.top;
 	
-	displayRecords(hovered,&RLBuffer,rArea);
+	draw();
 	//records operation
 	
 	//current->prev = '\0';
@@ -73,7 +73,7 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
-		if (c == '=' || c == '-') {
+		if (DEBUG && c == '=' || c == '-') {
 			int change = 0;
 			if(c == '=')
 				change++;
@@ -82,26 +82,30 @@ int main(void) {
 			rArea.bot += change;
 			redraw = TRUE;
 		}
+		if(DEBUG && c == 'r') {
+			message("refreshed | botom: %i | hovered->prev:%p",RLBuffer.bottom->num,hovered->prev);
+			redraw=TRUE; 
+		}
 		if(cursorArea == "record"){
 			if (c == KEY_ENTER) {
-                                selectRecord(hovered,RLBuffer,rArea);
+                                selectRecord(*hovered,RLBuffer,rArea);
                                 redraw = TRUE;
                         }
                         if (c == KEY_DOWN) {
-                                if(hovered.next != NULL) {
-                                        hovered = *(hovered.next);
-                                } else {
-                                        scrollDown();
-                                        hovered = *(RLBuffer.bottom);
+                                if(hovered->next) {
+                                        hovered = hovered->next;
+                                } else if (hovered->num != RLBuffer.srclength){
+                                        scrollDown(&RLBuffer);
+                                        hovered = RLBuffer.bottom;
                                 }
                                 redraw = TRUE;
                         } 
                         if (c == KEY_UP) {
-                                if(hovered.prev != NULL) {
-                                        hovered = *(hovered.prev);
+                                if(hovered->prev != NULL) {
+                                        hovered = hovered->prev;
                                 } else {
-                                        scrollUp();
-                                        hovered = *(RLBuffer.top);
+                                        scrollUp(&RLBuffer);
+                                        hovered = RLBuffer.top;
                                 }
                                 redraw = TRUE;
                         }
@@ -168,9 +172,9 @@ void draw() {
 	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 	nitems = atoi(searchNvs("nitems"));
-	
-	displayRecords(hovered,&RLBuffer,rArea);
+	RLBuffer.srclength = nitems;
 
+	displayRecords(*hovered,&RLBuffer,rArea);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 }
 
@@ -239,22 +243,6 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 }
 
 //RLBuffer must exist for scroll
-void scrollUp(){
-	int nextRecord = RLBuffer.top->num - 1;
-	if(nextRecord >= 1) {
-		addBufferTop(&RLBuffer, getRecord(nextRecord));
-	} else {
-		printf("top\n");
-	}
-}
-void scrollDown(){
-	int nextRecord = RLBuffer.bottom->num + 1;
-	if(nextRecord <= nitems) {
-		addBufferBot(&RLBuffer, getRecord(nextRecord));
-	} else {
-		printf("bottom\n");
-	}
-}
 // ---------------------------------- 	FindStringPosition ----------------
 int FindStringPosition(char *prompt) { //pos in string array 
 	int i;
