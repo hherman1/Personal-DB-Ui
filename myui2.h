@@ -10,8 +10,14 @@
 #define TRUE	1
 #define FALSE	0
 
-#define ERROR_MESSAGE_BUFFER_LENGTH 80
+#define DEBUG 1
+#define ERROR_MESSAGE_BUFFER_LENGTH 120
 
+#if DEBUG
+#include <assert.h>
+#endif
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Globals ---------------------------------
 struct NameValue {
 	char *name;

@@ -42,7 +42,6 @@ char *cursorArea = "record"; // what are the cursor is at
  				//title, record,addSubject, message, ....
 int cursorPos = 0; // cuurently only for adding subject and body
 int boolShowCurrentRecord = FALSE;
-int DEBUG = 1;
 
 // ------------------------------------------------ main --------------------
 int main(void) {
@@ -84,6 +83,7 @@ int main(void) {
 		}
 		if(DEBUG && c == 'r') {
 			message("refreshed | botom: %i | hovered->prev:%p",RLBuffer.bottom->num,hovered->prev);
+			message("| added in second call");
 			redraw=TRUE; 
 		}
 		if(cursorArea == "record"){
@@ -176,6 +176,7 @@ void draw() {
 
 	displayRecords(*hovered,&RLBuffer,rArea);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
+	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 }
 
 // ------------------------------------ fill --------------------------------
@@ -260,8 +261,10 @@ void addRecord(char *subject, char* body){
 }
 //------------------------ errors -----------------------------------------
 void message(char *msg, ...) {
+	int max = ERROR_MESSAGE_BUFFER_LENGTH;
+	while(errmsg[ERROR_MESSAGE_BUFFER_LENGTH - max] && max--);
 	va_list args;
 	va_start(args,msg);
-	vsnprintf(errmsg,80,msg,args);
+	vsnprintf(errmsg + ERROR_MESSAGE_BUFFER_LENGTH - max,max,msg,args);
 	va_end(args);
 }
