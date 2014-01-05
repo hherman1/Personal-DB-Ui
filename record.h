@@ -32,6 +32,7 @@ struct RecordList
 	int srclength;
 };
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
+void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea);
 void trimBuffer(struct RecordList *buffer, Record *cutoff);
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea);
 int requiredSpace(Record r,int width);

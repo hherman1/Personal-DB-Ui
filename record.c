@@ -6,16 +6,19 @@ extern int n_nvs;
 int recordSelected = 2;
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
-	int i = 0;
-	int width = rArea.right - rArea.left;
-	char *color;
-	printf("displaying searches...\n");
 	if(buffer->top) {
 		Record *bot = adjustBufferForArea(hovered,buffer,rArea);
 		if(bot){
 			trimBuffer(buffer,bot);
 		}
 	}
+	printf("adjustment complete");
+	printViewBuffer(hovered,buffer,rArea);
+}
+void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
+	int i = 0;
+	int width = rArea.right - rArea.left;
+	char *color;
 	Record *temp = buffer->top;
 	while(temp){// && i + rArea.top < rArea.bot){
 		color = R_TEXT_COLOR;
@@ -55,6 +58,7 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 		xt_par0(XT_BG_DEFAULT);
 		i++;
 	}
+	
 }
 void trimBuffer(struct RecordList *buffer, Record *cutoff) {
 	buffer->bottom = cutoff;
@@ -65,48 +69,49 @@ void trimBuffer(struct RecordList *buffer, Record *cutoff) {
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea) {
 	int availableSpace;
 	Record *current = buffer->top;
-	int overflow = 0;
-	int startSpace = rArea.bot-rArea.top + 1;
-	for(availableSpace = rArea.bot - rArea.top + 1;availableSpace > 0;availableSpace--) {
-		if(current->num == recordSelected){
-			int openSpace = requiredSpace(*current,rArea.right - rArea.left);
-			availableSpace -= openSpace;
-			if(current->num == hovered.num) {
-				while(availableSpace <= 0) {
-					scrollDown(buffer);
-					availableSpace++;
+	if(current) {
+		int overflow = 0;
+		int startSpace = rArea.bot-rArea.top + 1;
+		for(availableSpace = rArea.bot - rArea.top + 1;availableSpace > 0;availableSpace--) {
+			if(current->num == recordSelected){
+				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
+				availableSpace -= openSpace;
+				if(current->num == hovered.num) {
+					while(availableSpace <= 0) {
+						scrollDown(buffer);
+						availableSpace++;
+					}
+				}
+				else if(availableSpace<= 0){
+					while(availableSpace <= 0) {
+						scrollUp(buffer);
+						availableSpace++;
+					}
+					current = buffer->bottom;
 				}
 			}
-			else if(availableSpace<= 0){
-				while(availableSpace <= 0) {
-					scrollUp(buffer);
-					availableSpace++;
+			if(DEBUG && DUMP) {
+				if(!current->next)
+					message("N:%i ",current->num);
+				if(!current->prev)
+					message("P:%i ",current->num);
+			}
+			if(!current->next && availableSpace > 1){
+				Record *temp = getRecord(current->num + 1);
+				if(temp) {
+					bufferRecord(buffer,temp);
+					current = temp; 
+					//availableSpace++;
 				}
-				current = buffer->bottom;
+				else {
+					break;
+				}
 			}
+			if(current->next && availableSpace > 1){
+				current = current->next;
+			} 
 		}
-		if(DEBUG && DUMP) {
-			if(!current->next)
-				message("N:%i ",current->num);
-			if(!current->prev)
-				message("P:%i ",current->num);
-		}
-		if(!current->next && availableSpace > 1){
-			Record *temp = getRecord(current->num + 1);
-			if(temp) {
-				bufferRecord(buffer,temp);
-				current = temp; 
-				//availableSpace++;
-			}
-			else {
-				break;
-			}
-		}
-		if(current->next && availableSpace > 1){
-			current = current->next;
-		} 
 	}
-	//message("space: %i; selected: %i; hovered: %i; current:%i; last:%i; first:%i; overflow:%i;",1+rArea.bot-rArea.top,recordSelected,hovered.num,current->num,buffer->bottom->num,buffer->top->num,overflow);
 	return current;
 }
 int requiredSpace(Record r,int width) {

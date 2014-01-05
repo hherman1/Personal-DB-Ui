@@ -38,11 +38,11 @@ Record *hovered;
 int nitems = 0;  //numRecords
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
-char errmsg[ERROR_MESSAGE_BUFFER_LENGTH] = "";
+char errmsg[ERROR_MESSAGE_BUFFER_LENGTH+1];
 
 char *cursorArea = "record"; // what are the cursor is at
  				//title, record,addSubject, message, ....
-int cursorPos = 0; // cuurently only for adding subject and body
+Cursor cursor = {0,0};
 int boolShowCurrentRecord = FALSE;
 
 // ------------------------------------------------ main --------------------
@@ -60,10 +60,6 @@ int main(void) {
 	hovered = RLBuffer.top;
 	
 	draw();
-	//records operation
-	
-	//current->prev = '\0';
-	/*
 	while (TRUE) {
 		int redraw = FALSE;
 		DUMP = FALSE;
@@ -76,26 +72,26 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
-		if (DEBUG && c == '=' || c == '-') {
-			int change = 0;
-			if(c == '=')
-				change++;
-			else
-				change--;
-			rArea.bot += change;
-			redraw = TRUE;
-		}
-		if(DEBUG && c == 'r') {
-			message("refreshed | botom: %i | hovered->prev:%p",RLBuffer.bottom->num,hovered->prev);
-			message("| added in second call");
-			redraw=TRUE; 
-		}
-		if(DEBUG && c == 'p') {
-			DUMP = TRUE;
-			redraw = TRUE;
-			message("CORE DUMP: ");
-		}
 		if(cursorArea == "record"){
+			if (DEBUG && c == '=' || c == '-') {
+				int change = 0;
+				if(c == '=')
+					change++;
+				else
+					change--;
+				rArea.bot += change;
+				redraw = TRUE;
+			}
+			if(DEBUG && c == 'r') {
+				message("refreshed | botom: %i | hovered->prev:%p",RLBuffer.bottom->num,hovered->prev);
+				message("| added in second call");
+				redraw=TRUE; 
+			}
+			if(DEBUG && c == 'p') {
+				DUMP = TRUE;
+				redraw = TRUE;
+				message("CORE DUMP: ");
+			}
 			if (c == KEY_ENTER) {
                                 selectRecord(*hovered,RLBuffer,rArea);
                                 redraw = TRUE;
@@ -127,31 +123,37 @@ int main(void) {
 				cursorArea = "record";
 			}else {
 				if(c == KEY_LEFT){
-					if(cursorPos > 0) cursorPos--;
+					if(cursor.x > 0) cursor.x--;
 				}
 				if (c == KEY_RIGHT){
-					cursorPos++;
+					cursor.x++;
 				}
 				if (c == KEY_ENTER){
 					if (cursorArea == "addSubject"){
 						cursorArea = "addBody";
-						cursorPos = 0;
-					}else if (cursorArea = "addBody"){
+						cursor.x = 0;
+						cursor.y ++;
+					}else if (cursorArea == "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
 						fill(subject,30,'\0');
 						fill(body,140,'\0');
-						cursorPos = 0;
+						cursor.x = 0;
+						cursor.y = 0;
 					}
 				}
 				//to do: check if c a letter
 				if(c >= ' ' && c <= '~') {
-					if (cursorArea == "addSubject" && cursorPos <= MAX_SUBJECT_LEN){
-						if(cursorPos > MAX_SUBJECT_LEN) cursorPos = 0;
-						subject[cursorPos++] = c; 
-					}else if (cursorArea == "addBody" && cursorPos <= MAX_BODY_LEN){ 
-						if(cursorPos > MAX_BODY_LEN) cursorPos = 0;
-						body[cursorPos++] = c; 
+					if (strcmp(cursorArea,"addSubject") == 0 && cursor.x <= MAX_SUBJECT_LEN){
+						if(cursor.x > MAX_SUBJECT_LEN) {
+							cursor.x = MAX_SUBJECT_LEN;
+						}
+						subject[cursor.x++] = c; 
+					}else if (strcmp(cursorArea,"addBody") == 0 && cursor.x <= MAX_BODY_LEN){ 
+						if(cursor.x > MAX_BODY_LEN) {
+							cursor.x = MAX_BODY_LEN;
+						}
+						body[cursor.x++] = c; 
 					}
 				}
 			}
@@ -160,7 +162,7 @@ int main(void) {
 		if(redraw)
 			draw();
 	}
-	*/
+	
 	return 1;
 }
 // -------------------------------------draw---------------------------------
@@ -184,15 +186,14 @@ void draw() {
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 	nitems = atoi(searchNvs("nitems"));
 	RLBuffer.srclength = nitems;
-	ParseSearch("ho",&searchBuffer);
-	Record *current = searchBuffer.top;
-	for(i = 0; i < searchBuffer.srclength; i++) {
-		printf("S: %s\n",current->subject);
-		current = current->next;
+	//ParseSearch("ho",&searchBuffer);
+	if(hovered) {
+		displayRecords(*hovered,&RLBuffer,rArea);
 	}
-	//displayRecords(*hovered,&searchBuffer,rArea);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
+
+	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x);
 }
 
 // ------------------------------------ fill --------------------------------

@@ -47,6 +47,12 @@ typedef struct Area
 	int toDisplay;
 }Area;
 
+typedef struct Cursor
+{
+	int x;
+	int y;
+} Cursor;
+
 int DUMP;
 // Prototypes -------------------------------------
 int ParseInput(char *in, int n_in);
