@@ -32,6 +32,7 @@ char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 #define DISPLAY		3
 #define DELETE		4
 #define EDIT		5
+#define SEARCH 		6
 
 #define TRUE	1
 #define FALSE	0
@@ -49,6 +50,7 @@ int isPositive(char *s);
 int readData(void);
 int add(char *subject, char *body);
 void stat(void);
+int search(char *subject);
 char *rstrip(char *s);
 void list(void);
 
@@ -103,7 +105,13 @@ int main(int argc, char *argv[]) {
 	if (command == STAT) {
 		stat();
 	}
-	
+	if (command == SEARCH && !search(argv[2])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: Cannot search %s|\n",argv[2]);
+		return 1;
+	}
 	if (command == DISPLAY && !display(argv[2])) {
 		if (errmsg[0] != '\0')
 			printf("|status: ERROR: %s|\n", errmsg);
@@ -168,6 +176,11 @@ int parseArgs(int argc, char *argv[]) {
 		else if (strcmp(argv[1],"display") == 0 && isPositive(argv[2])) {
 			command = DISPLAY;
 			item_start = atoi(argv[2]);
+			return TRUE;
+		}
+		else if (strcmp(argv[1],"search") == 0){
+			command = SEARCH;
+			subject = argv[2];
 			return TRUE;
 		}
 		else {
@@ -379,6 +392,73 @@ char *rstrip(char *s) {
 	p[1] = '\0';
 	return s;
 }
+//------------------------------------- search ------------------------------
+char *toLowerStr(char *str) {
+	int i;
+	for (i =0;str[i];i++) {
+		str[i] = tolower(str[i]);
+	}
+	return str;
+}
+int contains(char *haystack, char *needle) {
+	int ans = FALSE;
+	for(;*haystack && *needle;needle++, haystack++) {
+		char *h = haystack;
+		char *n = needle;
+		for(;*h;n++,h++) {
+			if(!*n) {
+				ans = TRUE;
+				break;
+			}  else if(*n != *h) {
+				break;
+			}
+		}
+		if(ans)
+			break;
+	}
+	return ans;
+}
+int containsLC(char *haystack, char *needle) {
+	char *hsCpy = malloc(sizeof(char) * strlen(haystack));
+	char *ndCpy = malloc(sizeof(char) * strlen(needle));
+	strcpy(hsCpy,haystack);
+	strcpy(ndCpy,needle);
+	
+	hsCpy = toLowerStr(hsCpy);
+	ndCpy = toLowerStr(ndCpy);
+	
+	int ans = contains(hsCpy,ndCpy);
+
+	free(hsCpy);
+	free(ndCpy);
+	
+	return ans;
+}
+int search(char *subject) {
+	int i;
+	struct carrier *ptr;
+	struct data this_data;
+	struct tm *tp;
+	printf("Search results: \n");
+	for(i = 1, ptr = first; i <= nitems; i++) {
+		
+		if(containsLC(ptr->theData.theSubject,subject)) {
+		
+			this_data = ptr->theData;
+			printf("|status: OK|\n");
+			printf("|item: %d|\n",i);
+			tp = localtime(&this_data.theTime);
+			printf("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
+				tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+			//printf("|time: %s|\n",rstrip(ctime(&this_data.theTime)));
+			printf("|subject: %s|\n",this_data.theSubject);
+			printf("|body: %s|\n",this_data.theBody);
+		}
+		ptr = ptr->next;
+	}
+	return TRUE;
+}
+
 
 // ------------------------------------ display -----------------------------
 int display(char *sn) {
