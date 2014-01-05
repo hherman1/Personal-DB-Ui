@@ -38,7 +38,14 @@ int requiredSpace(Record r,int width);
 void selectRecord(Record record,struct RecordList buffer,Area rArea);
 void wrapText(int left,int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
+
+//located in myui2.c
+void ParseSearch(char *search, struct RecordList *sBuffer);
+/////
+
 Record *getRecord(int n);
+Record *allocateTopRecord();
+Record *popRecord();
 Record *findRecord(struct RecordList *buffer,int num);
 void freeRecord(Record *target);
 void bufferRecord(struct RecordList *buffer,Record *r);

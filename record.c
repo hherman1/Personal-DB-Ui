@@ -1,5 +1,7 @@
 #include "myui2.h"
 #include "record.h"
+extern struct NameValue *nvs;
+extern int n_nvs;
 
 int recordSelected = 2;
 //--------------------------Display----------------------------
@@ -7,7 +9,7 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
 	char *color;
-	
+	printf("displaying searches...\n");
 	if(buffer->top) {
 		Record *bot = adjustBufferForArea(hovered,buffer,rArea);
 		if(bot){
@@ -145,7 +147,9 @@ void loadRecords(struct RecordList *buffer,int low,int high,int number) {
 }
 Record *getRecord(int r) {
 	ParseRecord(r);
-	
+	return allocateTopRecord();
+}
+Record *allocateTopRecord() {
 	Record *ans = NULL;
 	char *temp;
 	temp = searchNvs("subject");
@@ -164,6 +168,19 @@ Record *getRecord(int r) {
 		ans->num = atoi(searchNvs("item"));
 		ans->prev = NULL;
 		ans->next = NULL;
+	}
+	return ans;
+}
+Record *popRecord() {
+	Record *ans = allocateTopRecord();
+	int i;
+	nvs++;
+	n_nvs--;
+	for(;n_nvs; n_nvs--) {
+		if(strcmp(nvs->name,"status") == 0) {
+			break;
+		}
+		nvs++;
 	}
 	return ans;
 }

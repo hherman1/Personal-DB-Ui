@@ -402,7 +402,7 @@ char *toLowerStr(char *str) {
 }
 int contains(char *haystack, char *needle) {
 	int ans = FALSE;
-	for(;*haystack && *needle;needle++, haystack++) {
+	for(;*haystack;haystack++) {
 		char *h = haystack;
 		char *n = needle;
 		for(;*h;n++,h++) {

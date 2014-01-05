@@ -63,6 +63,7 @@ int main(void) {
 	//records operation
 	
 	//current->prev = '\0';
+	/*
 	while (TRUE) {
 		int redraw = FALSE;
 		DUMP = FALSE;
@@ -159,6 +160,8 @@ int main(void) {
 		if(redraw)
 			draw();
 	}
+	*/
+	return 1;
 }
 // -------------------------------------draw---------------------------------
 void draw() {
@@ -181,8 +184,13 @@ void draw() {
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 	nitems = atoi(searchNvs("nitems"));
 	RLBuffer.srclength = nitems;
-
-	displayRecords(*hovered,&RLBuffer,rArea);
+	ParseSearch("ho",&searchBuffer);
+	Record *current = searchBuffer.top;
+	for(i = 0; i < searchBuffer.srclength; i++) {
+		printf("S: %s\n",current->subject);
+		current = current->next;
+	}
+	//displayRecords(*hovered,&searchBuffer,rArea);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 }
@@ -208,6 +216,13 @@ void ParseRecord(int numRec){
 void ParseSearch(char *search,struct RecordList *sBuffer) {
 	ReadMystoreFromChild("search",search,NULL,NULL);
 	ParseInput(input,n_input);
+	int len = 0;
+	while(n_nvs) {
+		len++;
+		Record *result = popRecord();
+		bufferRecord(sBuffer,result);
+	}
+	sBuffer->srclength = len;
 }
 // --------------------------- searching-----------------------------------
 void SearchDisplay(char *prompt, char *name, char *color) {
