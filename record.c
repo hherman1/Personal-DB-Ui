@@ -83,6 +83,12 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 				current = buffer->bottom;
 			}
 		}
+		if(DEBUG && DUMP) {
+			if(!current->next)
+				message("N:%i ",current->num);
+			if(!current->prev)
+				message("P:%i ",current->num);
+		}
 		if(!current->next && availableSpace > 1){
 			Record *temp = getRecord(current->num + 1);
 			if(temp) {

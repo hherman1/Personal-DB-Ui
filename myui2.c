@@ -63,6 +63,7 @@ int main(void) {
 	//current->prev = '\0';
 	while (TRUE) {
 		int redraw = FALSE;
+		DUMP = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
 
 		if (c == KEY_F9 || c == 'q')  {
@@ -85,6 +86,11 @@ int main(void) {
 			message("refreshed | botom: %i | hovered->prev:%p",RLBuffer.bottom->num,hovered->prev);
 			message("| added in second call");
 			redraw=TRUE; 
+		}
+		if(DEBUG && c == 'p') {
+			DUMP = TRUE;
+			redraw = TRUE;
+			message("CORE DUMP: ");
 		}
 		if(cursorArea == "record"){
 			if (c == KEY_ENTER) {
