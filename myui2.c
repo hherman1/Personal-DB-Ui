@@ -1,5 +1,6 @@
 #include "myui2.h"
 #include "record.h"
+#include "bindings.h"
 
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
@@ -119,7 +120,7 @@ int main(void) {
                         }
 		}
 		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
-			if (c == KEY_F2){
+			if (c == KEY_MODE_RECORDS){
 				cursorArea = "record";
 			}else {
 				if(c == KEY_LEFT){
