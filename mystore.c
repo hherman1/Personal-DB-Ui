@@ -439,7 +439,6 @@ int search(char *subject) {
 	struct carrier *ptr;
 	struct data this_data;
 	struct tm *tp;
-	printf("Search results: \n");
 	for(i = 1, ptr = first; i <= nitems; i++) {
 		
 		if(containsLC(ptr->theData.theSubject,subject)) {

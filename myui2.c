@@ -30,6 +30,8 @@ struct StringPosition SP[] = {
 };
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
+struct RecordList searchBuffer;
+struct RecordList searchView;
 struct RecordList RLBuffer;
 Record *hovered;
 
@@ -201,6 +203,10 @@ void ParseRecord(int numRec){
 	char str[15];
 	sprintf(str, "%d", numRec);
 	ReadMystoreFromChild("display",str,NULL,NULL);
+	ParseInput(input,n_input);
+}
+void ParseSearch(char *search,struct RecordList *sBuffer) {
+	ReadMystoreFromChild("search",search,NULL,NULL);
 	ParseInput(input,n_input);
 }
 // --------------------------- searching-----------------------------------
