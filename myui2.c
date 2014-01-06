@@ -1,10 +1,11 @@
 #include "myui2.h"
 #include "record.h"
+#include "ui.h"
 #include "bindings.h"
 
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
-
+extern int recordSelected;
 char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
@@ -83,7 +84,7 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
-		if(cursorArea == "record"){
+		if(!strcmp(cursorArea,"record")){
 			if (DEBUG && c == '=' || c == '-') {
 				int change = 0;
 				if(c == '=')
@@ -128,44 +129,42 @@ int main(void) {
                         else if (KEY_MODE_ADD(c)) {
                                 cursorArea = "addSubject";
                         	cursor.x = 0;
+				redraw = TRUE;
 			}
 			else if (KEY_MODE_SEARCH(c)){
 				fill(subject,MAX_SUBJECT_LEN,'\0');
 				cursorArea = "search";
+				cursor.y = 5;
 				cursor.x = 0;
+				redraw = TRUE;
 			}
 			else if (KEY_MODE_EDIT(c)) {
 				cursorArea = "editSubject";
-				selectRecord(*hovered,*activeBuffer);
+				if(hovered->num != recordSelected) {
+					selectRecord(*hovered,*activeBuffer);
+				}
 				cursorLeft = RECORD_NUM_SPACE +1;
 				cursor.x = strlen(hovered->subject);
 				cursor.y = getRecordY(hovered,activeBuffer,rArea);
 				redraw = TRUE;
 			}
 		}
-		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
-			cursor.y = newSubjectArea.top + (cursorArea == "addBody");
+		else if (!strcmp(cursorArea,"addSubject") || !strcmp(cursorArea,"addBody")){
+			cursor.y = newSubjectArea.top + (!strcmp(cursorArea,"addBody"));
 			if (KEY_MODE_RECORDS(c)){
 				cursorArea = "record";
 			}else {
-				if(c == KEY_LEFT){
-					if(cursor.x > 0) cursor.x--;
-				}
-				if (c == KEY_RIGHT){
-					cursor.x++;
-				}
-				if (c==KEY_BACKSPACE) {
-					if(cursorArea == "addSubject")
-						subject[--cursor.x] = '\0';
-					if(cursorArea == "addBody")
-						body[--cursor.x] = '\0';
-				}
-				if (c == KEY_ENTER){
-					if (cursorArea == "addSubject"){
+				if (!strcmp(cursorArea,"addSubject")){
+					if (c == KEY_ENTER){
 						cursorArea = "addBody";
 						cursor.x = 0;
 						cursor.y ++;
-					}else if (cursorArea == "addBody"){
+					}
+					else {
+						edit(subject,MAX_BODY_LEN,&cursor,c);
+					}
+				} else if (!strcmp(cursorArea,"addBody")){
+					if (c == KEY_ENTER){
 						cursorArea = "record";
 						addRecord(subject,body);
 						RLBuffer.lengthfrombot++;
@@ -174,36 +173,19 @@ int main(void) {
 						cursor.x = 0;
 						cursor.y = 0;
 					}
-				}
-				//to do: check if c a letter
-				if(c >= ' ' && c <= '~') {
-					if (strcmp(cursorArea,"addSubject") == 0 && cursor.x <= MAX_SUBJECT_LEN){
-						if(cursor.x > MAX_SUBJECT_LEN) {
-							cursor.x = MAX_SUBJECT_LEN;
-						}
-						subject[cursor.x++] = c; 
-					}else if (strcmp(cursorArea,"addBody") == 0 && cursor.x <= MAX_BODY_LEN){ 
-						if(cursor.x > MAX_BODY_LEN) {
-							cursor.x = MAX_BODY_LEN;
-						}
-						body[cursor.x++] = c; 
+					else {
+						edit(body,MAX_BODY_LEN,&cursor,c);
 					}
 				}
 			}
 			redraw = TRUE;
-		} else if (cursorArea == "search") {
-			cursor.y = 5;
+		} else if (!strcmp(cursorArea,"search")) {
 			if(KEY_MODE_RECORDS(c)) {
 				cursorArea = "record";
 			} else {
-				if(c == KEY_LEFT){
-					if(cursor.x > 0) cursor.x--;
-				}
-				if (c == KEY_RIGHT){
-					cursor.x++;
-				}
 				if (c == KEY_ENTER){
 					cursorArea = "record";
+					if(searchBuffer.top) freeBuffer(&searchBuffer);
 					ParseSearch(subject,&searchBuffer);
 					fill(subject,30,'\0');
 					cursor.x = 0;
@@ -211,37 +193,34 @@ int main(void) {
 					activeBuffer = &searchBuffer;
 					hovered = activeBuffer->top;
 				}
-				if (c==KEY_BACKSPACE) {
-					subject[--cursor.x] = '\0';
-				}
-				//to do: check if c a letter
-				if(c >= ' ' && c <= '~') {
-					if (cursor.x <= MAX_SUBJECT_LEN){
-						if(cursor.x > MAX_SUBJECT_LEN) {
-							cursor.x = MAX_SUBJECT_LEN;
-						}
-						subject[cursor.x++] = c; 
-					}
+				else {
+					edit(subject,MAX_SUBJECT_LEN,&cursor,c);
 				}
 			}
 			redraw = TRUE;
 				
 		}
 		
-		else if (cursorArea == "editSubject" || cursorArea == "editBody"){
+		else if (!strcmp(cursorArea,"editSubject") || !strcmp(cursorArea,"editBody")){
 			if (KEY_MODE_RECORDS(c)){
 				cursorArea = "record";
 			}else {
-				if (c == KEY_ENTER){
-					if (cursorArea == "editSubject"){
+				if (!strcmp(cursorArea,"editSubject")){
+					if(c == KEY_ENTER) {
 						cursorArea = "editBody";
 						cursor.x = 0;
 						cursor.y ++;
-					}else if (cursorArea == "editBody"){
+					} else {
+						edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
+					}
+				}else if (!strcmp(cursorArea,"editBody")){
+					if(c == KEY_ENTER) {
 						cursorArea = "record";
 						editRecord(hovered->num,hovered->subject,hovered->body);
 						cursor.x = 0;
 						cursor.y = 0;
+					} else {
+						edit(hovered->body,MAX_BODY_LEN,&cursor,c);
 					}
 				}
 			}
@@ -271,7 +250,7 @@ void draw() {
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
 	//new subject and body
-	if(cursorArea == "addBody" || cursorArea == "addSubject"){
+	if(!strcmp(cursorArea,"addBody") || !strcmp(cursorArea,"addSubject")){
 		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
 		cursorLeft = ENTRY_FIELD_LABEL_SPACE;

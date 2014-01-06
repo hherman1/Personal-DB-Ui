@@ -268,22 +268,28 @@ Record *findRecord(struct RecordList *buffer,int num) {
 }
 void freeBuffer(struct RecordList *buffer) {
 	while(buffer->top) {
+		printf("%i. %s [%p]",buffer->top->num,buffer->top->subject,buffer->top);
 		Record *next = buffer->top->next;
 		freeRecord(buffer->top);
 		buffer->top = next;
 	}
 }
 void freeRecord(Record *target) {
-	free(target->time);
+	int i = 0;
 	free(target->body);
+	printf("%i",i++);
+	free(target->time);
+	printf("%i",i++);
 	free(target->subject);
-	if(target->prev != NULL) {
+	printf("%i",i++);
+	if(target->prev) {
 		target->prev->next = target->next;
 	}
 	if(target->next != NULL) {
 		target->next->prev = target->prev;
 	}
 	free(target);
+	printf("%i\n",i++);
 }
 void bufferRecord(struct RecordList *buffer,Record *r) {
 	if(r == NULL) {

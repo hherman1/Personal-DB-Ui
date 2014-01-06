@@ -3,20 +3,22 @@
 
 void edit(char *str,int maxLength,Cursor *cursor,char c) {
 	if(c == KEY_LEFT){
-		if(cursor.x > 0) cursor.x--;
+		if(cursor->x > 0) cursor->x--;
 	}
 	if (c == KEY_RIGHT){
-		cursor.x++;
+		if(cursor->x <maxLength)
+			cursor->x++;
 	}
 	if (c==KEY_BACKSPACE) {
-		hovered->subject[cursor.x] = hovered->subject[cursor.x--]?' ':'\0';
+		str[cursor->x-1] = (str[cursor->x] && str[cursor->x] != ' ')?' ':'\0';
+		cursor->x--;
 	}
 	//to do: check if c a letter
 	if(c >= ' ' && c <= '~') {
-		if(cursor.x <= maxLength) {	
-			hovered->subject[cursor.x++] = c; 
-			if(cursor.x > maxLength) {
-				cursor.x = maxLength;
+		if(cursor->x <= maxLength) {	
+			str[cursor->x++] = c; 
+			if(cursor->x > maxLength) {
+				cursor->x = maxLength;
 			}
 		}
 	}

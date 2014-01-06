@@ -1,10 +1,13 @@
 all: mystore myui2
 
-myui2:	myui2.o record.o myui2_util.o keyboard.o xterm_control.o
-	gcc myui2.o record.o myui2_util.o keyboard.o xterm_control.o -o myui2
+myui2:	myui2.o ui.o record.o myui2_util.o keyboard.o xterm_control.o
+	gcc myui2.o ui.o record.o myui2_util.o keyboard.o xterm_control.o -o myui2
 	
 myui2.o:	myui2.c myui2.h record.h bindings.h
 	gcc -c myui2.c
+
+ui.o:		ui.c myui2.h ui.h
+	gcc -c ui.c
 
 record.o:	record.c record.h myui2.h
 	gcc -c record.c
