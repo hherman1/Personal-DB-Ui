@@ -78,13 +78,11 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 				message("selected//");
 				if(current->num == hovered.num) {
 					while(availableSpace <= 0) {
-						message("o");
 						buffer->top =nextRecord(buffer->top);
 						availableSpace++;
 					}
 				}
 				else if(availableSpace<= 0){
-					message("overflow");
 					//scrollUp(buffer);
 					while(availableSpace <= 0) {
 						if(buffer->top->num - 1)
@@ -96,21 +94,17 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 					current = current->prev;
 				}
 			}
-			message("%i.%i|",current->num,availableSpace);
 			if(current->next && availableSpace - 1) {
-			printf("%i#%i[%i]->%p\n",availableSpace,current->num,buffer->lengthfrombot,current->next);
 				if(current == buffer->bottom) {
 					buffer->lengthfrombot--;
 					buffer->bottom = current->next;
 				}
 				current = current->next;
 			} else if(buffer->lengthfrombot && availableSpace - 1){
-			printf("%i#%i[%i]->%p\n",availableSpace,current->num,buffer->lengthfrombot,current->next);
 				scrollDown(buffer);
 				buffer->top = previousRecord(buffer->top);
 				current = current->next;
 			} else {	
-			printf("%i#%i[%i]->%p|end\n",availableSpace,current->num,buffer->lengthfrombot,current->next);
 				message("end of buffer");
 				break;
 			}
