@@ -159,6 +159,7 @@ int main(void) {
 					}else if (cursorArea == "addBody"){
 						cursorArea = "record";
 						addRecord(subject,body);
+						RLBuffer.lengthfrombot++;
 						fill(subject,30,'\0');
 						fill(body,140,'\0');
 						cursor.x = 0;
