@@ -194,7 +194,8 @@ int main(void) {
 					fill(subject,30,'\0');
 					cursor.x = 0;
 					cursor.y = 0;
-					
+					activeBuffer = &searchBuffer;
+					hovered = activeBuffer->top;
 				}
 				if (c==KEY_BACKSPACE) {
 					subject[--cursor.x] = '\0';
