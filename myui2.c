@@ -59,9 +59,13 @@ int main(void) {
 	fill(body,140,'\0');
 	
 	xt_par0(XT_CLEAR_SCREEN);
+	ParseStat();
+	SearchDisplay("nitems","nitems",XT_CH_WHITE);
+	nitems = atoi(searchNvs("nitems"));
 	
 
 	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
+	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
 	//ParseSearch("te",&searchBuffer);
 	
 	hovered = RLBuffer.top;
@@ -246,14 +250,14 @@ void draw() {
 		DisplayAt(5,ENTRY_FIELD_LABEL_SPACE,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
 	}
 	//buffer
-	activeBuffer->lengthfrombot = nitems - activeBuffer->bottom->num;
 	if(hovered) {
 		displayRecords(*hovered,activeBuffer,rArea);
 	}
 	message("%i - %i",activeBuffer->top->num,activeBuffer->bottom->num);
+	//message("[%p",hovered->previous);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
-
+	
 	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x + ENTRY_FIELD_LABEL_SPACE);
 }
 

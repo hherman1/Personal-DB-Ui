@@ -68,9 +68,10 @@ void trimBuffer(struct RecordList *buffer, Record *cutoff) {
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea) {
 	int availableSpace;
 	Record *current = buffer->top;
+	Record *ans;
+	printf("\n\n\n");
 	if(current) {
 		for(availableSpace = rArea.bot - rArea.top;availableSpace > 0 ;availableSpace--) {
-			
 			if(current->num == recordSelected){
 				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
 				availableSpace -= openSpace;
@@ -89,27 +90,40 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 						if(buffer->top->num - 1)
 							buffer->top = previousRecord(buffer->top);
 						availableSpace++;
+						buffer->lengthfrombot++;
 					}
-					buffer->lengthfrombot ++;
+					//buffer->lengthfrombot ++;
 					current = current->prev;
 				}
 			}
 			message("%i.%i|",current->num,availableSpace);
 			if(current->next && availableSpace - 1) {
+			printf("%i#%i[%i]->%p\n",availableSpace,current->num,buffer->lengthfrombot,current->next);
+				if(current == buffer->bottom) {
+					buffer->lengthfrombot--;
+					buffer->bottom = current->next;
+				}
 				current = current->next;
 			} else if(buffer->lengthfrombot && availableSpace - 1){
+			printf("%i#%i[%i]->%p\n",availableSpace,current->num,buffer->lengthfrombot,current->next);
 				scrollDown(buffer);
 				buffer->top = previousRecord(buffer->top);
 				current = current->next;
 			} else {	
+			printf("%i#%i[%i]->%p|end\n",availableSpace,current->num,buffer->lengthfrombot,current->next);
 				message("end of buffer");
 				break;
 			}
-			buffer->bottom = current;
+			//buffer->bottom = current;
 		}
-		message("|%i;",current->num);
+		ans = current;
+		for(;current->num != buffer->bottom->num;current = current->next) {
+			buffer->lengthfrombot++;
+		}
+		buffer->bottom = ans;
+		message("|%i;[%i]",current->num,buffer->lengthfrombot);
 	}
-	return current;
+	return ans;
 }
 int requiredSpace(Record r,int width) {
 	return strlen(r.body) / (width) + 1;
