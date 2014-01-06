@@ -3,7 +3,7 @@ all: mystore myui2
 myui2:	myui2.o record.o myui2_util.o keyboard.o xterm_control.o
 	gcc myui2.o record.o myui2_util.o keyboard.o xterm_control.o -o myui2
 	
-myui2.o:	myui2.c myui2.h
+myui2.o:	myui2.c myui2.h record.h bindings.h
 	gcc -c myui2.c
 
 record.o:	record.c record.h myui2.h

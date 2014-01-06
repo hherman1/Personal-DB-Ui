@@ -9,7 +9,7 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 	if(buffer->top) {
 		Record *bot = adjustBufferForArea(hovered,buffer,rArea);
 		if(bot){
-			trimBuffer(buffer,bot);
+			//trimBuffer(buffer,bot);
 		}
 	}
 	printf("adjustment complete");
@@ -20,7 +20,7 @@ void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
 	int width = rArea.right - rArea.left;
 	char *color;
 	Record *temp = buffer->top;
-	while(temp){// && i + rArea.top < rArea.bot){
+	while(temp && temp->num <= buffer->bottom->num){
 		color = R_TEXT_COLOR;
 		int row = i + rArea.top;
 		char *num = malloc(RECORD_NUM_SPACE * sizeof(char));
@@ -70,48 +70,45 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 	int availableSpace;
 	Record *current = buffer->top;
 	if(current) {
-		int overflow = 0;
-		int startSpace = rArea.bot-rArea.top + 1;
-		for(availableSpace = rArea.bot - rArea.top + 1;availableSpace > 0;availableSpace--) {
+		for(availableSpace = rArea.bot - rArea.top;availableSpace > 0 ;availableSpace--) {
+			
 			if(current->num == recordSelected){
 				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
 				availableSpace -= openSpace;
+				message("selected//");
 				if(current->num == hovered.num) {
 					while(availableSpace <= 0) {
-						scrollDown(buffer);
+						message("o");
+						buffer->top =nextRecord(buffer->top);
 						availableSpace++;
 					}
 				}
 				else if(availableSpace<= 0){
+					message("overflow");
+					//scrollUp(buffer);
 					while(availableSpace <= 0) {
-						scrollUp(buffer);
+						if(buffer->top->num - 1)
+							buffer->top = previousRecord(buffer->top);
 						availableSpace++;
 					}
-					current = buffer->bottom;
+					buffer->lengthfrombot ++;
+					current = current->prev;
 				}
 			}
-			if(DEBUG && DUMP) {
-				if(!current->next)
-					message("N:%i ",current->num);
-				if(!current->prev)
-					message("P:%i ",current->num);
-			}
-			if(!current->next && availableSpace > 1){
-				Record *temp = getRecord(current->num + 1);
-				if(temp) {
-					bufferRecord(buffer,temp);
-					current = temp; 
-					//availableSpace++;
-				}
-				else {
-					break;
-				}
-			}
-			if(current->next && availableSpace > 1){
+			message("%i.%i|",current->num,availableSpace);
+			if(current->next && availableSpace - 1) {
 				current = current->next;
-			} 
+			} else if(buffer->lengthfrombot && availableSpace - 1){
+				scrollDown(buffer);
+				buffer->top = previousRecord(buffer->top);
+				current = current->next;
+			} else {	
+				message("end of buffer");
+				break;
+			}
+			buffer->bottom = current;
 		}
-	}
+		message("|%i;",current->num);
 	return current;
 }
 int requiredSpace(Record r,int width) {
@@ -248,24 +245,32 @@ void addBufferBot(struct RecordList *buffer,Record *r){
 int bufferLength(struct RecordList buffer) {
 	return buffer.bottom->num - buffer.top->num;
 }
-
-void scrollUp(struct RecordList *buffer){
-	int nextRecord = buffer->top->num - 1;
-	if(nextRecord >= 1) {
-		addBufferTop(buffer, getRecord(nextRecord));
-	} else {
-	//	buffer->bottom = buffer->bottom->prev;
-	//	freeRecord(buffer->bottom->next);
-		printf("top\n");
+Record *previousRecord(Record *r) {
+	if(!r->prev){
+		int prev = r->num - 1;
+		r->prev = getRecord(prev);
+		r->prev->next = r;
 	}
+	r = r->prev;
+	return r;
+}
+Record *nextRecord(Record *r) {
+	if(!r->next){
+		int next = r->num + 1;
+		r->next = getRecord(next);
+		r->next->prev = r;
+	}
+	r = r->next;
+	return r;
+}
+void scrollUp(struct RecordList *buffer){
+	buffer->bottom = previousRecord(buffer->bottom);
+	buffer->top = previousRecord(buffer->top);
+	buffer->lengthfrombot++;
 }
 void scrollDown(struct RecordList *buffer){
-	int nextRecord = buffer->bottom->num + 1;
-	if(nextRecord <= buffer->srclength) {
-		addBufferBot(buffer, getRecord(nextRecord));
-	} else {
-		buffer->top = buffer->top->next;
-		freeRecord(buffer->top->prev);
-		printf("bottom\n");
-	}
+	buffer->bottom = nextRecord(buffer->bottom);
+	buffer->top = nextRecord(buffer->top);
+	buffer->lengthfrombot--;
 }
+

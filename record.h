@@ -28,8 +28,7 @@ struct RecordList
 {
 	Record *top;
 	Record *bottom;
-	int length;
-	int srclength;
+	int lengthfrombot;
 };
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
 void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea);
@@ -44,6 +43,7 @@ void loadRecords(struct RecordList *buffer,int low,int high,int number);
 void ParseSearch(char *search, struct RecordList *sBuffer);
 /////
 
+
 Record *getRecord(int n);
 Record *allocateTopRecord();
 Record *popRecord();
@@ -53,5 +53,8 @@ void bufferRecord(struct RecordList *buffer,Record *r);
 void addBufferTop(struct RecordList *buffer,Record *r);
 void addBufferBot(struct RecordList *buffer,Record *r);
 int bufferLength(struct RecordList buffer);
+
+Record *nextRecord(Record *r);
+Record *previousRecord(Record *r);
 void scrollUp(struct RecordList *buffer);
 void scrollDown(struct RecordList *buffer);

@@ -57,6 +57,7 @@ int main(void) {
 	
 
 	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
+	//ParseSearch("te",&searchBuffer);
 	
 	hovered = RLBuffer.top;
 	
@@ -98,28 +99,30 @@ int main(void) {
                                 redraw = TRUE;
                         }
                         if (c == KEY_DOWN) {
-                                if(hovered->next) {
-                                        hovered = hovered->next;
-                                } else if (hovered->num != RLBuffer.srclength){
+				if (hovered == RLBuffer.bottom && RLBuffer.lengthfrombot){
                                         scrollDown(&RLBuffer);
                                         hovered = RLBuffer.bottom;
+                                }else if(hovered->next) {
+                                        hovered = hovered->next;
                                 }
                                 redraw = TRUE;
                         } 
                         if (c == KEY_UP) {
-                                if(hovered->prev != NULL) {
-                                        hovered = hovered->prev;
-                                } else {
+                                if(hovered == RLBuffer.top && hovered->num - 1) {
                                         scrollUp(&RLBuffer);
                                         hovered = RLBuffer.top;
+                                }else if(hovered->prev) {
+                                        hovered = hovered->prev;
                                 }
                                 redraw = TRUE;
                         }
                         else if (c == 'a') {
                                 cursorArea = "addSubject";
                         }
+			else if (
 		}
 		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
+			cursor.y = newSubjectArea.top + (cursorArea == "addBody");
 			if (c == KEY_MODE_RECORDS){
 				cursorArea = "record";
 			}else {
@@ -186,11 +189,11 @@ void draw() {
 	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 	nitems = atoi(searchNvs("nitems"));
-	RLBuffer.srclength = nitems;
-	//ParseSearch("ho",&searchBuffer);
+	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
 	if(hovered) {
 		displayRecords(*hovered,&RLBuffer,rArea);
 	}
+	message("%i - %i",RLBuffer.top->num,RLBuffer.bottom->num);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 
@@ -224,7 +227,7 @@ void ParseSearch(char *search,struct RecordList *sBuffer) {
 		Record *result = popRecord();
 		bufferRecord(sBuffer,result);
 	}
-	sBuffer->srclength = len;
+	sBuffer->lengthfrombot = 0;
 }
 // --------------------------- searching-----------------------------------
 void SearchDisplay(char *prompt, char *name, char *color) {
