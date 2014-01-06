@@ -119,6 +119,69 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 	}
 	return ans;
 }
+int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
+	int availableSpace;
+	Record *current = buffer->top;
+	int ans = rArea.top;
+	int found = 0;
+	printf("\n\n\n");
+	if(current) {
+		for(availableSpace = rArea.bot - rArea.top;availableSpace > 0 ;availableSpace--) {
+			
+			if(current->num == recordSelected){
+				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
+				availableSpace -= openSpace;
+				message("selected//");
+				if(current->num == r->num) {
+					while(availableSpace <= 0) {
+						buffer->top =nextRecord(buffer->top);
+						availableSpace++;
+						ans--;
+					}
+				}
+				else if(availableSpace<= 0){
+					//scrollUp(buffer);
+					while(availableSpace <= 0) {
+						if(buffer->top->num - 1)
+							buffer->top = previousRecord(buffer->top);
+						availableSpace++;
+						ans--;
+						buffer->lengthfrombot++;
+					}
+					//buffer->lengthfrombot ++;
+					current = current->prev;
+				}
+				found = 1;
+			}
+			if(current->next && availableSpace - 1) {
+				if(current == buffer->bottom) {
+					buffer->lengthfrombot--;
+					buffer->bottom = current->next;
+				}
+				current = current->next;
+			} else if(buffer->lengthfrombot && availableSpace - 1){
+				scrollDown(buffer);
+				buffer->top = previousRecord(buffer->top);
+				current = current->next;
+			} else {	
+				message("end of buffer");
+				break;
+			}
+			//buffer->bottom = current;
+			if(!found)
+				ans++;
+		}
+		Record *temp = current;
+		for(;current->num != buffer->bottom->num;current = current->next) {
+			buffer->lengthfrombot++;
+		}
+		buffer->bottom = temp;
+		message("|%i;[%i]",current->num,buffer->lengthfrombot);
+	
+	}
+	return ans;
+	
+}
 int requiredSpace(Record r,int width) {
 	return strlen(r.body) / (width) + 1;
 }
@@ -137,7 +200,7 @@ void wrapText(int left,int width, char *text) {
 	}
 	
 }
-void selectRecord(Record record,struct RecordList buffer,Area rArea) {
+void selectRecord(Record record,struct RecordList buffer){
 	int rNum = record.num;
 	if(rNum == recordSelected) {
 		recordSelected = 0;
@@ -202,6 +265,13 @@ Record *findRecord(struct RecordList *buffer,int num) {
 		exit(EXIT_FAILURE);
 	}
 	return cur;
+}
+void freeBuffer(struct RecordList *buffer) {
+	while(buffer->top) {
+		Record *next = buffer->top->next;
+		freeRecord(buffer->top);
+		buffer->top = next;
+	}
 }
 void freeRecord(Record *target) {
 	free(target->time);

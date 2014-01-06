@@ -34,7 +34,6 @@ struct StringPosition SP[] = {
 int nSP = sizeof(SP)/sizeof(SP[0]);
 
 struct RecordList searchBuffer;
-struct RecordList searchView;
 struct RecordList RLBuffer;
 
 struct RecordList *activeBuffer;
@@ -49,6 +48,7 @@ char errmsg[ERROR_MESSAGE_BUFFER_LENGTH+1];
 char *cursorArea = "record"; // what are the cursor is at
  				//title, record,addSubject, message, ....
 Cursor cursor = {0,0};
+int cursorLeft = 0;
 int boolShowCurrentRecord = FALSE;
 
 // ------------------------------------------------ main --------------------
@@ -104,7 +104,7 @@ int main(void) {
 				message("CORE DUMP: ");
 			}
 			if (c == KEY_ENTER) {
-                                selectRecord(*hovered,*activeBuffer,rArea);
+                                selectRecord(*hovered,*activeBuffer);
                                 redraw = TRUE;
                         }
                         if (c == KEY_DOWN) {
@@ -130,8 +130,17 @@ int main(void) {
                         	cursor.x = 0;
 			}
 			else if (KEY_MODE_SEARCH(c)){
+				fill(subject,MAX_SUBJECT_LEN,'\0');
 				cursorArea = "search";
 				cursor.x = 0;
+			}
+			else if (KEY_MODE_EDIT(c)) {
+				cursorArea = "editSubject";
+				selectRecord(*hovered,*activeBuffer);
+				cursorLeft = RECORD_NUM_SPACE +1;
+				cursor.x = strlen(hovered->subject);
+				cursor.y = getRecordY(hovered,activeBuffer,rArea);
+				redraw = TRUE;
 			}
 		}
 		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
@@ -219,6 +228,25 @@ int main(void) {
 				
 		}
 		
+		else if (cursorArea == "editSubject" || cursorArea == "editBody"){
+			if (KEY_MODE_RECORDS(c)){
+				cursorArea = "record";
+			}else {
+				if (c == KEY_ENTER){
+					if (cursorArea == "editSubject"){
+						cursorArea = "editBody";
+						cursor.x = 0;
+						cursor.y ++;
+					}else if (cursorArea == "editBody"){
+						cursorArea = "record";
+						editRecord(hovered->num,hovered->subject,hovered->body);
+						cursor.x = 0;
+						cursor.y = 0;
+					}
+				}
+			}
+			redraw = TRUE;
+		}
 		if(redraw)
 			draw();
 	}
@@ -246,9 +274,12 @@ void draw() {
 	if(cursorArea == "addBody" || cursorArea == "addSubject"){
 		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
+		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
 	} else if (strcmp(cursorArea,"search") == 0) {
-		
+		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
 		DisplayAt(5,ENTRY_FIELD_LABEL_SPACE,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
+	} else if (strcmp(cursorArea,"edit") == 0) {
+		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
 	if(hovered) {
@@ -259,7 +290,7 @@ void draw() {
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 	
-	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x + ENTRY_FIELD_LABEL_SPACE);
+	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x + cursorLeft);
 }
 
 // ------------------------------------ fill --------------------------------
@@ -352,6 +383,14 @@ int FindStringPosition(char *prompt) { //pos in string array
 void addRecord(char *subject, char* body){
 	ReadMystoreFromChild("add",subject,body,NULL);
 	ParseRecord(++nitems);
+}
+//------------------------ editing----------------------------------------
+void editRecord(int num,char *subject, char* body){
+	char sNum[15];
+	sNum[14] = '\0';
+	sprintf(sNum,"%d",num);
+	ReadMystoreFromChild("edit",sNum,subject,body);
+	//ParseRecord(nitems);
 }
 //------------------------ errors -----------------------------------------
 void message(char *msg, ...) {

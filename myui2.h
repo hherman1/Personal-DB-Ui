@@ -68,6 +68,7 @@ int FindStringPosition(char *prompt);
 void draw();
 char *searchNvs(char name[]);
 void addRecord(char *subject, char* body);
+void editRecord(int num,char *subject, char* body);
 void ParseStat(void);
 void ParseRecord(int numRec);
 void addRecord(char *subject, char* body);

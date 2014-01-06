@@ -34,8 +34,9 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea);
 void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea);
 void trimBuffer(struct RecordList *buffer, Record *cutoff);
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea);
+int getRecordY(Record *r,struct RecordList *buffer,Area rArea);
 int requiredSpace(Record r,int width);
-void selectRecord(Record record,struct RecordList buffer,Area rArea);
+void selectRecord(Record record,struct RecordList buffer);
 void wrapText(int left,int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
 
@@ -48,6 +49,7 @@ Record *getRecord(int n);
 Record *allocateTopRecord();
 Record *popRecord();
 Record *findRecord(struct RecordList *buffer,int num);
+void freeBuffer(struct RecordList *buffer);
 void freeRecord(Record *target);
 void bufferRecord(struct RecordList *buffer,Record *r);
 void addBufferTop(struct RecordList *buffer,Record *r);
