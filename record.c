@@ -109,6 +109,7 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 			buffer->bottom = current;
 		}
 		message("|%i;",current->num);
+	}
 	return current;
 }
 int requiredSpace(Record r,int width) {

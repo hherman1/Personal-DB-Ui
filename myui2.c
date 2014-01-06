@@ -11,7 +11,9 @@ int n_input=0;	// number of chars in the input, not including terminating NULL-b
 Area rArea = {1,120,7,7 + MAX_RECORDS_TO_DISPLAY - 1,"",TRUE};
 Area SCREEN = {1,120,1,55,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
-Area newBodyArea = {12,120,45,47,"",TRUE};																												
+Area newBodyArea = {12,120,45,47,"",TRUE};
+
+
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
@@ -116,14 +118,18 @@ int main(void) {
                                 }
                                 redraw = TRUE;
                         }
-                        else if (c == 'a') {
+                        else if (KEY_MODE_ADD(c)) {
                                 cursorArea = "addSubject";
-                        }
-			else if (
+                        	cursor.x = 0;
+			}
+			else if (KEY_MODE_SEARCH(c)){
+				cursorArea = "search";
+				cursor.x = 0;
+			}
 		}
 		else if (cursorArea == "addSubject" || cursorArea == "addBody"){
 			cursor.y = newSubjectArea.top + (cursorArea == "addBody");
-			if (c == KEY_MODE_RECORDS){
+			if (KEY_MODE_RECORDS(c)){
 				cursorArea = "record";
 			}else {
 				if(c == KEY_LEFT){
@@ -131,6 +137,12 @@ int main(void) {
 				}
 				if (c == KEY_RIGHT){
 					cursor.x++;
+				}
+				if (c==KEY_BACKSPACE) {
+					if(cursorArea == "addSubject")
+						subject[--cursor.x] = '\0';
+					if(cursorArea == "addBody")
+						body[--cursor.x] = '\0';
 				}
 				if (c == KEY_ENTER){
 					if (cursorArea == "addSubject"){
@@ -162,7 +174,41 @@ int main(void) {
 				}
 			}
 			redraw = TRUE;
+		} else if (cursorArea == "search") {
+			if(KEY_MODE_RECORDS(c)) {
+				cursorArea = "record";
+			} else {
+				if(c == KEY_LEFT){
+					if(cursor.x > 0) cursor.x--;
+				}
+				if (c == KEY_RIGHT){
+					cursor.x++;
+				}
+				if (c == KEY_ENTER){
+					cursorArea = "record";
+					ParseSearch(subject,&searchBuffer);
+					fill(subject,30,'\0');
+					cursor.x = 0;
+					cursor.y = 0;
+					
+				}
+				if (c==KEY_BACKSPACE) {
+					subject[--cursor.x] = '\0';
+				}
+				//to do: check if c a letter
+				if(c >= ' ' && c <= '~') {
+					if (cursor.x <= MAX_SUBJECT_LEN){
+						if(cursor.x > MAX_SUBJECT_LEN) {
+							cursor.x = MAX_SUBJECT_LEN;
+						}
+						subject[cursor.x++] = c; 
+					}
+				}
+			}
+			redraw = TRUE;
+				
 		}
+		
 		if(redraw)
 			draw();
 	}
@@ -185,10 +231,16 @@ void draw() {
 	//perform operations on stat
 	ParseStat();
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
-	//new subject and body
-	DisplayAt(newSubjectArea.top,newSubjectArea.left,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
-	DisplayAt(newBodyArea.top,newBodyArea.left,XT_CH_WHITE,MAX_BODY_LEN,body);
 	nitems = atoi(searchNvs("nitems"));
+	//new subject and body
+	if(cursorArea == "addBody" || cursorArea == "addSubject"){
+		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
+		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
+	} else if (strcmp(cursorArea,"search") == 0) {
+		DisplayAt(52,0,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
+	}
+	printf("\n!!%s!!\n",cursorArea);
+	//buffer
 	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
 	if(hovered) {
 		displayRecords(*hovered,&RLBuffer,rArea);
@@ -197,7 +249,7 @@ void draw() {
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 
-	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x);
+	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x + ENTRY_FIELD_LABEL_SPACE);
 }
 
 // ------------------------------------ fill --------------------------------

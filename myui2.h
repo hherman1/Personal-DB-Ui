@@ -13,6 +13,8 @@
 #define DEBUG 1
 #define ERROR_MESSAGE_BUFFER_LENGTH 120
 
+#define ENTRY_FIELD_LABEL_SPACE 15
+
 #if DEBUG
 #include <assert.h>
 #endif
