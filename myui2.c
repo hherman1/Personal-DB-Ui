@@ -18,7 +18,7 @@ struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
 	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
 	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
-	{5,1,XT_CH_YELLOW,"Search: _________________________________"},
+	{5,1,XT_CH_YELLOW,"Search:"},
 	{44,1,XT_CH_YELLOW,"new Subject: "},																				
 	{45,1,XT_CH_YELLOW,"new Body: "},
 	{48,1,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
@@ -36,6 +36,9 @@ int nSP = sizeof(SP)/sizeof(SP[0]);
 struct RecordList searchBuffer;
 struct RecordList searchView;
 struct RecordList RLBuffer;
+
+struct RecordList *activeBuffer;
+
 Record *hovered;
 
 int nitems = 0;  //numRecords
@@ -62,7 +65,7 @@ int main(void) {
 	//ParseSearch("te",&searchBuffer);
 	
 	hovered = RLBuffer.top;
-	
+	activeBuffer = &RLBuffer;
 	draw();
 	while (TRUE) {
 		int redraw = FALSE;
@@ -87,7 +90,7 @@ int main(void) {
 				redraw = TRUE;
 			}
 			if(DEBUG && c == 'r') {
-				message("refreshed | botom: %i | hovered->prev:%p",RLBuffer.bottom->num,hovered->prev);
+				message("refreshed | botom: %i | hovered->prev:%p",activeBuffer->bottom->num,hovered->prev);
 				message("| added in second call");
 				redraw=TRUE; 
 			}
@@ -97,22 +100,22 @@ int main(void) {
 				message("CORE DUMP: ");
 			}
 			if (c == KEY_ENTER) {
-                                selectRecord(*hovered,RLBuffer,rArea);
+                                selectRecord(*hovered,*activeBuffer,rArea);
                                 redraw = TRUE;
                         }
                         if (c == KEY_DOWN) {
-				if (hovered == RLBuffer.bottom && RLBuffer.lengthfrombot){
-                                        scrollDown(&RLBuffer);
-                                        hovered = RLBuffer.bottom;
+				if (hovered == activeBuffer->bottom && activeBuffer->lengthfrombot){
+                                        scrollDown(activeBuffer);
+                                        hovered = activeBuffer->bottom;
                                 }else if(hovered->next) {
                                         hovered = hovered->next;
                                 }
                                 redraw = TRUE;
                         } 
                         if (c == KEY_UP) {
-                                if(hovered == RLBuffer.top && hovered->num - 1) {
-                                        scrollUp(&RLBuffer);
-                                        hovered = RLBuffer.top;
+                                if(hovered == activeBuffer->top && hovered->num - 1) {
+                                        scrollUp(activeBuffer);
+                                        hovered = activeBuffer->top;
                                 }else if(hovered->prev) {
                                         hovered = hovered->prev;
                                 }
@@ -175,6 +178,7 @@ int main(void) {
 			}
 			redraw = TRUE;
 		} else if (cursorArea == "search") {
+			cursor.y = 5;
 			if(KEY_MODE_RECORDS(c)) {
 				cursorArea = "record";
 			} else {
@@ -237,15 +241,15 @@ void draw() {
 		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
 	} else if (strcmp(cursorArea,"search") == 0) {
-		DisplayAt(52,0,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
+		
+		DisplayAt(5,ENTRY_FIELD_LABEL_SPACE,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
 	}
-	printf("\n!!%s!!\n",cursorArea);
 	//buffer
-	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
+	activeBuffer->lengthfrombot = nitems - activeBuffer->bottom->num;
 	if(hovered) {
-		displayRecords(*hovered,&RLBuffer,rArea);
+		displayRecords(*hovered,activeBuffer,rArea);
 	}
-	message("%i - %i",RLBuffer.top->num,RLBuffer.bottom->num);
+	message("%i - %i",activeBuffer->top->num,activeBuffer->bottom->num);
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 

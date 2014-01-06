@@ -12,7 +12,6 @@ void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 			//trimBuffer(buffer,bot);
 		}
 	}
-	printf("adjustment complete");
 	printViewBuffer(hovered,buffer,rArea);
 }
 void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
