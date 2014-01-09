@@ -76,7 +76,9 @@ int main(void) {
 		int redraw = FALSE;
 		DUMP = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
-
+		message("keypress:%i|",c);
+		message("%s",cursorArea);
+		redraw = TRUE;
 		if (c == KEY_F9 || c == 'q')  {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
@@ -94,134 +96,74 @@ int main(void) {
 				rArea.bot += change;
 				redraw = TRUE;
 			}
-			if(DEBUG && c == 'r') {
-				message("refreshed | botom: %i | hovered->prev:%p",activeBuffer->bottom->num,hovered->prev);
-				message("| added in second call");
-				redraw=TRUE; 
-			}
-			if(DEBUG && c == 'p') {
-				DUMP = TRUE;
-				redraw = TRUE;
-				message("CORE DUMP: ");
-			}
-			if (c == KEY_ENTER) {
-                                selectRecord(*hovered,*activeBuffer);
-                                redraw = TRUE;
-                        }
-                        if (c == KEY_DOWN) {
-				if (hovered == activeBuffer->bottom && activeBuffer->lengthfrombot){
-                                        scrollDown(activeBuffer);
-                                        hovered = activeBuffer->bottom;
-                                }else if(hovered->next) {
-                                        hovered = hovered->next;
-                                }
-                                redraw = TRUE;
-                        } 
-                        if (c == KEY_UP) {
-                                if(hovered == activeBuffer->top && hovered->num - 1) {
-                                        scrollUp(activeBuffer);
-                                        hovered = activeBuffer->top;
-                                }else if(hovered->prev) {
-                                        hovered = hovered->prev;
-                                }
-                                redraw = TRUE;
-                        }
-                        else if (KEY_MODE_ADD(c)) {
-                                cursorArea = "addSubject";
-                        	cursor.x = 0;
-				redraw = TRUE;
-			}
-			else if (KEY_MODE_SEARCH(c)){
-				fill(subject,MAX_SUBJECT_LEN,'\0');
-				cursorArea = "search";
-				cursor.y = 5;
-				cursor.x = 0;
-				redraw = TRUE;
-			}
-			else if (KEY_MODE_EDIT(c)) {
-				cursorArea = "editSubject";
-				if(hovered->num != recordSelected) {
-					selectRecord(*hovered,*activeBuffer);
-				}
-				cursorLeft = RECORD_NUM_SPACE +1;
-				cursor.x = strlen(hovered->subject);
-				cursor.y = getRecordY(hovered,activeBuffer,rArea);
-				redraw = TRUE;
-			}
+			redraw = scroll(&hovered,&activeBuffer,c) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 		}
 		else if (!strcmp(cursorArea,"addSubject") || !strcmp(cursorArea,"addBody")){
 			cursor.y = newSubjectArea.top + (!strcmp(cursorArea,"addBody"));
-			if (KEY_MODE_RECORDS(c)){
-				cursorArea = "record";
-			}else {
-				if (!strcmp(cursorArea,"addSubject")){
-					if (c == KEY_ENTER){
-						cursorArea = "addBody";
-						cursor.x = 0;
-						cursor.y ++;
-					}
-					else {
-						edit(subject,MAX_BODY_LEN,&cursor,c);
-					}
-				} else if (!strcmp(cursorArea,"addBody")){
-					if (c == KEY_ENTER){
-						cursorArea = "record";
-						addRecord(subject,body);
-						RLBuffer.lengthfrombot++;
-						fill(subject,30,'\0');
-						fill(body,140,'\0');
-						cursor.x = 0;
-						cursor.y = 0;
-					}
-					else {
-						edit(body,MAX_BODY_LEN,&cursor,c);
-					}
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			if (!strcmp(cursorArea,"addSubject")){
+				if (c == KEY_ENTER){
+					cursorArea = "addBody";
+					cursor.x = 0;
+					cursor.y ++;
+				}
+				else {
+					message("c:%i|",cursor.x);
+					edit(subject,MAX_BODY_LEN,&cursor,c);
+				}
+			} else if (!strcmp(cursorArea,"addBody")){
+				if (c == KEY_ENTER){
+					cursorArea = "record";
+					addRecord(subject,body);
+					RLBuffer.lengthfrombot++;
+					fill(subject,30,'\0');
+					fill(body,140,'\0');
+					cursor.x = 0;
+					cursor.y = 0;
+				}
+				else {
+					edit(body,MAX_BODY_LEN,&cursor,c);
 				}
 			}
 			redraw = TRUE;
 		} else if (!strcmp(cursorArea,"search")) {
-			if(KEY_MODE_RECORDS(c)) {
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			if (c == KEY_ENTER){
 				cursorArea = "record";
-			} else {
-				if (c == KEY_ENTER){
-					cursorArea = "record";
-					if(searchBuffer.top) freeBuffer(&searchBuffer);
-					ParseSearch(subject,&searchBuffer);
-					fill(subject,30,'\0');
-					cursor.x = 0;
-					cursor.y = 0;
-					activeBuffer = &searchBuffer;
-					hovered = activeBuffer->top;
-				}
-				else {
-					edit(subject,MAX_SUBJECT_LEN,&cursor,c);
-				}
+				if(searchBuffer.top) freeBuffer(&searchBuffer);
+				ParseSearch(subject,&searchBuffer);
+				fill(subject,30,'\0');
+				cursor.x = 0;
+				cursor.y = 0;
+				activeBuffer = &searchBuffer;
+				hovered = activeBuffer->top;
+			}
+			else {
+				edit(subject,MAX_SUBJECT_LEN,&cursor,c);
 			}
 			redraw = TRUE;
 				
 		}
 		
 		else if (!strcmp(cursorArea,"editSubject") || !strcmp(cursorArea,"editBody")){
-			if (KEY_MODE_RECORDS(c)){
-				cursorArea = "record";
-			}else {
-				if (!strcmp(cursorArea,"editSubject")){
-					if(c == KEY_ENTER) {
-						cursorArea = "editBody";
-						cursor.x = 0;
-						cursor.y ++;
-					} else {
-						edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
-					}
-				}else if (!strcmp(cursorArea,"editBody")){
-					if(c == KEY_ENTER) {
-						cursorArea = "record";
-						editRecord(hovered->num,hovered->subject,hovered->body);
-						cursor.x = 0;
-						cursor.y = 0;
-					} else {
-						edit(hovered->body,MAX_BODY_LEN,&cursor,c);
-					}
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			if (!strcmp(cursorArea,"editSubject")){
+				if(c == KEY_ENTER) {
+					cursorArea = "editBody";
+					cursor.x = 0;
+					cursor.y ++;
+				} else {
+					edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
+				}
+			}else if (!strcmp(cursorArea,"editBody")){
+				if(c == KEY_ENTER) {
+					cursorArea = "record";
+					editRecord(hovered->num,hovered->subject,hovered->body);
+					cursor.x = 0;
+					cursor.y = 0;
+				} else {
+					edit(hovered->body,MAX_BODY_LEN,&cursor,c);
 				}
 			}
 			redraw = TRUE;

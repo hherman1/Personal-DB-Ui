@@ -1,3 +1,4 @@
+#pragma once
 #define R_TEXT_COLOR XT_CH_GREEN
 #define R_HOVERED_BG_COLOR XT_BG_GREEN
 #define R_HOVERED_TEXT_COLOR XT_CH_WHITE
