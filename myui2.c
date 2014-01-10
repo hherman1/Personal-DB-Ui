@@ -72,9 +72,10 @@ int main(void) {
 	//ParseSearch("te",&searchBuffer);
 	activeBuffer = &RLBuffer;
 	//ParseSearch("hun",activeBuffer);
-	hovered = RLBuffer.top;
-
-	draw();
+	if(RLBuffer.top) {
+		hovered = RLBuffer.top;
+		draw();
+	}
 	while (TRUE) {
 
 		int redraw = FALSE;
@@ -212,11 +213,13 @@ void draw() {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
-
-	if(hovered) {
-		displayRecords(*hovered,activeBuffer,rArea);
+	if(activeBuffer->top) {
+		if(hovered) {
+			displayRecords(*hovered,activeBuffer,rArea);
+		} else {
+			hovered = activeBuffer->top;
+		}
 	}
-
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 	

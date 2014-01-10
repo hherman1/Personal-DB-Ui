@@ -7,15 +7,8 @@ int recordSelected = 2;
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
 
-	if(buffer->top) {
-		Record *bot = adjustBufferForArea(hovered,buffer,rArea);
-		if(bot){
-			//trimBuffer(buffer,bot);
-		}
-	}
-
+	Record *bot = adjustBufferForArea(hovered,buffer,rArea);
 	printViewBuffer(hovered,buffer,rArea);
-
 
 }
 void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
@@ -237,6 +230,8 @@ Record *getRecord(int r) {
 Record *allocateTopRecord() {
 	Record *ans = malloc(sizeof(Record));
 	char *temp = NULL;
+	temp = searchNvs("status");
+	if(!(*temp - 'E')) {
 	temp = searchNvs("subject");
 	if(temp) {
 		ans->subject = malloc(sizeof(char) * MAX_SUBJECT_LEN);
@@ -251,6 +246,7 @@ Record *allocateTopRecord() {
 		ans->num = atoi(searchNvs("item"));
 		ans->prev = NULL;
 		ans->next = NULL;
+	}
 	}
 	return ans;
 }
@@ -282,6 +278,8 @@ void freeBuffer(struct RecordList *buffer) {
 		freeRecord(buffer->top);
 		buffer->top = next;
 	}
+	buffer->top = NULL;
+	buffer->bottom = NULL;
 }
 void freeRecord(Record *target) {
 	int i = 0;
