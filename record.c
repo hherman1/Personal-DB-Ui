@@ -256,7 +256,6 @@ Record *allocateTopRecord() {
 }
 Record *popRecord() {
 	Record *ans = allocateTopRecord();
-	int i;
 	nvs++;
 	n_nvs--;
 	for(;n_nvs; n_nvs--) {
