@@ -43,7 +43,7 @@ int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 
 	return redraw;
 }
-int modeCheck(int c,int recordSelected,int *cursorLeft,char **cursorArea, char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
+int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
 	int redraw = FALSE;
 	if(KEY_MODE_RECORDS(c) || KEY_MODE_ESCAPE(c)) {
 		redraw = check_record(cursorArea,hovered,activeBuffer,RLBuffer);
@@ -56,38 +56,48 @@ int modeCheck(int c,int recordSelected,int *cursorLeft,char **cursorArea, char *
 	}
 	else if (KEY_MODE_EDIT(c)) {
 		redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
+	} else if(KEY_MODE_DELETE(c)) {
+		redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
 	}
 	printf("%i\n",redraw);
 	return redraw;
 }
-int check_record(char **cursorArea, Record **hovered,struct RecordList **activeBuffer,struct RecordList *RLBuffer) {
-	if(!strcmp(*cursorArea,"record")) {
+int check_record(int *cursorArea, Record **hovered,struct RecordList **activeBuffer,struct RecordList *RLBuffer) {
+	if(*cursorArea == UI_AREA_RECORDS) {
 		*activeBuffer = RLBuffer;
 	}
 	*hovered = (*activeBuffer)->top;
-	*cursorArea = "record";
+	*cursorArea = UI_AREA_RECORDS;
 	return TRUE;
 }
-int init_add(char **cursorArea, Cursor* cursor) {
-	*cursorArea = "addSubject";
+int init_add(int *cursorArea, Cursor* cursor) {
+	*cursorArea = UI_AREA_ADD_SUBJECT;
 	cursor->x = 0;
 	return TRUE;
 }
-int init_search(char *subject,Cursor *cursor,char **cursorArea) {
+int init_search(char *subject,Cursor *cursor,int *cursorArea) {
 	fill(subject,MAX_SUBJECT_LEN,'\0');
-	*cursorArea = "search";
+	*cursorArea = UI_AREA_SEARCH;
 	cursor->y = 5;
 	cursor->x = 0;
 	return TRUE;
 }
-int init_edit(int recordSelected,int *cursorLeft,char **cursorArea, Cursor *cursor,Area rArea,Record *hovered,struct RecordList *activeBuffer) {
-	*cursorArea = "editSubject";
+int init_edit(int recordSelected,int *cursorLeft,int *cursorArea, Cursor *cursor,Area rArea,Record *hovered,struct RecordList *activeBuffer) {
+	*cursorArea = UI_AREA_EDIT_SUBJECT;
 	if(hovered->num != recordSelected) {
 		selectRecord(*hovered,*activeBuffer);
 	}
 	*cursorLeft = RECORD_NUM_SPACE +1;
 	cursor->x = strlen(hovered->subject);
 	cursor->y = getRecordY(hovered,activeBuffer,rArea);
+	return TRUE;
+}
+int init_delete(int recordSelected,int *cursorArea,Record *hovered,struct RecordList *activeBuffer) {
+	*cursorArea = UI_AREA_DELETE;
+	if(hovered->num != recordSelected) {
+		selectRecord(*hovered,*activeBuffer);
+	}
+	message(UI_DELETE_CONFIRM,hovered->num);
 	return TRUE;
 }
 void edit(char *str,int maxLength,Cursor *cursor,char c) {

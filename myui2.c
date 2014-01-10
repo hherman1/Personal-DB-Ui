@@ -46,7 +46,7 @@ char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
 char errmsg[ERROR_MESSAGE_BUFFER_LENGTH+1];
 
-char *cursorArea = "record"; // what are the cursor is at
+int cursorArea =UI_AREA_RECORDS; // what are the cursor is at
  				//title, record,addSubject, message, ....
 Cursor cursor = {0,0};
 int cursorLeft = 0;
@@ -92,7 +92,7 @@ int main(void) {
 			exit(0);
 		}
 
-		if(!strcmp(cursorArea,"record")){
+		if(cursorArea == UI_AREA_RECORDS) {
 			if (DEBUG && c == '=' || c == '-') {
 				int change = 0;
 				if(c == '=')
@@ -106,21 +106,21 @@ int main(void) {
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 
 		}
-		else if (!strcmp(cursorArea,"addSubject") || !strcmp(cursorArea,"addBody")){
-			cursor.y = newSubjectArea.top + (!strcmp(cursorArea,"addBody"));
+		else if (cursorArea == UI_AREA_ADD_SUBJECT || cursorArea == UI_AREA_ADD_BODY){
+			cursor.y = newSubjectArea.top + (cursorArea - UI_AREA_ADD_SUBJECT);
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
-			if (!strcmp(cursorArea,"addSubject")){
+			if (cursorArea == UI_AREA_ADD_SUBJECT){
 				if (c == KEY_ENTER){
-					cursorArea = "addBody";
+					cursorArea = UI_AREA_ADD_BODY;
 					cursor.x = 0;
 					cursor.y ++;
 				}
 				else {
 					edit(subject,MAX_BODY_LEN,&cursor,c);
 				}
-			} else if (!strcmp(cursorArea,"addBody")){
+			} else if (cursorArea == UI_AREA_ADD_BODY){
 				if (c == KEY_ENTER){
-					cursorArea = "record";
+					cursorArea = UI_AREA_RECORDS;
 					addRecord(subject,body);
 					RLBuffer.lengthfrombot++;
 					fill(subject,30,'\0');
@@ -133,10 +133,10 @@ int main(void) {
 				}
 			}
 			redraw = TRUE;
-		} else if (!strcmp(cursorArea,"search")) {
+		} else if (cursorArea == UI_AREA_SEARCH) {
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (c == KEY_ENTER){
-				cursorArea = "record";
+				cursorArea = UI_AREA_RECORDS;
 				if(searchBuffer.top) freeBuffer(&searchBuffer);
 				ParseSearch(subject,&searchBuffer);
 				fill(subject,30,'\0');
@@ -152,19 +152,19 @@ int main(void) {
 				
 		}
 
-		else if (!strcmp(cursorArea,"editSubject") || !strcmp(cursorArea,"editBody")){
+		else if (cursorArea == UI_AREA_EDIT_SUBJECT || cursorArea == UI_AREA_EDIT_BODY){
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
-			if (!strcmp(cursorArea,"editSubject")){
+			if (cursorArea == UI_AREA_EDIT_SUBJECT){
 				if(c == KEY_ENTER) {
-					cursorArea = "editBody";
+					cursorArea = UI_AREA_EDIT_BODY;
 					cursor.x = 0;
 					cursor.y ++;
 				} else {
 					edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
 				}
-			}else if (!strcmp(cursorArea,"editBody")){
+			}else if (cursorArea == UI_AREA_EDIT_BODY){
 				if(c == KEY_ENTER) {
-					cursorArea = "record";
+					cursorArea = UI_AREA_RECORDS;
 					editRecord(hovered->num,hovered->subject,hovered->body);
 					cursor.x = 0;
 					cursor.y = 0;
@@ -202,14 +202,14 @@ void draw() {
 	nitems = atoi(searchNvs("nitems"));
 	//new subject and body
 
-	if(!strcmp(cursorArea,"addBody") || !strcmp(cursorArea,"addSubject")){
+	if(cursorArea == UI_AREA_ADD_BODY || cursorArea == UI_AREA_ADD_SUBJECT){
 		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
 		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
-	} else if (strcmp(cursorArea,"search") == 0) {
+	} else if (cursorArea == UI_AREA_SEARCH) {
 		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
 		DisplayAt(5,ENTRY_FIELD_LABEL_SPACE,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
-	} else if (strcmp(cursorArea,"edit") == 0) {
+	} else if (cursorArea == UI_AREA_RECORDS) {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
