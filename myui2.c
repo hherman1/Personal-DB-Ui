@@ -66,13 +66,13 @@ int main(void) {
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
 	
-
-	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
-	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
-	//ParseSearch("te",&searchBuffer);
 	activeBuffer = &RLBuffer;
-	//ParseSearch("hun",activeBuffer);
-	if(RLBuffer.top) {
+
+	if(nitems && RLBuffer.top) {
+		loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
+		RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
+		//ParseSearch("te",&searchBuffer);
+		//ParseSearch("hun",activeBuffer);
 		hovered = RLBuffer.top;
 		draw();
 	}
@@ -213,7 +213,7 @@ void draw() {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
-	if(activeBuffer->top) {
+	if(nitems && activeBuffer->top) {
 		if(hovered) {
 			displayRecords(*hovered,activeBuffer,rArea);
 		} else {

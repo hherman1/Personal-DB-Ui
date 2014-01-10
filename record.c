@@ -230,8 +230,6 @@ Record *getRecord(int r) {
 Record *allocateTopRecord() {
 	Record *ans = malloc(sizeof(Record));
 	char *temp = NULL;
-	temp = searchNvs("status");
-	if(!(*temp - 'E')) {
 	temp = searchNvs("subject");
 	if(temp) {
 		ans->subject = malloc(sizeof(char) * MAX_SUBJECT_LEN);
@@ -246,7 +244,6 @@ Record *allocateTopRecord() {
 		ans->num = atoi(searchNvs("item"));
 		ans->prev = NULL;
 		ans->next = NULL;
-	}
 	}
 	return ans;
 }
