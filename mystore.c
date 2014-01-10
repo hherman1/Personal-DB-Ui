@@ -392,6 +392,7 @@ char *rstrip(char *s) {
 	p[1] = '\0';
 	return s;
 }
+//######################################################################
 //------------------------------------- search ------------------------------
 char *toLowerStr(char *str) {
 	int i;
@@ -405,12 +406,12 @@ int contains(char *haystack, char *needle) {
 	for(;*haystack;haystack++) {
 		char *h = haystack;
 		char *n = needle;
-		for(;*h;n++,h++) {
-			if(!*n) {
-				ans = TRUE;
-				break;
-			}  else if(*n != *h) {
-				break;
+		for(;*n;n++,h++) {
+			if(*n != *h) {
+					ans = FALSE;
+					break;
+			} else {
+					ans = TRUE;
 			}
 		}
 		if(ans)
@@ -439,8 +440,8 @@ int search(char *subject) {
 	struct carrier *ptr;
 	struct data this_data;
 	struct tm *tp;
-	for(i = 1, ptr = first; i <= nitems; i++) {
-		
+	for(i = 1, ptr = first; i <= nitems; i++) { // change 1 to nitems
+		printf("%s\n",ptr->theData.theSubject);
 		if(containsLC(ptr->theData.theSubject,subject)) {
 		
 			this_data = ptr->theData;

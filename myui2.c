@@ -39,7 +39,7 @@ struct RecordList RLBuffer;
 
 struct RecordList *activeBuffer;
 
-Record *hovered;
+Record *hovered = NULL;
 
 int nitems = 0;  //numRecords
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
@@ -51,7 +51,9 @@ char *cursorArea = "record"; // what are the cursor is at
 Cursor cursor = {0,0};
 int cursorLeft = 0;
 int boolShowCurrentRecord = FALSE;
-
+void debug(struct RecordList *buffer) {
+	return;
+}
 // ------------------------------------------------ main --------------------
 int main(void) {
 	int c;
@@ -68,17 +70,20 @@ int main(void) {
 	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
 	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
 	//ParseSearch("te",&searchBuffer);
-	
-	hovered = RLBuffer.top;
 	activeBuffer = &RLBuffer;
+	//ParseSearch("hun",activeBuffer);
+	hovered = RLBuffer.top;
+
 	draw();
 	while (TRUE) {
+
 		int redraw = FALSE;
 		DUMP = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
-		message("keypress:%i|",c);
-		message("%s",cursorArea);
+		printf("assert");
+
 		redraw = TRUE;
+
 		if (c == KEY_F9 || c == 'q')  {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
@@ -86,6 +91,7 @@ int main(void) {
 			getkey_terminate();
 			exit(0);
 		}
+
 		if(!strcmp(cursorArea,"record")){
 			if (DEBUG && c == '=' || c == '-') {
 				int change = 0;
@@ -98,6 +104,7 @@ int main(void) {
 			}
 			redraw = scroll(&hovered,&activeBuffer,c) || redraw;
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+
 		}
 		else if (!strcmp(cursorArea,"addSubject") || !strcmp(cursorArea,"addBody")){
 			cursor.y = newSubjectArea.top + (!strcmp(cursorArea,"addBody"));
@@ -109,7 +116,6 @@ int main(void) {
 					cursor.y ++;
 				}
 				else {
-					message("c:%i|",cursor.x);
 					edit(subject,MAX_BODY_LEN,&cursor,c);
 				}
 			} else if (!strcmp(cursorArea,"addBody")){
@@ -145,7 +151,7 @@ int main(void) {
 			redraw = TRUE;
 				
 		}
-		
+
 		else if (!strcmp(cursorArea,"editSubject") || !strcmp(cursorArea,"editBody")){
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (!strcmp(cursorArea,"editSubject")){
@@ -168,8 +174,10 @@ int main(void) {
 			}
 			redraw = TRUE;
 		}
+		
 		if(redraw)
 			draw();
+
 	}
 	
 	return 1;
@@ -177,6 +185,7 @@ int main(void) {
 // -------------------------------------draw---------------------------------
 void draw() {
 	printf("redrawing");
+
 	int i = 0;
 	xt_par0(XT_CLEAR_SCREEN);
 	
@@ -192,6 +201,7 @@ void draw() {
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
 	//new subject and body
+
 	if(!strcmp(cursorArea,"addBody") || !strcmp(cursorArea,"addSubject")){
 		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
@@ -203,11 +213,12 @@ void draw() {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
+
 	if(hovered) {
 		displayRecords(*hovered,activeBuffer,rArea);
 	}
-	message("%i - %i",activeBuffer->top->num,activeBuffer->bottom->num);
-	//message("[%p",hovered->previous);
+		assert(*(activeBuffer->top->body));
+
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 	
@@ -216,8 +227,15 @@ void draw() {
 
 // ------------------------------------ fill --------------------------------
 void fill(char *s, int n, char c) {
+	printf("[Done%s]\n",s);
 	while (n--) *s++=c;
-	*s='\0';
+	*s='\0';		
+	printf("Done%s\n",s);
+
+	if(activeBuffer && activeBuffer->top && activeBuffer->top->body)
+		assert(*(activeBuffer->top->body));
+	printf("Done%s\n",s);
+
 }
 
 

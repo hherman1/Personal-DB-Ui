@@ -6,28 +6,35 @@ extern int n_nvs;
 int recordSelected = 2;
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
+
 	if(buffer->top) {
 		Record *bot = adjustBufferForArea(hovered,buffer,rArea);
 		if(bot){
 			//trimBuffer(buffer,bot);
 		}
 	}
+
 	printViewBuffer(hovered,buffer,rArea);
+
+
 }
 void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
-	char *color;
-	Record *temp = buffer->top;
+	char *color = NULL;
+	Record *temp = buffer->top;			
 	while(temp && temp->num <= buffer->bottom->num){
+
 		color = R_TEXT_COLOR;
 		int row = i + rArea.top;
-		char *num = malloc(RECORD_NUM_SPACE * sizeof(char));
-		sprintf(num,"%i.",temp->num);
+		char numString[RECORD_NUM_SPACE+1];
+		numString[RECORD_NUM_SPACE] = '\0';
+		snprintf(numString,RECORD_NUM_SPACE,"%i.",temp->num);
 		if(temp->num == hovered.num) {
 			xt_par0(R_HOVERED_BG_COLOR);
 			color = R_HOVERED_TEXT_COLOR;
-		}
+		}	
+
 		if(temp->num == recordSelected) {
 			xt_par0(R_SELECTED_BG_COLOR);
 			xt_par0(R_SELECTED_TEXT_STYLE);
@@ -35,7 +42,7 @@ void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
 			if(temp->num == hovered.num) {
 				color = R_SELECTED_HOVERED_TEXT_COLOR;
 			}
-			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,num);
+			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,numString);
 			DisplayAt(row,rArea.left+RECORD_NUM_SPACE,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 			int spaceNeeded = requiredSpace(*temp,width);//strlen(sTemp) / width + 1;
@@ -48,16 +55,19 @@ void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
 			xt_par0(XT_CH_NORMAL);
 		}
 		else if(row <= rArea.bot) {
-			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,num);
+			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,numString);
 			DisplayAt(row,rArea.left+RECORD_NUM_SPACE,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 		}
-		free(num);
+
+
 		temp = temp->next;
 		xt_par0(XT_BG_DEFAULT);
-		i++;
+		i++;	
+
+
 	}
-	
+
 }
 void trimBuffer(struct RecordList *buffer, Record *cutoff) {
 	buffer->bottom = cutoff;
@@ -68,8 +78,8 @@ void trimBuffer(struct RecordList *buffer, Record *cutoff) {
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea) {
 	int availableSpace;
 	Record *current = buffer->top;
-	Record *ans;
-	printf("\n\n\n");
+	Record *ans = NULL;
+
 	if(current) {
 		for(availableSpace = rArea.bot - rArea.top;availableSpace > 0 ;availableSpace--) {
 			if(current->num == recordSelected){
@@ -104,7 +114,7 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 				scrollDown(buffer);
 				buffer->top = previousRecord(buffer->top);
 				current = current->next;
-			} else {	
+			} else {
 				message("end of buffer");
 				break;
 			}
@@ -117,6 +127,8 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 		buffer->bottom = ans;
 		message("|%i;[%i]",current->num,buffer->lengthfrombot);
 	}
+
+
 	return ans;
 }
 int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
@@ -127,7 +139,7 @@ int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
 	printf("\n\n\n");
 	if(current) {
 		for(availableSpace = rArea.bot - rArea.top;availableSpace > 0 ;availableSpace--) {
-			
+
 			if(current->num == recordSelected){
 				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
 				availableSpace -= openSpace;
@@ -163,7 +175,7 @@ int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
 				scrollDown(buffer);
 				buffer->top = previousRecord(buffer->top);
 				current = current->next;
-			} else {	
+			} else {
 				message("end of buffer");
 				break;
 			}
@@ -177,10 +189,10 @@ int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
 		}
 		buffer->bottom = temp;
 		message("|%i;[%i]",current->num,buffer->lengthfrombot);
-	
+
 	}
 	return ans;
-	
+
 }
 int requiredSpace(Record r,int width) {
 	return strlen(r.body) / (width) + 1;
@@ -198,7 +210,7 @@ void wrapText(int left,int width, char *text) {
 		putchar(text[i]);
 		i++;
 	}
-	
+
 }
 void selectRecord(Record record,struct RecordList buffer){
 	int rNum = record.num;
@@ -215,29 +227,27 @@ void loadRecords(struct RecordList *buffer,int low,int high,int number) {
 	while(++low < high && low <= number) {
 		temp = getRecord(low);
 		bufferRecord(buffer,temp);
-	}	
-	
+	}
+
 }
 Record *getRecord(int r) {
 	ParseRecord(r);
 	return allocateTopRecord();
 }
 Record *allocateTopRecord() {
-	Record *ans = NULL;
-	char *temp;
+	Record *ans = malloc(sizeof(Record));
+	char *temp = NULL;
 	temp = searchNvs("subject");
 	if(temp) {
-		ans = malloc(sizeof(Record));
-		ans->subject = malloc(sizeof(char) * 31);
+		ans->subject = malloc(sizeof(char) * MAX_SUBJECT_LEN);
 		strcpy(ans->subject,temp);
 		temp = searchNvs("body");
-		ans->body = malloc(sizeof(char) * 141);
+		ans->body = malloc(sizeof(char) * MAX_BODY_LEN);
 		strcpy(ans->body,temp);
-		
 		temp = searchNvs("time");
-		ans->time = malloc(sizeof(char) * 141);
+		ans->time = malloc(sizeof(char) * MAX_TIME_LEN);
 		strcpy(ans->time,temp);
-		
+
 		ans->num = atoi(searchNvs("item"));
 		ans->prev = NULL;
 		ans->next = NULL;
@@ -276,20 +286,24 @@ void freeBuffer(struct RecordList *buffer) {
 }
 void freeRecord(Record *target) {
 	int i = 0;
-	free(target->body);
-	printf("%i",i++);
-	free(target->time);
-	printf("%i",i++);
-	free(target->subject);
-	printf("%i",i++);
+	if(target->body){
+		free(target->body);
+	}
+	if(target->time){
+		free(target->time);
+	}
+	if(target->subject){
+		free(target->subject);
+	}
 	if(target->prev) {
 		target->prev->next = target->next;
 	}
 	if(target->next != NULL) {
 		target->next->prev = target->prev;
 	}
+	
+	message("%i\n",target->num);
 	free(target);
-	printf("%i\n",i++);
 }
 void bufferRecord(struct RecordList *buffer,Record *r) {
 	if(r == NULL) {
@@ -315,11 +329,11 @@ void addBufferTop(struct RecordList *buffer,Record *r) { //r == new record
 		if(buffer->bottom->next != NULL){
 			freeRecord(buffer->bottom->next);
 		}
-	}else { 
+	}else {
 		printf("%s\n", "can't shiftBufferUp");
 	}
 }
-void addBufferBot(struct RecordList *buffer,Record *r){ 
+void addBufferBot(struct RecordList *buffer,Record *r){
 	bufferRecord(buffer,r);
 	buffer->top = buffer->top->next;
 	if(buffer->top->prev != NULL){

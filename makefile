@@ -1,28 +1,28 @@
 all: mystore myui2
 
 myui2:	myui2.o ui.o record.o myui2_util.o keyboard.o xterm_control.o
-	gcc myui2.o ui.o record.o myui2_util.o keyboard.o xterm_control.o -o myui2
+	gcc -g -Wall myui2.o ui.o record.o myui2_util.o keyboard.o xterm_control.o -o myui2
 	
 myui2.o:	myui2.c myui2.h record.h bindings.h
-	gcc -c myui2.c
+	gcc -g -Wall -c myui2.c
 
 ui.o:		ui.c myui2.h ui.h
-	gcc -c ui.c
+	gcc -g -Wall -c ui.c
 
 record.o:	record.c record.h myui2.h
-	gcc -c record.c
+	gcc -g -Wall  -c record.c
 
 myui2_util.o:	myui2_util.c myui2.h
-	gcc -c myui2_util.c
+	gcc -g -Wall -c myui2_util.c
 	
 keyboard.o:	keyboard.c keyboard.h
-	gcc -c keyboard.c
+	gcc -g -Wall -c keyboard.c
 	
 xterm_control.o:	xterm_control.c xterm_control.h
-	gcc -c xterm_control.c
+	gcc -g -Wall -c xterm_control.c
 	
 mystore:	mystore.o 
-	gcc mystore.o -o mystore
+	gcc -g -Wall mystore.o -o mystore
 	
 mystore.o:	mystore.c
-	gcc -c mystore.c
+	gcc -g -Wall -c mystore.c

@@ -19,9 +19,9 @@
 typedef struct Record
 {
 	int num;
-	char *subject;
-	char *body;
-	char *time;
+	char *subject; 
+	char *body; 
+	char *time; 
 	struct Record *next;
 	struct Record *prev;
 }Record;

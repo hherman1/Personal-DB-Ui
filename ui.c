@@ -4,6 +4,7 @@
 #include "bindings.h"
 
 int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
+
 	int redraw = FALSE;
 	if(DEBUG && c == 'r') {
 		message("refreshed | botom: %i | (*hovered)->prev:%p",(*activeBuffer)->bottom->num,(*hovered)->prev);
@@ -12,7 +13,9 @@ int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 	if(DEBUG && c == 'p') {
 		DUMP = TRUE;
 		redraw = TRUE;
-		message("CORE DUMP: ");
+	}
+	if(DUMP) {
+		message("%p<-[[%p]]->%p",(*activeBuffer)->top->prev,(*activeBuffer)->top,(*activeBuffer)->top->next);
 	}
 	if (c == KEY_ENTER) {
 		selectRecord(*(*hovered),*(*activeBuffer));
@@ -34,9 +37,10 @@ int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 			(*hovered) = (*activeBuffer)->top;
 		}else if((*hovered)->prev) {
 			(*hovered) = (*hovered)->prev;
-		}
+		}		
 		redraw = TRUE;
 	}
+
 	return redraw;
 }
 int modeCheck(int c,int recordSelected,int *cursorLeft,char **cursorArea, char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
