@@ -43,23 +43,49 @@ int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 
 	return redraw;
 }
+
+void edit(char *str,int maxLength,Cursor *cursor,char c) {
+	if(c == KEY_LEFT){
+		if(cursor->x > 0) cursor->x--;
+	}
+	if (c == KEY_RIGHT){
+		if(cursor->x <maxLength)
+			cursor->x++;
+	}
+	if (c==KEY_BACKSPACE) {
+		str[cursor->x-1] = (str[cursor->x] && str[cursor->x] != ' ')?' ':'\0';
+		cursor->x--;
+	}
+	//to do: check if c a letter
+	if(c >= ' ' && c <= '~') {
+		if(cursor->x <= maxLength) {	
+			str[cursor->x++] = c; 
+			if(cursor->x > maxLength) {
+				cursor->x = maxLength;
+			}
+		}
+	}
+
+}
+
 int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
 	int redraw = FALSE;
-	if(KEY_MODE_RECORDS(c) || KEY_MODE_ESCAPE(c)) {
-		redraw = check_record(cursorArea,hovered,activeBuffer,RLBuffer);
+	if(commandMode(*cursorArea)) {
+		if(KEY_MODE_RECORDS(c) || KEY_MODE_ESCAPE(c)) {
+			redraw = check_record(cursorArea,hovered,activeBuffer,RLBuffer);
+		}
+		else if (KEY_MODE_ADD(c)) {
+			redraw = init_add(cursorArea,cursor);
+		}
+		else if (KEY_MODE_SEARCH(c)){
+			redraw = init_search(subject,cursor,cursorArea);
+		}
+		else if (KEY_MODE_EDIT(c)) {
+			redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
+		} else if(KEY_MODE_DELETE(c)) {
+			redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
+		}
 	}
-	else if (KEY_MODE_ADD(c)) {
-		redraw = init_add(cursorArea,cursor);
-	}
-	else if (KEY_MODE_SEARCH(c)){
-		redraw = init_search(subject,cursor,cursorArea);
-	}
-	else if (KEY_MODE_EDIT(c)) {
-		redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
-	} else if(KEY_MODE_DELETE(c)) {
-		redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
-	}
-	printf("%i\n",redraw);
 	return redraw;
 }
 int check_record(int *cursorArea, Record **hovered,struct RecordList **activeBuffer,struct RecordList *RLBuffer) {
@@ -100,26 +126,6 @@ int init_delete(int recordSelected,int *cursorArea,Record *hovered,struct Record
 	message(UI_DELETE_CONFIRM,hovered->num);
 	return TRUE;
 }
-void edit(char *str,int maxLength,Cursor *cursor,char c) {
-	if(c == KEY_LEFT){
-		if(cursor->x > 0) cursor->x--;
-	}
-	if (c == KEY_RIGHT){
-		if(cursor->x <maxLength)
-			cursor->x++;
-	}
-	if (c==KEY_BACKSPACE) {
-		str[cursor->x-1] = (str[cursor->x] && str[cursor->x] != ' ')?' ':'\0';
-		cursor->x--;
-	}
-	//to do: check if c a letter
-	if(c >= ' ' && c <= '~') {
-		if(cursor->x <= maxLength) {	
-			str[cursor->x++] = c; 
-			if(cursor->x > maxLength) {
-				cursor->x = maxLength;
-			}
-		}
-	}
-
+int commandMode(int cursorArea) {
+	return UI_COMMANDABLE(cursorArea);
 }
