@@ -6,41 +6,42 @@
 int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 
 	int redraw = FALSE;
-	if(DEBUG && c == 'r') {
-		message("refreshed | botom: %i | (*hovered)->prev:%p",(*activeBuffer)->bottom->num,(*hovered)->prev);
-		redraw = TRUE; 
-	}
-	if(DEBUG && c == 'p') {
-		DUMP = TRUE;
-		redraw = TRUE;
-	}
-	if(DUMP) {
-		message("%p<-[[%p]]->%p",(*activeBuffer)->top->prev,(*activeBuffer)->top,(*activeBuffer)->top->next);
-	}
-	if (c == KEY_ENTER) {
-		selectRecord(*(*hovered),*(*activeBuffer));
-		redraw = TRUE;
-	}
-	if (c == KEY_DOWN) {
-		if ((*hovered) == (*activeBuffer)->bottom && (*activeBuffer)->lengthfrombot){
-			scrollDown((*activeBuffer));
-			(*hovered) = (*activeBuffer)->bottom;
-		}else if((*hovered)->next) {
-			(*hovered) = (*hovered)->next;
-			
+	if(*hovered) {
+		if(DEBUG && c == 'r') {
+			message("refreshed | botom: %i | (*hovered)->prev:%p",(*activeBuffer)->bottom->num,(*hovered)->prev);
+			redraw = TRUE; 
 		}
-		redraw = TRUE;
-	} 
-	if (c == KEY_UP) {
-		if((*hovered) == (*activeBuffer)->top && (*hovered)->num - 1) {
-			scrollUp((*activeBuffer));
-			(*hovered) = (*activeBuffer)->top;
-		}else if((*hovered)->prev) {
-			(*hovered) = (*hovered)->prev;
-		}		
-		redraw = TRUE;
+		if(DEBUG && c == 'p') {
+			DUMP = TRUE;
+			redraw = TRUE;
+		}
+		if(DUMP) {
+			message("%p<-[[%p]]->%p",(*activeBuffer)->top->prev,(*activeBuffer)->top,(*activeBuffer)->top->next);
+		}
+		if (c == KEY_ENTER) {
+			selectRecord(*(*hovered),*(*activeBuffer));
+			redraw = TRUE;
+		}
+		if (c == KEY_DOWN) {
+			if ((*hovered) == (*activeBuffer)->bottom && (*activeBuffer)->lengthfrombot){
+				scrollDown((*activeBuffer));
+				(*hovered) = (*activeBuffer)->bottom;
+			}else if((*hovered)->next) {
+				(*hovered) = (*hovered)->next;
+				
+			}
+			redraw = TRUE;
+		} 
+		if (c == KEY_UP) {
+			if((*hovered) == (*activeBuffer)->top && (*hovered)->num - 1) {
+				scrollUp((*activeBuffer));
+				(*hovered) = (*activeBuffer)->top;
+			}else if((*hovered)->prev) {
+				(*hovered) = (*hovered)->prev;
+			}		
+			redraw = TRUE;
+		}
 	}
-
 	return redraw;
 }
 
@@ -123,7 +124,7 @@ int init_delete(int recordSelected,int *cursorArea,Record *hovered,struct Record
 	if(hovered->num != recordSelected) {
 		selectRecord(*hovered,*activeBuffer);
 	}
-	message(UI_DELETE_CONFIRM,hovered->num);
+	//message(UI_DELETE_CONFIRM,hovered->num);
 	return TRUE;
 }
 int commandMode(int cursorArea) {

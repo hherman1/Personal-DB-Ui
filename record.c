@@ -78,7 +78,6 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 			if(current->num == recordSelected){
 				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
 				availableSpace -= openSpace;
-				message("selected//");
 				if(current->num == hovered.num) {
 					while(availableSpace <= 0) {
 						buffer->top =nextRecord(buffer->top);
@@ -108,7 +107,6 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 				buffer->top = previousRecord(buffer->top);
 				current = current->next;
 			} else {
-				message("end of buffer");
 				break;
 			}
 			//buffer->bottom = current;
@@ -118,7 +116,6 @@ Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea
 			buffer->lengthfrombot++;
 		}
 		buffer->bottom = ans;
-		message("|%i;[%i]",current->num,buffer->lengthfrombot);
 	}
 
 
@@ -136,7 +133,6 @@ int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
 			if(current->num == recordSelected){
 				int openSpace = requiredSpace(*current,rArea.right - rArea.left);
 				availableSpace -= openSpace;
-				message("selected//");
 				if(current->num == r->num) {
 					while(availableSpace <= 0) {
 						buffer->top =nextRecord(buffer->top);
@@ -169,7 +165,6 @@ int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
 				buffer->top = previousRecord(buffer->top);
 				current = current->next;
 			} else {
-				message("end of buffer");
 				break;
 			}
 			//buffer->bottom = current;
@@ -181,7 +176,6 @@ int getRecordY(Record *r, struct RecordList *buffer,Area rArea) {
 			buffer->lengthfrombot++;
 		}
 		buffer->bottom = temp;
-		message("|%i;[%i]",current->num,buffer->lengthfrombot);
 
 	}
 	return ans;
@@ -290,7 +284,7 @@ void mapPrevwards(int n, Record *r) {
 //-------------------DELETE------------------------------------------------------------------------------------------------------------------
 void removeRecordFromBuffer(Record *r, struct RecordList *buffer) {
 	if(buffer->top == r) buffer->top = buffer->top->next;
-	if(buffer->bottom == r) buffer->bottom = buffer->top->prev;
+	if(buffer->bottom == r) buffer->bottom = buffer->bottom->prev;
 	removeRecord(r);
 }
 void removeRecord(Record *r) {
@@ -322,7 +316,6 @@ void freeRecord(Record *target) {
 		target->next->prev = target->prev;
 	}
 	
-	message("%i\n",target->num);
 	free(target);
 }
 //-------------------add------------------------------------------------------------------------------------------------------------------

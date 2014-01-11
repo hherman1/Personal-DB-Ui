@@ -67,15 +67,18 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 	
 	activeBuffer = &RLBuffer;
-	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
+	if(nitems) {
+		loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
 
-	if(nitems && RLBuffer.top) {
-		RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
-		//ParseSearch("te",&searchBuffer);
-		//ParseSearch("hun",activeBuffer);
-		hovered = RLBuffer.top;
-		draw();
+			 if( RLBuffer.top) {
+				RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
+				//ParseSearch("te",&searchBuffer);
+				//ParseSearch("hun",activeBuffer);
+				hovered = RLBuffer.top;
+			}
 	}
+	draw();
+
 	while (TRUE) {
 
 		int redraw = FALSE;
@@ -174,6 +177,10 @@ int main(void) {
 			}
 			redraw = TRUE;
 		}
+		else if (cursorArea == UI_AREA_DELETE) {
+			deleteRecord(hovered,activeBuffer);
+			cursorArea = UI_AREA_RECORDS;
+		}
 		
 		if(redraw)
 			draw();
@@ -213,11 +220,16 @@ void draw() {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
-	if(nitems && activeBuffer->top) {
-		if(hovered) {
-			displayRecords(*hovered,activeBuffer,rArea);
-		} else {
+	if(nitems) {
+		if(!RLBuffer.top){
+			loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
+			RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
+		} 
+		if(!hovered) {
 			hovered = activeBuffer->top;
+		}
+		if(activeBuffer->top) {
+			displayRecords(*hovered,activeBuffer,rArea);			
 		}
 	}
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
@@ -228,13 +240,8 @@ void draw() {
 
 // ------------------------------------ fill --------------------------------
 void fill(char *s, int n, char c) {
-	printf("[Done%s]\n",s);
 	while (n--) *s++=c;
 	*s='\0';		
-	printf("Done%s\n",s);
-
-	printf("Done%s\n",s);
-
 }
 
 
@@ -334,9 +341,14 @@ void editRecord(int num,char *subject, char* body){
 void deleteRecord(Record *r, struct RecordList *buffer) {
 	deleteRecordMystore(r->num);
 	removeRecordFromBuffer(r,buffer);
+	nitems--;
 }
 void deleteRecordMystore(int num) {
-	ReadMystoreFromChild("delete",num,NULL,NULL);
+	char numS[10];
+	snprintf(numS,10,"%i",num);
+	int p = ReadMystoreFromChild("delete",numS,NULL,NULL);
+	ParseInput(input,n_input);
+	message("%i",p);
 }
 //------------------------ errors -----------------------------------------
 void message(char *msg, ...) {
