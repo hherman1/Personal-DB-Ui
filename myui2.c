@@ -67,9 +67,9 @@ int main(void) {
 	nitems = atoi(searchNvs("nitems"));
 	
 	activeBuffer = &RLBuffer;
+	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
 
 	if(nitems && RLBuffer.top) {
-		loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
 		RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
 		//ParseSearch("te",&searchBuffer);
 		//ParseSearch("hun",activeBuffer);
@@ -322,13 +322,21 @@ void addRecord(char *subject, char* body){
 	ReadMystoreFromChild("add",subject,body,NULL);
 	ParseRecord(++nitems);
 }
-//------------------------ editing----------------------------------------
+//------------------------ editing ---------------------------------------
 void editRecord(int num,char *subject, char* body){
 	char sNum[15];
 	sNum[14] = '\0';
 	sprintf(sNum,"%d",num);
 	ReadMystoreFromChild("edit",sNum,subject,body);
 	//ParseRecord(nitems);
+}
+//------------------------ deleting ---------------------------------------
+void deleteRecord(Record *r, struct RecordList *buffer) {
+	deleteRecordMystore(r->num);
+	removeRecordFromBuffer(r,buffer);
+}
+void deleteRecordMystore(int num) {
+	ReadMystoreFromChild("delete",num,NULL,NULL);
 }
 //------------------------ errors -----------------------------------------
 void message(char *msg, ...) {

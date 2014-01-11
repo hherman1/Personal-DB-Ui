@@ -268,13 +268,39 @@ Record *findRecord(struct RecordList *buffer,int num) {
 	}
 	return cur;
 }
-void freeBuffer(struct RecordList *buffer) {
-	while(buffer->top) {
-		printf("%i. %s [%p]",buffer->top->num,buffer->top->subject,buffer->top);
-		Record *next = buffer->top->next;
-		freeRecord(buffer->top);
-		buffer->top = next;
+//-------------------Map------------------------------------------------------------------------------------------------------------------
+
+void mapNum(int n, struct RecordList *buffer) {
+	mapNextwards(n,buffer->top->next);
+	mapPrevwards(n,buffer->top->prev);
+	buffer->top->num += n;
+}
+void mapNextwards(int n, Record *r) {
+	while(r) {
+		r->num += n;
+		r = r->next;
 	}
+}
+void mapPrevwards(int n, Record *r) {
+	while(r) {
+		r->num += n;
+		r = r->next;
+	}
+}
+//-------------------DELETE------------------------------------------------------------------------------------------------------------------
+void removeRecordFromBuffer(Record *r, struct RecordList *buffer) {
+	if(buffer->top == r) buffer->top = buffer->top->next;
+	if(buffer->bottom == r) buffer->bottom = buffer->top->prev;
+	removeRecord(r);
+}
+void removeRecord(Record *r) {
+	mapNextwards(-1,r);
+	freeRecord(r);
+}
+void freeBuffer(struct RecordList *buffer) {
+	while(buffer->top->next) freeRecord(buffer->top->next);
+	while(buffer->top->prev) freeRecord(buffer->top->prev);
+	freeRecord(buffer->top);
 	buffer->top = NULL;
 	buffer->bottom = NULL;
 }
@@ -299,6 +325,8 @@ void freeRecord(Record *target) {
 	message("%i\n",target->num);
 	free(target);
 }
+//-------------------add------------------------------------------------------------------------------------------------------------------
+
 void bufferRecord(struct RecordList *buffer,Record *r) {
 	if(r == NULL) {
 		printf("ERROR: Record does not exist\n");

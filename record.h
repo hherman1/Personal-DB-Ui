@@ -43,7 +43,18 @@ void loadRecords(struct RecordList *buffer,int low,int high,int number);
 
 //located in myui2.c
 void ParseSearch(char *search, struct RecordList *sBuffer);
+void deleteRecord(Record *r, struct RecordList *buffer);
+void deleteRecordMystore(int num);
+
 /////
+
+void mapNum(int n, struct RecordList *buffer);
+void mapPrevwards(int n, Record *r);
+void mapNextwards(int n, Record *r);
+
+void removeRecordFromBuffer(Record *r, struct RecordList *buffer);
+void removeRecord(Record *r);
+
 
 
 Record *getRecord(int n);
