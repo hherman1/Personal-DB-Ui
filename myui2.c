@@ -66,21 +66,21 @@ int main(void) {
 	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
 	
-
-	loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
-	RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
-	//ParseSearch("te",&searchBuffer);
 	activeBuffer = &RLBuffer;
-	//ParseSearch("hun",activeBuffer);
-	hovered = RLBuffer.top;
 
-	draw();
+	if(nitems && RLBuffer.top) {
+		loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
+		RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
+		//ParseSearch("te",&searchBuffer);
+		//ParseSearch("hun",activeBuffer);
+		hovered = RLBuffer.top;
+		draw();
+	}
 	while (TRUE) {
 
 		int redraw = FALSE;
 		DUMP = FALSE;
 		while ((c = getkey()) == KEY_NOTHING) ;
-		printf("assert");
 
 		redraw = TRUE;
 
@@ -213,12 +213,13 @@ void draw() {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
 	//buffer
-
-	if(hovered) {
-		displayRecords(*hovered,activeBuffer,rArea);
+	if(nitems && activeBuffer->top) {
+		if(hovered) {
+			displayRecords(*hovered,activeBuffer,rArea);
+		} else {
+			hovered = activeBuffer->top;
+		}
 	}
-		assert(*(activeBuffer->top->body));
-
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 	
@@ -232,8 +233,6 @@ void fill(char *s, int n, char c) {
 	*s='\0';		
 	printf("Done%s\n",s);
 
-	if(activeBuffer && activeBuffer->top && activeBuffer->top->body)
-		assert(*(activeBuffer->top->body));
 	printf("Done%s\n",s);
 
 }
@@ -253,12 +252,12 @@ void ParseRecord(int numRec){
 void ParseSearch(char *search,struct RecordList *sBuffer) {
 	ReadMystoreFromChild("search",search,NULL,NULL);
 	ParseInput(input,n_input);
-	int len = 0;
+	struct NameValue *startPos = nvs;
 	while(n_nvs) {
-		len++;
 		Record *result = popRecord();
 		bufferRecord(sBuffer,result);
 	}
+	nvs = startPos;
 	sBuffer->lengthfrombot = 0;
 }
 // --------------------------- searching-----------------------------------
