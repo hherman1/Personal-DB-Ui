@@ -14,6 +14,7 @@ Area SCREEN = {1,120,1,55,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
 Area newBodyArea = {12,120,45,47,"",TRUE};
 
+int colorScheme = R_COLOR_SCHEME_SELECTED;
 
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
@@ -106,12 +107,12 @@ int main(void) {
 				redraw = TRUE;
 			}
 			redraw = scroll(&hovered,&activeBuffer,c) || redraw;
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 
 		}
 		else if (cursorArea == UI_AREA_ADD_SUBJECT || cursorArea == UI_AREA_ADD_BODY){
 			cursor.y = newSubjectArea.top + (cursorArea - UI_AREA_ADD_SUBJECT);
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (cursorArea == UI_AREA_ADD_SUBJECT){
 				if (c == KEY_ENTER){
 					cursorArea = UI_AREA_ADD_BODY;
@@ -137,7 +138,7 @@ int main(void) {
 			}
 			redraw = TRUE;
 		} else if (cursorArea == UI_AREA_SEARCH) {
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (c == KEY_ENTER){
 				cursorArea = UI_AREA_RECORDS;
 				if(searchBuffer.top) freeBuffer(&searchBuffer);
@@ -156,7 +157,7 @@ int main(void) {
 		}
 
 		else if (cursorArea == UI_AREA_EDIT_SUBJECT || cursorArea == UI_AREA_EDIT_BODY){
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (cursorArea == UI_AREA_EDIT_SUBJECT){
 				if(c == KEY_ENTER) {
 					cursorArea = UI_AREA_EDIT_BODY;
@@ -178,8 +179,21 @@ int main(void) {
 			redraw = TRUE;
 		}
 		else if (cursorArea == UI_AREA_DELETE) {
-			deleteRecord(hovered,activeBuffer);
-			cursorArea = UI_AREA_RECORDS;
+			if(KEY_MODE_DELETE_CONFIRM(c)) {
+				if(activeBuffer != &RLBuffer) {
+					Record *RLhovered = findRecord(RLBuffer,hovered->num);
+					if(RLhovered) removeRecordFromBuffer(hovered,&RLBuffer);
+				}
+				deleteRecord(hovered,activeBuffer);
+				hovered = activeBuffer->top;
+				cursorArea = UI_AREA_RECORDS;
+				colorScheme = R_COLOR_SCHEME_SELECTED;				
+			} else if (KEY_MODE_DELETE_DENY(c)) {
+				cursorArea = UI_AREA_RECORDS;
+				colorScheme = R_COLOR_SCHEME_SELECTED;				
+			} else {
+				message(UI_DELETE_CONFIRM(hovered));
+			}
 		}
 		
 		if(redraw)
@@ -229,7 +243,7 @@ void draw() {
 			hovered = activeBuffer->top;
 		}
 		if(activeBuffer->top) {
-			displayRecords(*hovered,activeBuffer,rArea);			
+			displayRecords(*hovered,activeBuffer,rArea,colorScheme);			
 		}
 	}
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
@@ -348,7 +362,6 @@ void deleteRecordMystore(int num) {
 	snprintf(numS,10,"%i",num);
 	int p = ReadMystoreFromChild("delete",numS,NULL,NULL);
 	ParseInput(input,n_input);
-	message("%i",p);
 }
 //------------------------ errors -----------------------------------------
 void message(char *msg, ...) {

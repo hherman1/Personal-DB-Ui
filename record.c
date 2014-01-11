@@ -5,47 +5,80 @@ extern int n_nvs;
 
 int recordSelected = 2;
 //--------------------------Display----------------------------
-void displayRecords(Record hovered,struct RecordList *buffer,Area rArea) {
+void displayRecords(Record hovered,struct RecordList *buffer,Area rArea,int colorScheme) {
 
 	Record *bot = adjustBufferForArea(hovered,buffer,rArea);
-	printViewBuffer(hovered,buffer,rArea);
+	printViewBuffer(hovered,buffer,rArea,colorScheme);
 
 }
-void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
+void setColor(int colorScheme) {
+
+	if(colorScheme == R_COLOR_SCHEME_DEFAULT) {
+		xt_par0(XT_CH_NORMAL);
+		xt_par0(XT_BG_DEFAULT);
+		xt_par0(XT_CH_DEFAULT);
+	} else if(colorScheme == R_COLOR_SCHEME_TEXT) {
+		xt_par0(R_TEXT_COLOR);
+	} else if (colorScheme == R_COLOR_SCHEME_HOVERED) {
+		xt_par0(R_HOVERED_BG_COLOR);
+		xt_par0(R_HOVERED_TEXT_COLOR);		
+	} else if (colorScheme == R_COLOR_SCHEME_SELECTED) {	
+
+		xt_par0(R_SELECTED_TEXT_STYLE);
+		xt_par0(R_SELECTED_BG_COLOR);
+		xt_par0(R_SELECTED_TEXT_COLOR);
+
+	} else if (colorScheme == R_COLOR_SCHEME_SELECTED_BODY) {		
+		xt_par0(R_SELECTED_BODY_STYLE);
+		xt_par0(R_SELECTED_BG_COLOR);
+		xt_par0(R_SELECTED_BODY_COLOR);
+	} else if (colorScheme == R_COLOR_SCHEME_SELECTED_HOVERED) {
+		setColor(R_COLOR_SCHEME_SELECTED);
+		xt_par0(R_SELECTED_HOVERED_TEXT_COLOR);
+	} else if (colorScheme == R_COLOR_SCHEME_DELETE) {
+		xt_par0(R_DELETE_TEXT_STYLE);
+		xt_par0(R_DELETE_BG_COLOR);
+		xt_par0(R_DELETE_TEXT_COLOR);
+	} else if (colorScheme == R_COLOR_SCHEME_DELETE_BODY) {
+		xt_par0(R_DELETE_BODY_STYLE);		
+		xt_par0(R_DELETE_TEXT_COLOR);
+		xt_par0(R_DELETE_BG_COLOR);
+	} else if (colorScheme == R_COLOR_SCHEME_DELETE_HOVERED) {
+		setColor(R_COLOR_SCHEME_DELETE);
+	}
+}
+void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,int colorScheme) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
-	char *color = NULL;
+	char *color = "";
 	Record *temp = buffer->top;			
 	while(temp && temp->num <= buffer->bottom->num){
 
-		color = R_TEXT_COLOR;
+		//color = R_TEXT_COLOR;
+		setColor(R_COLOR_SCHEME_TEXT);
 		int row = i + rArea.top;
 		char numString[RECORD_NUM_SPACE+1];
 		numString[RECORD_NUM_SPACE] = '\0';
 		snprintf(numString,RECORD_NUM_SPACE,"%i.",temp->num);
+
 		if(temp->num == hovered.num) {
-			xt_par0(R_HOVERED_BG_COLOR);
-			color = R_HOVERED_TEXT_COLOR;
+			setColor(R_COLOR_SCHEME_HOVERED);
 		}	
 
 		if(temp->num == recordSelected) {
-			xt_par0(R_SELECTED_BG_COLOR);
-			xt_par0(R_SELECTED_TEXT_STYLE);
-			color = R_SELECTED_TEXT_COLOR;
+			setColor(colorScheme);
 			if(temp->num == hovered.num) {
-				color = R_SELECTED_HOVERED_TEXT_COLOR;
+				setColor(colorScheme+1);
 			}
 			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,numString);
 			DisplayAt(row,rArea.left+RECORD_NUM_SPACE,color,MAX_SUBJECT_LEN,temp->subject);
 			DisplayAt(row,rArea.right-MAX_TIME_LEN,color,MAX_TIME_LEN,temp->time);
 			int spaceNeeded = requiredSpace(*temp,width);//strlen(sTemp) / width + 1;
 			i += spaceNeeded;
-				xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
-				xt_par0(R_SELECTED_BODY_STYLE);
-				xt_par0(R_SELECTED_BG_COLOR);
-				xt_par0(R_SELECTED_BODY_COLOR);
-				wrapText(RECORD_NUM_SPACE,width,temp->body);
-			xt_par0(XT_CH_NORMAL);
+
+			xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
+			setColor(colorScheme+2);
+			wrapText(RECORD_NUM_SPACE,width,temp->body);
 		}
 		else if(row <= rArea.bot) {
 			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,numString);
@@ -55,7 +88,7 @@ void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea) {
 
 
 		temp = temp->next;
-		xt_par0(XT_BG_DEFAULT);
+		setColor(R_COLOR_SCHEME_DEFAULT);
 		i++;	
 
 
@@ -253,14 +286,18 @@ Record *popRecord() {
 	}
 	return ans;
 }
-Record *findRecord(struct RecordList *buffer,int num) {
-	Record *cur = buffer->top;
-	while(cur->num != num && (cur = cur->next) && cur != NULL);
-	if(cur == NULL) {
-		printf("ERROR: Record #%i could not be found in the buffer starting at %i and ending at %i\n",num,buffer->top->num,buffer->bottom->num);
-		exit(EXIT_FAILURE);
+Record *findRecord(struct RecordList buffer,int num) {
+	Record *curL = buffer.top;
+	Record *curR = buffer.top;
+	while(curL = curL->prev) {
+		if(curL->num == num)
+			return curL;
 	}
-	return cur;
+	while(curR = curR->next) {
+		if(curR->num == num)
+			return curR;
+	}
+	return NULL;
 }
 //-------------------Map------------------------------------------------------------------------------------------------------------------
 

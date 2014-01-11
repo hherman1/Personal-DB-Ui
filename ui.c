@@ -69,7 +69,7 @@ void edit(char *str,int maxLength,Cursor *cursor,char c) {
 
 }
 
-int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
+int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, int *colorScheme,char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
 	int redraw = FALSE;
 	if(commandMode(*cursorArea)) {
 		if(KEY_MODE_RECORDS(c) || KEY_MODE_ESCAPE(c)) {
@@ -84,7 +84,7 @@ int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, char *su
 		else if (KEY_MODE_EDIT(c)) {
 			redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
 		} else if(KEY_MODE_DELETE(c)) {
-			redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
+			redraw = init_delete(recordSelected,cursorArea,colorScheme,*hovered,*activeBuffer);
 		}
 	}
 	return redraw;
@@ -119,12 +119,13 @@ int init_edit(int recordSelected,int *cursorLeft,int *cursorArea, Cursor *cursor
 	cursor->y = getRecordY(hovered,activeBuffer,rArea);
 	return TRUE;
 }
-int init_delete(int recordSelected,int *cursorArea,Record *hovered,struct RecordList *activeBuffer) {
+int init_delete(int recordSelected,int *cursorArea,int *colorScheme,Record *hovered,struct RecordList *activeBuffer) {
 	*cursorArea = UI_AREA_DELETE;
+	*colorScheme = R_COLOR_SCHEME_DELETE;
 	if(hovered->num != recordSelected) {
 		selectRecord(*hovered,*activeBuffer);
 	}
-	//message(UI_DELETE_CONFIRM,hovered->num);
+	message(UI_DELETE_CONFIRM(hovered));
 	return TRUE;
 }
 int commandMode(int cursorArea) {
