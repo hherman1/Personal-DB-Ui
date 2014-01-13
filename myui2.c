@@ -14,6 +14,7 @@ Area SCREEN = {1,120,1,55,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
 Area newBodyArea = {12,120,45,47,"",TRUE};
 
+struct winsize window;
 
 struct TemplateString TS[] = {
 	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
@@ -55,6 +56,12 @@ int boolShowCurrentRecord = FALSE;
 // ------------------------------------------------ main --------------------
 int main(void) {
 	int c;
+	
+	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
+	
+	rArea.right = window.ws_col - rArea.left;
+	rArea.bot = window.ws_row - rArea.top;
+
 	
 	fill(subject,30,'\0');
 	fill(body,140,'\0');

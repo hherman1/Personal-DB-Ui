@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <stdarg.h>
 
+#include <sys/ioctl.h>
+
 #include "xterm_control.h"
 #include "keyboard.h"
 
