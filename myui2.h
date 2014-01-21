@@ -58,6 +58,9 @@ typedef struct Cursor
 } Cursor;
 
 int DUMP;
+
+//resizing
+Area windowToArea(struct winsize window);
 // Prototypes -------------------------------------
 int ParseInput(char *in, int n_in);
 int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4);

@@ -2,7 +2,38 @@
 #include "ui.h"
 #include "record.h"
 #include "bindings.h"
+#include "color.h"
 
+//display functions
+void displayUIElement(Area window,struct displayText ui) {
+	int row = 0;
+	int col = 0;
+	int len = strlen(ui.text);
+
+	if(ui.verticalMargin > 0) {
+		row = window.top + ui.verticalMargin;
+	} else if (ui.verticalMargin < 0) {
+		row = window.bot + ui.verticalMargin;
+	}
+
+	if(ui.alignment == TEXT_ALIGN_LEFT) {
+		col = 1;
+	} else if (ui.alignment == TEXT_ALIGN_CENTER) {
+		col = (window.right - window.left - len) / 2;
+	} else if (ui.alignment == TEXT_ALIGN_RIGHT) {
+		col = window.right - len;
+	}
+
+	xt_par2(XT_SET_ROW_COL_POS,row,col);
+	xt_par0(ui.color);
+	printf(ui.text);
+}
+
+void displayModeBar(int recordArea,int nModes, char **modes, Area window) {
+
+}
+
+//Mode Functions
 int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 
 	int redraw = FALSE;

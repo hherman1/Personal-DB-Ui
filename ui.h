@@ -12,6 +12,24 @@
 
 #define UI_DELETE_CONFIRM(r) "Are you sure you want to delete record %i, %s? [y/N]",r->num,r->subject
 
+
+#define TEXT_ALIGN_LEFT 0
+#define TEXT_ALIGN_CENTER 1
+#define TEXT_ALIGN_RIGHT 2
+
+struct displayText {
+	int verticalMargin;
+	int alignment;
+	char *color;
+	char *text;
+};
+
+
+//display functions
+void displayUIElement(Area window,struct displayText ui);
+
+//mode functions
+
 void edit(char *str,int maxLength,Cursor *cursor,char c);
 int scroll(Record **hovered, struct RecordList **activeBuffer,char c);
 

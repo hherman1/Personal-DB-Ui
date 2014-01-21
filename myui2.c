@@ -2,7 +2,7 @@
 #include "record.h"
 #include "ui.h"
 #include "bindings.h"
-
+#include "color.h"
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
 extern int recordSelected;
@@ -16,19 +16,22 @@ Area newBodyArea = {12,120,45,47,"",TRUE};
 
 int colorScheme = R_COLOR_SCHEME_SELECTED;
 struct winsize window;
-
-struct TemplateString TS[] = {
-	{1,1,XT_CH_CYAN,"dbname | Max Cards cards | 					FutureDiary				(c) Hunter Herman & Tian Ci Lin"},
-	{2,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{3,32,XT_CH_YELLOW,"S: Search	[R: Read]	A: Add		H: Help"},
-	{5,1,XT_CH_YELLOW,"Search:"},
-	{44,1,XT_CH_YELLOW,"new Subject: "},																				
-	{45,1,XT_CH_YELLOW,"new Body: "},
-	{48,1,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
-	{49,1,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"}//,
-	//{50,1,XT_CH_GREEN,"Message: nitems = "}
+Area windowArea;
+struct displayText UI[] = {
+	{1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"dbname | MAX CARDS: %i|"},
+//	{2,TEXT_ALIGN_LEFT,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
+	{3,TEXT_ALIGN_CENTER,XT_CH_YELLOW,"S: Search 	R: Read		A: Add		H: Help"},
+	{5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"Search:"},
+	{-6,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
+	{-5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
+	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
+//	{-1,TEXT_ALIGN_LEFT,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"}//,
 };
-int nTS = sizeof(TS)/sizeof(TS[0]);
+int nUI = sizeof(UI)/sizeof(UI[0]);
+/*struct TemplateString TS[] = {
+	//{50,1,XT_CH_GREEN,"Message: nitems = "}
+};*/
+//int nTS = sizeof(TS)/sizeof(TS[0]);
 
 struct StringPosition SP[] = {
 	{4,10,70,"message"},
@@ -61,7 +64,8 @@ int main(void) {
 	int c;
 	
 	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
-	
+	windowArea = windowToArea(window);
+
 	rArea.right = window.ws_col - rArea.left;
 	rArea.bot = window.ws_row - rArea.top;
 
@@ -216,13 +220,18 @@ void draw() {
 
 	int i = 0;
 	xt_par0(XT_CLEAR_SCREEN);
+	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
+	windowArea = windowToArea(window);
 	
 	// display template
- 	for (i = 0; i < nTS; ++i) {
+ /*	for (i = 0; i < nTS; ++i) {
 		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
 		xt_par0(XT_CH_DEFAULT);
 		xt_par0(TS[i].color);
 		printf("%s",TS[i].string);
+	}*/
+	for (i = 0; i < nUI; ++i) {
+		displayUIElement(windowArea,UI[i]);
 	}
 	//perform operations on stat
 	ParseStat();
@@ -253,6 +262,7 @@ void draw() {
 			displayRecords(*hovered,activeBuffer,rArea,colorScheme);			
 		}
 	}
+	message("test");
 	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 	
@@ -378,4 +388,13 @@ void message(char *msg, ...) {
 	va_start(args,msg);
 	vsnprintf(errmsg + ERROR_MESSAGE_BUFFER_LENGTH - max,max,msg,args);
 	va_end(args);
+}
+//------------------------ resizing ---------------------------------------
+Area windowToArea(struct winsize window) {
+	Area ans;
+	ans.top = 1;
+	ans.left = 1;
+	ans.bot = window.ws_row;
+	ans.right = window.ws_col;
+	return ans;
 }
