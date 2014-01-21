@@ -14,6 +14,7 @@ Area SCREEN = {1,120,1,55,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
 Area newBodyArea = {12,120,45,47,"",TRUE};
 
+int colorScheme = R_COLOR_SCHEME_SELECTED;
 struct winsize window;
 
 struct TemplateString TS[] = {
