@@ -5,10 +5,13 @@
 #include "color.h"
 
 //display functions
-void displayUIElement(Area window,struct displayText ui) {
+void displayUIElement(Area window,struct displayText ui, ...) {
 	int row = 0;
 	int col = 0;
 	int len = strlen(ui.text);
+	va_list args;
+	va_start(args,ui);
+
 
 	if(ui.verticalMargin > 0) {
 		row = window.top + ui.verticalMargin;
@@ -26,12 +29,52 @@ void displayUIElement(Area window,struct displayText ui) {
 
 	xt_par2(XT_SET_ROW_COL_POS,row,col);
 	xt_par0(ui.color);
-	printf(ui.text);
+	vprintf(ui.text,args);
+	va_end(args);
 }
 
-void displayModeBar(int recordArea,int nModes, char **modes, Area window) {
+void displayModeBar(int cursorArea,Area window,struct modeBar modeBar){
+	int i = 0;
+	int totalLength = 2;
+	int col = window.top;
+	int row = window.left;
+	for(i = 0; i < modeBar.nModes;i++) {
+		totalLength += strlen(modeBar.modes[i].text);
+		totalLength += 2;
+	}
+	col = (window.right - totalLength) / 2;
+	if(col < window.left) {
+		col = window.left;
+	}
+	if(modeBar.verticalMargin > 0) {
+		row = window.top + modeBar.verticalMargin;
+	} else if (modeBar.verticalMargin < 0) {
+		row = window.bot + modeBar.verticalMargin;
+	}
 
+	xt_par2(XT_SET_ROW_COL_POS,row,col);
+
+	for(i = 0; i < modeBar.nModes;i++) {
+		if(isMode(cursorArea,modeBar.modes[i])) {
+			setColor(UI_COLOR_SCHEME_MODE_BAR_SELECTED);
+			printf(" [%s] ",modeBar.modes[i].text);
+		} else {
+			setColor(UI_COLOR_SCHEME_MODE_BAR);
+			printf(" %s ",modeBar.modes[i].text);
+		}
+	}
 }
+int isMode(int mode,struct modeText mt) {
+	int ans = 0;
+	int i = 0;
+	for(i = 0;i < mt.nModes;i++) {
+		if(mt.mode[i] == mode) {
+			ans = 1;
+		}
+	}
+	return ans;
+}
+
 
 //Mode Functions
 int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {

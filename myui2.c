@@ -10,34 +10,43 @@ char input[1000];
 int n_input=0;	// number of chars in the input, not including terminating NULL-byte
 
 Area rArea = {1,120,7,7 + MAX_RECORDS_TO_DISPLAY - 1,"",TRUE};
-Area SCREEN = {1,120,1,55,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
 Area newBodyArea = {12,120,45,47,"",TRUE};
 
 int colorScheme = R_COLOR_SCHEME_SELECTED;
 struct winsize window;
 Area windowArea;
+
+
+//
+struct displayText DBInfo = {
+	1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"mystore.dat | MAX CARDS: %i"
+};
+
 struct displayText UI[] = {
-	{1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"dbname | MAX CARDS: %i|"},
-//	{2,TEXT_ALIGN_LEFT,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"},
-	{3,TEXT_ALIGN_CENTER,XT_CH_YELLOW,"S: Search 	R: Read		A: Add		H: Help"},
 	{5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"Search:"},
 	{-6,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
 	{-5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
 	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
-//	{-1,TEXT_ALIGN_LEFT,XT_CH_WHITE,"--------------------------------------------------------------------------------------------------------------------------------"}//,
 };
 int nUI = sizeof(UI)/sizeof(UI[0]);
-/*struct TemplateString TS[] = {
-	//{50,1,XT_CH_GREEN,"Message: nitems = "}
-};*/
-//int nTS = sizeof(TS)/sizeof(TS[0]);
+///
 
-struct StringPosition SP[] = {
-	{4,10,70,"message"},
-	{50,25,3,"nitems"}
+
+///
+struct modeText UIModes[] = {
+	{(int[1]){UI_AREA_SEARCH},1,"s: Search"},
+	{(int[2]){UI_AREA_ADD_SUBJECT,UI_AREA_ADD_BODY},2,"a: Add"},
+	{(int[2]){UI_AREA_EDIT_SUBJECT,UI_AREA_EDIT_BODY},2,"e: Edit"},
+	{(int[1]){UI_AREA_DELETE},1,"d: Delete"}
 };
-int nSP = sizeof(SP)/sizeof(SP[0]);
+int nUIModes = sizeof(UIModes)/sizeof(UIModes[0]);
+
+struct modeBar UIModeBar;
+//
+
+
+
 
 struct RecordList searchBuffer;
 struct RecordList RLBuffer;
@@ -46,17 +55,34 @@ struct RecordList *activeBuffer;
 
 Record *hovered = NULL;
 
+
 int nitems = 0;  //numRecords
+
+
+
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 char body[MAX_BODY_LEN+1];
-char errmsg[ERROR_MESSAGE_BUFFER_LENGTH+1];
 
-int cursorArea =UI_AREA_RECORDS; // what are the cursor is at
- 				//title, record,addSubject, message, ....
-Cursor cursor = {0,0};
-int cursorLeft = 0;
-int boolShowCurrentRecord = FALSE;
-void debug(struct RecordList *buffer) {
+
+
+
+char errmsg[ERROR_MESSAGE_BUFFER_LENGTH+1]; // message at bottom
+struct displayText UIMessage = {
+	-3,TEXT_ALIGN_LEFT,XT_CH_DEFAULT,errmsg
+};
+
+
+int cursorArea =UI_AREA_RECORDS; // what are the cursor is at //title, record,addSubject, message, ....
+
+
+
+Cursor cursor = {0,0}; //the cursor
+
+int cursorLeft = 0; //ridiculous hack but saves a lot of time from proper code
+
+
+
+void debug(struct RecordList *buffer) { // worthless function for debug purposes
 	return;
 }
 // ------------------------------------------------ main --------------------
@@ -65,6 +91,11 @@ int main(void) {
 	
 	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
 	windowArea = windowToArea(window);
+
+	UIModeBar.modes = UIModes;
+	UIModeBar.nModes = nUIModes;
+	UIModeBar.verticalMargin = 3;
+
 
 	rArea.right = window.ws_col - rArea.left;
 	rArea.bot = window.ws_row - rArea.top;
@@ -75,7 +106,6 @@ int main(void) {
 	
 	xt_par0(XT_CLEAR_SCREEN);
 	ParseStat();
-	SearchDisplay("nitems","nitems",XT_CH_WHITE);
 	nitems = atoi(searchNvs("nitems"));
 	
 	activeBuffer = &RLBuffer;
@@ -84,8 +114,6 @@ int main(void) {
 
 			 if( RLBuffer.top) {
 				RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
-				//ParseSearch("te",&searchBuffer);
-				//ParseSearch("hun",activeBuffer);
 				hovered = RLBuffer.top;
 			}
 	}
@@ -95,7 +123,13 @@ int main(void) {
 
 		int redraw = FALSE;
 		DUMP = FALSE;
-		while ((c = getkey()) == KEY_NOTHING) ;
+		while ((c = getkey()) == KEY_NOTHING) {
+			struct winsize old = window;
+			ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
+			if(old.ws_col != window.ws_col || old.ws_row != window.ws_row) {
+				draw();
+			}
+		} 
 
 		redraw = TRUE;
 
@@ -215,30 +249,33 @@ int main(void) {
 	return 1;
 }
 // -------------------------------------draw---------------------------------
+void resize() {
+	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
+	windowArea = windowToArea(window);
+	rArea.right = windowArea.right - rArea.left;
+	rArea.bot = windowArea.bot - rArea.top;	
+}
 void draw() {
+	//config
 	printf("redrawing");
 
 	int i = 0;
 	xt_par0(XT_CLEAR_SCREEN);
-	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
-	windowArea = windowToArea(window);
-	
-	// display template
- /*	for (i = 0; i < nTS; ++i) {
-		xt_par2(XT_SET_ROW_COL_POS,TS[i].row,TS[i].col);
-		xt_par0(XT_CH_DEFAULT);
-		xt_par0(TS[i].color);
-		printf("%s",TS[i].string);
-	}*/
+
+	resize();
+	//perform operations on stat
+	ParseStat();
+	nitems = atoi(searchNvs("nitems"));
+	// display basic elements
+
+	displayUIElement(windowArea,DBInfo,nitems);
 	for (i = 0; i < nUI; ++i) {
 		displayUIElement(windowArea,UI[i]);
 	}
-	//perform operations on stat
-	ParseStat();
-	SearchDisplay("nitems","nitems",XT_CH_WHITE);
-	nitems = atoi(searchNvs("nitems"));
-	//new subject and body
+	displayModeBar(cursorArea,windowArea,UIModeBar);
 
+	//new subject and body
+	//draw entered text (not so) properly
 	if(cursorArea == UI_AREA_ADD_BODY || cursorArea == UI_AREA_ADD_SUBJECT){
 		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
@@ -263,7 +300,8 @@ void draw() {
 		}
 	}
 	message("test");
-	DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
+	displayUIElement(windowArea,UIMessage);
+	//DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');
 	
 	xt_par2(XT_SET_ROW_COL_POS,cursor.y,cursor.x + cursorLeft);
@@ -298,22 +336,8 @@ void ParseSearch(char *search,struct RecordList *sBuffer) {
 	nvs = startPos;
 	sBuffer->lengthfrombot = 0;
 }
-// --------------------------- searching-----------------------------------
-void SearchDisplay(char *prompt, char *name, char *color) {
-	int loc, col, i, j;
-	int instring = TRUE;
-	char *value;
-	
-	// search for location
-	loc = FindStringPosition(prompt);
-	col = SP[loc].col;
-	
-	// search for value
-	value = searchNvs(name);
-	
-	DisplayAt(SP[loc].row,SP[loc].col,XT_CH_WHITE,SP[loc].length,value);
-}
 
+// --------------------------- searching-----------------------------------
 char *searchNvs(char name[]){
 	int i;
 	char *ans = NULL;
@@ -336,24 +360,12 @@ void DisplayAt(int row, int col, char *color, int maxlength, char *value) {
 		if (value[i] == '\0') 
 			instring = FALSE;
 		printf("%c",instring?value[i]:' ');
-		if (++col == SCREEN.right) {
+		if (++col == windowArea.right) {
 			xt_par2(XT_SET_ROW_COL_POS,row+1,1);
 			col = 1;
 		}
 	}
 	fflush(stdout);
-}
-
-//RLBuffer must exist for scroll
-// ---------------------------------- 	FindStringPosition ----------------
-int FindStringPosition(char *prompt) { //pos in string array 
-	int i;
-	
-	for (i = 0; i < nSP; ++i) {
-		if (strcmp(prompt,SP[i].name) == 0)
-			return i;
-	}
-	return 0;
 }
 //------------------------ adding ----------------------------------------
 void addRecord(char *subject, char* body){

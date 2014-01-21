@@ -36,5 +36,13 @@ void setColor(int colorScheme) {
 		xt_par0(R_DELETE_BG_COLOR);
 	} else if (colorScheme == R_COLOR_SCHEME_DELETE_HOVERED) {
 		setColor(R_COLOR_SCHEME_DELETE);
+	} else if (colorScheme == UI_COLOR_SCHEME_MODE_BAR) {
+		xt_par0(UI_MODE_BAR_TEXT_STYLE);
+		xt_par0(UI_MODE_BAR_TEXT_COLOR);
+		xt_par0(UI_MODE_BAR_BG_COLOR);
+	} else if (colorScheme == UI_COLOR_SCHEME_MODE_BAR_SELECTED) {
+		xt_par0(UI_MODE_BAR_SELECTED_TEXT_STYLE);
+		xt_par0(UI_MODE_BAR_TEXT_COLOR);
+		xt_par0(UI_MODE_BAR_BG_COLOR);
 	}
 }

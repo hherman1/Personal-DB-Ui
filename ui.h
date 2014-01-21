@@ -24,9 +24,20 @@ struct displayText {
 	char *text;
 };
 
+struct modeText {
+	int *mode;
+	int nModes;
+	char *text;
+};
+struct modeBar {
+	struct modeText *modes;
+	int nModes;
+	int verticalMargin;
+};
 
 //display functions
-void displayUIElement(Area window,struct displayText ui);
+void displayUIElement(Area window,struct displayText ui,...);
+void displayModeBar(int cursorArea,Area window,struct modeBar modeBar);
 
 //mode functions
 
@@ -43,3 +54,7 @@ int init_edit(int recordSelected,int *cursorLeft,int *cursorArea, Cursor *cursor
 int init_delete(int recordSelected,int *cursorArea,int *colorScheme,Record *hovered, struct RecordList *activeBuffer);
 int commandMode(int cursorArea);
 //}
+
+//utility
+int isMode(int mode, struct modeText mt);
+
