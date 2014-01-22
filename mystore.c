@@ -42,7 +42,7 @@ char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 #define FALSE	0
 // Prototypes:
 int parseArgs(int argc, char *argv[]); //changed and
-int parseArgsUtil(int argc, char *argv[]) //moved by Tianci Lin
+int parseArgsUtil(int argc, char *argv[]); //moved by Tianci Lin
 int isPositive(char *s);
 int readData(void);
 int add(char *subject, char *body);
