@@ -1,5 +1,13 @@
 #include "myui2.h"
 
+#include "myui2.h"
+#include <string.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 extern struct NameValue *nvs;
 extern int n_nvs;
 
@@ -14,67 +22,43 @@ extern char errmsg[80];
 
 // ----------------------------------------- ReadMystoreFromChild ---------------------------
 int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
-	int pid, mypipe[2], i;
-	char *newargv[7];
+	//update
+	char *fifo_write = "/tmp/fifo_server.dat";
+	char fifo_read[40];
+	char send_message[300], read_message[300];
+	int fd_write, fd_read, n_read;
 	
-	if (nvs != NULL) {
-		free(nvs);
-		nvs = NULL;
+	// create and open the client's own FIFO for reading
+	sprintf(fifo_read, "/tmp/fifo_client_%d.dat",getpid());
+	if (mkfifo(fifo_read,0666) != 0) {
+		perror("client mkfifo failed, returns: ");
+		return -1;
 	}
-	n_nvs = 0;
-	n_input = 0;
+	// open the server's FIFO for writing
+	if ((fd_write = open(fifo_write, O_WRONLY)) < 0) {
+		perror("Cannot open FIFO to server: ");
+		return -1;
+	}
+
+	// compose and send write message to server's FIFO
+	sprintf(send_message, "return %s %s %s %s %s", fifo_read, argv1, argv2, argv3, argv4);
+
+	write(fd_write,send_message,strlen(send_message));
+	close(fd_write);
 	
-	// turn off special keyboard handling
-	getkey_terminate();
-	
-	// create the pipe
-	if (pipe(mypipe) == -1) {
-		strcpy(errmsg,"Problem in creating the pipe");
-		return 0;
+	// open the client's FIFO for reading
+	if ((fd_read = open(fifo_read, O_RDONLY)) < 0) {
+		perror("Cannot open FIFO to read from server: ");
+		return -1;
 	}
 	
-	pid = fork();
+	// read server's reply in client's FIFO
+	n_input = read(fd_read,input,300);                   /////CHANGED read_message to input
+	if (n_input >= 0) input[n_input] = '\0';
 	
-	if (pid == -1) {
-		strcpy(errmsg, "Error in forking");
-		return 0;
-	}
-	if (pid == 0) {  // child
-		close(mypipe[0]);  // Don't need to read from the pipe
-		dup2(mypipe[1],STDOUT_FILENO);  // connect the "write-end" of the pipe to child's STDOUT
-		
-		for (i = 2; i < 7; ++i) newargv[i] = NULL;
-		newargv[0] = newargv[1] = "./mystore";
-		newargv[2] = argv1;
-		newargv[3] = argv2;
-		newargv[4] = argv3;
-		newargv[5] = argv4;
-		newargv[6] = NULL;
-		
-		execvp(newargv[0],newargv+1);
-		exit(0);
-	}
-	else if (pid > 0) {
-		char *s = input;
-		int c, i, n;
-		close(mypipe[1]);  // Don't need to write to the pipe
-		
-		// read the data into the input array
-		FILE *fpin;
-		if ((fpin = fdopen(mypipe[0],"r")) == NULL) {
-			printf("ERROR: Cannot read from mypipe[0]\n");
-			exit(1);
-		}
-		for (n_input = 0; n_input < sizeof(input)-1; ++n_input) {
-			if ((c = getc(fpin)) == EOF) break;
-			*s++ = c;
-		}
-		input[n_input] = '\0';
-		fclose(fpin);
-		
-		wait(NULL);  // wait for child to finish
-		close(mypipe[0]);
-	}
+	// close and delete client's FIFO
+	close(fd_read);
+	unlink(fifo_read);
 	
 	return n_input;
 }
