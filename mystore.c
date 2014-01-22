@@ -40,16 +40,6 @@ char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 
 #define TRUE	1
 #define FALSE	0
-
-int fd_read, fd_write;
-char *fifo_read = "/tmp/fifo_server.dat";
-// Command line arguments processed:
-int command = NOTHING;
-char *subject = NULL;
-char *body = NULL;
-int item_start = -1;
-int item_end = -1;
-
 // Prototypes:
 int parseArgs(int argc, char *argv[]); //changed and
 int parseArgsUtil(int argc, char *argv[]) //moved by Tianci Lin
@@ -64,6 +54,17 @@ void list(void);
 int Process(char *s);
 int SeparateIntoFields(char *s, char **fields, int max_fields);
 static void the_handler(int sig);
+
+int fd_read, fd_write;
+char *fifo_read = "/tmp/fifo_server.dat";
+// Command line arguments processed:
+int command = NOTHING;
+char *subject = NULL;
+char *body = NULL;
+int item_start = -1;
+int item_end = -1;
+
+
 
 // this describes the data item on disk
 struct data {
