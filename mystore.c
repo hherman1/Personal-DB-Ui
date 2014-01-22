@@ -598,8 +598,8 @@ int Process(char *s) {
 		if ((fd_write = open(fields[1],O_WRONLY)) < 0)
 			printf("Cannot write to %s\n", fields[1]);
 		else {
-			parseArgsUtil(nfields - 2, fields[2]);
-			runCommand(nfields - 2,fields[2]);
+			parseArgsUtil(nfields - 2, &fields[2]);
+			runCommand(nfields - 2,&fields[2]);
 			//write(fd_write,Capital(fields[2]),strlen(fields[2]));
 			close(fd_write);
 		}
