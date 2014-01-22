@@ -1,6 +1,5 @@
 #include "myui2.h"
 
-#include "myui2.h"
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>

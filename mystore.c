@@ -428,24 +428,41 @@ int writeData(void) {
 // ------------------------------------- status ------------------------------
 void status(void) {
 	struct tm *tp;
-
-	printf("|status: OK|\n");
-	printf("|version: %s|\n",version);
-	printf("|author: %s|\n",author);
-	printf("|nitems: %d|\n", nitems);
 	if (nitems == 0) return;
+	char *statusS = saveFormatted("|status: OK|\n");
+	char *versionS = saveFormatted("|version: %s|\n",version);
+	char *authorS = saveFormatted("|author: %s|\n",author);
+	char *nitemsS = saveFormatted("|nitems: %d|\n", nitems);
 	tp = localtime(&(first->theData.theTime));
-	printf("|first-time: %d-%02d-%02d %02d:%02d:%02d|\n",
+	char *timeSS = saveFormatted("|first-time: %d-%02d-%02d %02d:%02d:%02d|\n",
 		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 	tp = localtime(&(last->theData.theTime));
-	printf("|last-time: %d-%02d-%02d %02d:%02d:%02d|\n",
+	char *timeES = saveFormatted("|last-time: %d-%02d-%02d %02d:%02d:%02d|\n",
 		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 
-	//printf("|first-time: %s|\n", rstrip(ctime(&(first->theData.theTime))));
-	//printf("|last-time: %s|\n", rstrip(ctime(&(last->theData.theTime))));
+	char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
+	//write()
+	free(statusS);
+	free(versionS);
+	free(authorS);
+	free(nitemsS);
+	free(timeSS);
+	free(timeES);
+	free(ans);
 	return;
 }
-
+char *saveFormatted(char *format, ...) {
+	char *ans = malloc(sizeof(char));
+	int spaceRequired = 0;
+	va_list args;
+	va_start(args,format);
+	spaceRequired = vsnprintf(ans,1,format,args);
+	free(ans);
+	ans = malloc(sizeof(char) * spaceRequired + 1);
+	vsnprintf(ans,spaceRequired + 1,format,args);
+	va_end; 
+	return ans;
+}
 // ------------------------------------- rstrip ------------------------------
 // removes the trailing whitespace 
 char *rstrip(char *s) {
@@ -583,18 +600,19 @@ int delete(char *sn) {
 	printf("|status: OK|\n");
 	return TRUE;
 
-
+}
 //-----------------------FIFO update-----------------------------
 	// ================================ Process ===========================
 int Process(char *s) {
-	char *fields[3];
+	char *fields[10];
 	int nfields, fd_write;
-	
+	//debug
 	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
 	// do the commands:
+	printf("%s %s %s",fields[0], fields[1], fields[2]);
 	if (strcmp(fields[0],"quit") == 0){ 
 		return -1;
-	}else if (strcmp(fields[0],"return") == 0 && nfields == 3) {
+	}else if (strcmp(fields[0],"return") == 0 && nfields <= 10) {
 		if ((fd_write = open(fields[1],O_WRONLY)) < 0)
 			printf("Cannot write to %s\n", fields[1]);
 		else {
