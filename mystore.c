@@ -15,9 +15,13 @@ V 0.90: implements edit
 #define version "0.92"
 #define author "PBrooks"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <stdlib.h>
 #include <time.h>
 
 char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
@@ -37,6 +41,8 @@ char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 #define TRUE	1
 #define FALSE	0
 
+int fd_read, fd_write;
+char *fifo_read = "/tmp/fifo_server.dat";
 // Command line arguments processed:
 int command = NOTHING;
 char *subject = NULL;
@@ -45,7 +51,8 @@ int item_start = -1;
 int item_end = -1;
 
 // Prototypes:
-int parseArgs(int argc, char *argv[]);
+int parseArgs(int argc, char *argv[]); //changed and
+int parseArgsUtil(int argc, char *argv[]) //moved by Tianci Lin
 int isPositive(char *s);
 int readData(void);
 int add(char *subject, char *body);
@@ -53,6 +60,10 @@ void stat(void);
 int search(char *subject);
 char *rstrip(char *s);
 void list(void);
+//---fifo prototypes
+int Process(char *s);
+int SeparateIntoFields(char *s, char **fields, int max_fields);
+static void the_handler(int sig);
 
 // this describes the data item on disk
 struct data {
@@ -86,64 +97,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	if (!readData()) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: Error reading mystore.dat\n\n%s|\n", Usage);
-		return 1;
-	}
-	
-	if (command == ADD && !add(argv[2],argv[3])) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: Failure to add new item|\n");
-		return 1;
-	}
-	
-	if (command == STAT) {
-		stat();
-	}
-	if (command == SEARCH && !search(argv[2])) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: Cannot search %s|\n",argv[2]);
-		return 1;
-	}
-	if (command == DISPLAY && !display(argv[2])) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: Cannot display %s|\n",argv[2]);
-		return 1;
-	}
-	
-	if (command == DELETE && !delete(argv[2])) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: Cannot delete %s|\n", argv[2]);
-		return 1;
-	}
-	
-	if (command == EDIT && !edit(argv[2])) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: cannot edit %s|\n",argv[2]);
-		return 1;
-	}
-	
-	if (rewrite)
-		if (!writeData()) {
-			if (errmsg[0] != '\0')
-				printf("|status: ERROR: %s|\n", errmsg);
-			else
-				printf("|status: ERROR: Could not write the data, file may be destroyed|\n");
-			return 1;
-		}
+	//run comand
 	
 	
 	return 0;
@@ -153,8 +107,54 @@ int main(int argc, char *argv[]) {
 // parse the command-line arguments, and assign the global variables from them
 // return FALSE if any problem with the command-line arguments
 int parseArgs(int argc, char *argv[]) {
-	if (argc < 2) return FALSE;
+	//----------------using fifo-----------
+	if (argc < 2) {
+	int how_much;
+	char input[BUFSIZ];
+	// remove the FIFO in case it exists
+	unlink(fifo_read);
 	
+	// create the FIFO pseudo-file
+	if (mkfifo(fifo_read,0666) != 0) {
+		perror("mkfifo error: ");
+		return -1;
+	}
+	// open it for reading:
+	fd_read = open(fifo_read, O_RDONLY);
+	if (fd_read < 0) {
+		printf("open(fifo_read) failed, returns: %d\n", fd_read);
+		return fd_read;
+	}
+	
+	// also open it for writing, but don't write anything to it (this is to prevent its closure when a client has finished writing to it).
+	if ((fd_write = open(fifo_read, O_WRONLY)) < 0) {
+		perror("Cannot open fifo_read for writing. ");
+		return fd_write;
+	}
+	printf("running fifo server. send message instructions to mystore\n");
+	while (1) {
+		how_much = read(fd_read,input,BUFSIZ);
+		if (how_much > 0) {
+			input[how_much]='\0';
+			if (Process(input) == -1) { //process will do runcomman
+				printf("fifo_server quitting...\n");
+				close(fd_read);
+				unlink(fifo_read);
+				return 0;
+			}
+		}
+	}
+	return 0;
+	
+	}else {  //no fifo
+		parseArgsUtil(argc, argv);
+		runCommand(argc,argv);
+	}
+}
+
+//use before runcommand
+int parseArgsUtil(int argc, char *argv[]){   
+	/////////////////////////////////////////////////////////OLD version, pipes
 	// try zero-argument commands: list and stat
 	if (argc == 2) {
 		if (strcmp(argv[1], "stat") == 0) {
@@ -217,6 +217,68 @@ int parseArgs(int argc, char *argv[]) {
 	}
 	else
 		return FALSE;
+}
+
+int runCommand(int argc, char *argv[]){
+	if (!readData()) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: Error reading mystore.dat\n\n%s|\n", Usage);
+		return 1;
+	}
+	
+	if (command == ADD && !add(argv[2],argv[3])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: Failure to add new item|\n");
+		return 1;
+	}
+	
+	if (command == STAT) {
+		stat();
+	}
+	if (command == SEARCH && !search(argv[2])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: Cannot search %s|\n",argv[2]);
+		return 1;
+	}
+	if (command == DISPLAY && !display(argv[2])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: Cannot display %s|\n",argv[2]);
+		return 1;
+	}
+	
+	if (command == DELETE && !delete(argv[2])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: Cannot delete %s|\n", argv[2]);
+		return 1;
+	}
+	
+	if (command == EDIT && !edit(argv[2])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: cannot edit %s|\n",argv[2]);
+		return 1;
+	}
+	
+	if (rewrite)
+		if (!writeData()) {
+			if (errmsg[0] != '\0')
+				printf("|status: ERROR: %s|\n", errmsg);
+			else
+				printf("|status: ERROR: Could not write the data, file may be destroyed|\n");
+			return 1;
+		}
+	return 0;
 }
 
 // --------------------------------- isPositive ------------------------------
@@ -519,4 +581,55 @@ int delete(char *sn) {
 	rewrite = TRUE;
 	printf("|status: OK|\n");
 	return TRUE;
+
+
+//-----------------------FIFO update-----------------------------
+	// ================================ Process ===========================
+int Process(char *s) {
+	char *fields[3];
+	int nfields, fd_write;
+	
+	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
+	// do the commands:
+	if (strcmp(fields[0],"quit") == 0) return -1;
+	}
+	else if (strcmp(fields[0],"return") == 0 && nfields == 3) {
+		if ((fd_write = open(fields[1],O_WRONLY)) < 0)
+			printf("Cannot write to %s\n", fields[1]);
+		else {
+			parseArgsUtil(nfields - 2, fields[2]);
+			runCommand(nfields - 2,fields[2]);
+			//write(fd_write,Capital(fields[2]),strlen(fields[2]));
+			close(fd_write);
+		}
+	}
+	else
+		printf("Unrecognized command: %s %s %s\n", fields[0],fields[1],fields[2]);
+	return 0;
+}
+// ================================ SeparateIntoFields ===================================
+int SeparateIntoFields(char *s, char **fields, int max_fields) {
+	int i;
+	static char null_c = '\0';
+	
+	for (i = 0; i < max_fields; ++i) fields[i] = &null_c;
+	
+	for (i = 0; i < max_fields; ++i) {
+		while (*s && (*s == ' ' || *s == '\t' || *s == '\n')) ++s;	// skip whitespace
+		if (!*s) return i;
+		fields[i] = s;
+		if (i == max_fields - 1) return i+1;
+		while (*s && *s != ' ' && *s != '\t' && *s != '\n') ++s;	// skip non-whitespace
+		if (!*s) return i+1;
+		*s++ = '\0';
+	}
+	return -1;
+}
+// ============================ the_handler ==================
+static void the_handler(int sig) {
+	printf("Signal caught: fifo_server terminated by signal %d\n",sig);
+	close(fd_read);
+	close(fd_write);
+	unlink(fifo_read);
+	exit(0);
 }
