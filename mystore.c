@@ -46,7 +46,7 @@ int parseArgsUtil(int argc, char *argv[]); //moved by Tianci Lin
 int isPositive(char *s);
 int readData(void);
 int add(char *subject, char *body);
-void stat(void);
+void status(void);
 int search(char *subject);
 char *rstrip(char *s);
 void list(void);
@@ -238,7 +238,7 @@ int runCommand(int argc, char *argv[]){
 	}
 	
 	if (command == STAT) {
-		stat();
+		status();
 	}
 	if (command == SEARCH && !search(argv[2])) {
 		if (errmsg[0] != '\0')
@@ -425,8 +425,8 @@ int writeData(void) {
 	return TRUE;
 }
 
-// ------------------------------------- stat ------------------------------
-void stat(void) {
+// ------------------------------------- status ------------------------------
+void status(void) {
 	struct tm *tp;
 
 	printf("|status: OK|\n");
@@ -592,9 +592,9 @@ int Process(char *s) {
 	
 	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
 	// do the commands:
-	if (strcmp(fields[0],"quit") == 0) return -1;
-	}
-	else if (strcmp(fields[0],"return") == 0 && nfields == 3) {
+	if (strcmp(fields[0],"quit") == 0){ 
+		return -1;
+	}else if (strcmp(fields[0],"return") == 0 && nfields == 3) {
 		if ((fd_write = open(fields[1],O_WRONLY)) < 0)
 			printf("Cannot write to %s\n", fields[1]);
 		else {
