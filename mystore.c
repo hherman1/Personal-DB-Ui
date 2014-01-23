@@ -55,8 +55,10 @@ int Process(char *s);
 int SeparateIntoFields(char *s, char **fields, int max_fields);
 static void the_handler(int sig);
 
+//
 int fd_read, fd_write;
 char *fifo_read = "/tmp/fifo_server.dat";
+
 // Command line arguments processed:
 int command = NOTHING;
 char *subject = NULL;
@@ -109,7 +111,7 @@ int main(int argc, char *argv[]) {
 // return FALSE if any problem with the command-line arguments
 int parseArgs(int argc, char *argv[]) {
 	//----------------using fifo-----------
-	if (argc < 2) {
+	//if (argc < 2) {
 	int how_much;
 	char input[BUFSIZ];
 	// remove the FIFO in case it exists
@@ -147,10 +149,12 @@ int parseArgs(int argc, char *argv[]) {
 	}
 	return 0;
 	
+	/*
 	}else {  //no fifo
 		parseArgsUtil(argc, argv);
 		runCommand(argc,argv);
 	}
+	*/
 }
 
 //use before runcommand
@@ -360,7 +364,8 @@ int add(char *subject, char *body) {
 	
 	++nitems;
 	rewrite = TRUE;
-	printf("|status: OK|\n");
+	char* message = "|status: OK|\n";
+	write(fd_write,message,strlen(message));
 	
 	return TRUE;
 }
@@ -389,7 +394,8 @@ int edit(char *sn) {
 	ptr->theData = this_data;
 	
 	rewrite = TRUE;
-	printf("|status: OK|\n");
+	char* message = "|status: OK|\n";
+	write(fd_write,message,strlen(message));
 	return TRUE;
 }
 	
@@ -441,7 +447,8 @@ void status(void) {
 		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 
 	char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
-	//write()
+	// make sure fd_write is opened already
+	write(fd_write,ans,strlen(ans));
 	free(statusS);
 	free(versionS);
 	free(authorS);
@@ -451,7 +458,7 @@ void status(void) {
 	free(ans);
 	return;
 }
-char *saveFormatted(char *format, ...) {
+char *saveFormatted(char *format, ...) { //hunter
 	char *ans = malloc(sizeof(char));
 	int spaceRequired = 0;
 	va_list args;
@@ -473,6 +480,79 @@ char *rstrip(char *s) {
 	return s;
 }
 //######################################################################
+
+// ------------------------------------ display -----------------------------
+int display(char *sn) {
+	int n = atoi(sn);
+	int i;
+	struct carrier *ptr;
+	struct data this_data;
+	struct tm *tp;
+	
+	if (n > nitems) {
+		sprintf(errmsg, "Cannot display item %d.  Item numbers range from 1 to %d",n,nitems);
+		return FALSE;
+	}
+	
+	for (i = 1, ptr = first; i < n; ++i)
+		ptr = ptr->next;
+	
+	this_data = ptr->theData;
+
+	char *statusS = saveFormatted("|status: OK|\n");
+	char *itemS = saveFormatted("|item: %d|\n",n);
+	tp = localtime(&this_data.theTime);
+	char *timeS = saveFormatted("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
+		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+	//printf("|time: %s|\n",rstrip(ctime(&this_data.theTime)));
+
+	char *subjectS = saveFormatted("|subject: %s|\n",this_data.theSubject);
+	char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
+	char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
+	write(fd_write,ans,strlen(ans));
+	free(statusS);
+	free(itemS);
+	free(timeS);
+	free(subjectS);
+	free(bodyS);
+	free(ans);
+	return TRUE;
+}
+
+// ------------------------------------ delete ------------------------------
+int delete(char *sn) {
+	int n = atoi(sn);
+	int i;
+	struct carrier *ptr, *previous;
+
+	
+	if (n > nitems) {
+		sprintf(errmsg, "Cannot delete item %d.  Item numbers range from 1 to %d",n,nitems);
+		return FALSE;
+	}
+		
+	previous = first;
+	if (n == 1) {
+		first = first->next;
+		if (nitems == 1) last = NULL;
+	}
+	else {
+		for (i = 2, ptr = first->next; i < n; ++i) {
+			previous = ptr;
+			ptr = ptr->next;
+		}
+		previous->next = ptr->next;
+		if (n == nitems) last = previous;
+	}
+	
+	--nitems;
+	rewrite = TRUE;
+	char* message = "|status: OK|\n";
+	write(fd_write,message,strlen(message));
+	return TRUE;
+
+}
+
 //------------------------------------- search ------------------------------
 char *toLowerStr(char *str) {
 	int i;
@@ -522,85 +602,30 @@ int search(char *subject) {
 	struct tm *tp;
 	for(i = 1, ptr = first; i <= nitems; i++) { // change 1 to nitems
 		printf("%s\n",ptr->theData.theSubject);
-		if(containsLC(ptr->theData.theSubject,subject)) {
-		
+		if(containsLC(ptr->theData.theSubject,subject)) {	
 			this_data = ptr->theData;
-			printf("|status: OK|\n");
-			printf("|item: %d|\n",i);
+
+			char *statusS = saveFormatted("|status: OK|\n");
+			char *itemS = saveFormatted("|item: %d|\n",i);
 			tp = localtime(&this_data.theTime);
-			printf("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
+			char *timeS = saveFormatted("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
 				tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
-			//printf("|time: %s|\n",rstrip(ctime(&this_data.theTime)));
-			printf("|subject: %s|\n",this_data.theSubject);
-			printf("|body: %s|\n",this_data.theBody);
+			char *subjectS = saveFormatted("|subject: %s|\n",this_data.theSubject);
+			char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
+			char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
+			write(fd_write,ans,strlen(ans));
+			free(statusS);
+			free(itemS);
+			free(timeS);
+			free(subjectS);
+			free(bodyS);
+			free(ans);
 		}
 		ptr = ptr->next;
 	}
 	return TRUE;
 }
 
-
-// ------------------------------------ display -----------------------------
-int display(char *sn) {
-	int n = atoi(sn);
-	int i;
-	struct carrier *ptr;
-	struct data this_data;
-	struct tm *tp;
-	
-	if (n > nitems) {
-		sprintf(errmsg, "Cannot display item %d.  Item numbers range from 1 to %d",n,nitems);
-		return FALSE;
-	}
-	
-	for (i = 1, ptr = first; i < n; ++i)
-		ptr = ptr->next;
-	
-	this_data = ptr->theData;
-	printf("|status: OK|\n");
-	printf("|item: %d|\n",n);
-	tp = localtime(&this_data.theTime);
-	printf("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
-		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
-	//printf("|time: %s|\n",rstrip(ctime(&this_data.theTime)));
-	printf("|subject: %s|\n",this_data.theSubject);
-	printf("|body: %s|\n",this_data.theBody);
-	
-	return TRUE;
-}
-
-// ------------------------------------ delete ------------------------------
-int delete(char *sn) {
-	int n = atoi(sn);
-	int i;
-	struct carrier *ptr, *previous;
-
-	
-	if (n > nitems) {
-		sprintf(errmsg, "Cannot delete item %d.  Item numbers range from 1 to %d",n,nitems);
-		return FALSE;
-	}
-		
-	previous = first;
-	if (n == 1) {
-		first = first->next;
-		if (nitems == 1) last = NULL;
-	}
-	else {
-		for (i = 2, ptr = first->next; i < n; ++i) {
-			previous = ptr;
-			ptr = ptr->next;
-		}
-		previous->next = ptr->next;
-		if (n == nitems) last = previous;
-	}
-	
-	--nitems;
-	rewrite = TRUE;
-	printf("|status: OK|\n");
-	return TRUE;
-
-}
 //-----------------------FIFO update-----------------------------
 	// ================================ Process ===========================
 int Process(char *s) {
