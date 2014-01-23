@@ -47,6 +47,7 @@ int isPositive(char *s);
 int readData(void);
 int add(char *subject, char *body);
 void status(void);
+char *saveFormatted(char *format, ...);
 int search(char *subject);
 char *rstrip(char *s);
 void list(void);
