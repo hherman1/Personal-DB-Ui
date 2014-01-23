@@ -508,7 +508,7 @@ int display(char *sn) {
 
 	char *subjectS = saveFormatted("|subject: %s|\n",this_data.theSubject);
 	char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
-	char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
+	char *ans = saveFormatted("%s%s%s%s%s",statusS,itemS,timeS,subjectS,bodyS);
 	write(fd_write,ans,strlen(ans));
 	free(statusS);
 	free(itemS);
@@ -612,7 +612,7 @@ int search(char *subject) {
 				tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 			char *subjectS = saveFormatted("|subject: %s|\n",this_data.theSubject);
 			char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
-			char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
+			char *ans = saveFormatted("%s%s%s%s%s",statusS,itemS,timeS,subjectS,bodyS);
 			write(fd_write,ans,strlen(ans));
 			free(statusS);
 			free(itemS);
