@@ -17,6 +17,7 @@ V 0.90: implements edit
 
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -162,62 +163,62 @@ int parseArgs(int argc, char *argv[]) {
 int parseArgsUtil(int argc, char *argv[]){   
 	/////////////////////////////////////////////////////////OLD version, pipes
 	// try zero-argument commands: list and stat
-	if (argc == 2) {
-		if (strcmp(argv[1], "stat") == 0) {
+	if (argc == 1) {
+		if (strcmp(argv[0], "stat") == 0) {
 			command = STAT;
 			return TRUE;
 		}
 		else {
-			sprintf(errmsg, "Unrecognized argument: %s", argv[1]);
+			sprintf(errmsg, "Unrecognized argument: %s", argv[0]);
 			return FALSE;
 		}
 	}
 	// try the one-argument commands: delete and display
-	else if (argc == 3) {
-		if (strcmp(argv[1],"delete") == 0 && isPositive(argv[2])) {
+	else if (argc == 2) {
+		if (strcmp(argv[0],"delete") == 0 && isPositive(argv[1])) {
 			command = DELETE;
-			item_start = atoi(argv[2]);
+			item_start = atoi(argv[1]);
 			return TRUE;
 		}
-		else if (strcmp(argv[1],"display") == 0 && isPositive(argv[2])) {
+		else if (strcmp(argv[0],"display") == 0 && isPositive(argv[1])) {
 			command = DISPLAY;
-			item_start = atoi(argv[2]);
+			item_start = atoi(argv[1]);
 			return TRUE;
 		}
-		else if (strcmp(argv[1],"search") == 0){
+		else if (strcmp(argv[0],"search") == 0){
 			command = SEARCH;
-			subject = argv[2];
+			subject = argv[1];
 			return TRUE;
 		}
 		else {
-			sprintf(errmsg, "Unrecognized 2-argument call: %s %s", argv[1],argv[2]);
+			sprintf(errmsg, "Unrecognized 2-argument call: %s %s", argv[0],argv[1]);
 			return FALSE;
 		}
 	}
 	// try the two-argument command: add
-	else if (argc == 4) {
-		if (strcmp(argv[1],"add") == 0) {
+	else if (argc == 3) {
+		if (strcmp(argv[0],"add") == 0) {
 			command = ADD;
+			subject = argv[1];
+			body = argv[2];
+			return TRUE;
+		}
+		else {
+			sprintf(errmsg, "Unrecognized 3-argument call: %s %s %s",argv[0],argv[1],argv[2]);
+			return FALSE;
+		}
+	}
+	// try the three-argument command: edit
+	else if (argc == 4) {
+		if (strcmp(argv[0], "edit") == 0 && isPositive(argv[1])) {
+			command = EDIT;
+			item_start = atoi(argv[1]);
 			subject = argv[2];
 			body = argv[3];
 			return TRUE;
 		}
 		else {
-			sprintf(errmsg, "Unrecognized 3-argument call: %s %s %s",argv[1],argv[2],argv[3]);
-			return FALSE;
-		}
-	}
-	// try the three-argument command: edit
-	else if (argc == 5) {
-		if (strcmp(argv[1], "edit") == 0 && isPositive(argv[2])) {
-			command = EDIT;
-			item_start = atoi(argv[2]);
-			subject = argv[3];
-			body = argv[4];
-			return TRUE;
-		}
-		else {
-			sprintf(errmsg, "Unrecognized 4-argument call: %s %s %s %s",argv[1],argv[2],argv[3],argv[4]);
+			sprintf(errmsg, "Unrecognized 4-argument call: %s %s %s %s",argv[0],argv[1],argv[2],argv[3]);
 			return FALSE;
 		}
 	}
@@ -449,7 +450,9 @@ void status(void) {
 
 	char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
 	// make sure fd_write is opened already
+	printf("Writing:\n%s\n",ans);
 	write(fd_write,ans,strlen(ans));
+	
 	free(statusS);
 	free(versionS);
 	free(authorS);
@@ -468,7 +471,7 @@ char *saveFormatted(char *format, ...) { //hunter
 	free(ans);
 	ans = malloc(sizeof(char) * spaceRequired + 1);
 	vsnprintf(ans,spaceRequired + 1,format,args);
-	va_end; 
+	va_end(args); 
 	return ans;
 }
 // ------------------------------------- rstrip ------------------------------
@@ -635,7 +638,7 @@ int Process(char *s) {
 	//debug
 	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
 	// do the commands:
-	printf("%s %s %s",fields[0], fields[1], fields[2]);
+	printf("%s %s %s\n",fields[0], fields[1], fields[2]);
 	if (strcmp(fields[0],"quit") == 0){ 
 		return -1;
 	}else if (strcmp(fields[0],"return") == 0 && nfields <= 10) {

@@ -10,7 +10,7 @@
 #define UI_AREA_EDIT_BODY 5
 #define UI_AREA_DELETE 6
 
-#define UI_DELETE_CONFIRM(r) "Are you sure you want to delete record %i, %s? color([y/N],UI_DELETE_CONFIRM_COLOR)",r->num,r->subject
+#define UI_DELETE_CONFIRM(r) "Are you sure you want to delete record %i, %s? [y/N]",r->num,r->subject
 
 
 #define TEXT_ALIGN_LEFT 0

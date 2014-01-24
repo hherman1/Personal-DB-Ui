@@ -37,9 +37,7 @@
 
 #define UI_MODE_BAR_SELECTED_TEXT_STYLE XT_CH_BOLD
 
-#define UI_DELETE_CONFIRM_COLOR XT_CH_RED
 
-#define color(string,color) ##color##stringXT_CH_NORMAL
 
 
 void setColor(int colorScheme);
