@@ -25,8 +25,8 @@ struct displayText DBInfo = {
 
 struct displayText UI[] = {
 	{5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"Search:"},
-	{-6,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
-	{-5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
+	{UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
+	{UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
 	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
 };
 int nUI = sizeof(UI)/sizeof(UI[0]);
@@ -61,8 +61,14 @@ int nitems = 0;  //numRecords
 
 
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
-char body[MAX_BODY_LEN+1];
+struct displayText UIInputSubject = {
+	UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_CENTER,XT_CH_NORMAL,subject
+};
 
+char body[MAX_BODY_LEN+1];
+struct displayText UIInputBody = {
+	UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_CENTER,XT_CH_NORMAL,body
+};
 
 
 
@@ -276,10 +282,16 @@ void draw() {
 
 	//new subject and body
 	//draw entered text (not so) properly
+	Area subjectArea = windowArea;
 	if(cursorArea == UI_AREA_ADD_BODY || cursorArea == UI_AREA_ADD_SUBJECT){
-		DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
-		DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
-		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
+		//DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
+		//DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
+		subjectArea.left = ENTRY_FIELD_LABEL_SPACE;
+		UIInputSubject.verticalMargin = UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN;
+		UIInputBody.verticalMargin = UI_AREA_ADD_BODY_VERTICAL_MARGIN;
+		displayUIElement(subjectArea,UIInputSubject);
+		displayUIElement(subjectArea,UIInputBody);
+		//cursorLeft = ENTRY_FIELD_LABEL_SPACE;
 	} else if (cursorArea == UI_AREA_SEARCH) {
 		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
 		DisplayAt(5,ENTRY_FIELD_LABEL_SPACE,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);

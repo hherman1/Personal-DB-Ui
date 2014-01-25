@@ -39,7 +39,7 @@
 
 #define UI_DELETE_CONFIRM_COLOR XT_CH_RED
 
-#define color(string,color) ##color##stringXT_CH_NORMAL
+#define color(string,color) color##stringXT_CH_NORMAL
 
 
 void setColor(int colorScheme);

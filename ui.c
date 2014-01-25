@@ -20,7 +20,7 @@ void displayUIElement(Area window,struct displayText ui, ...) {
 	}
 
 	if(ui.alignment == TEXT_ALIGN_LEFT) {
-		col = 1;
+		col = window.left;
 	} else if (ui.alignment == TEXT_ALIGN_CENTER) {
 		col = (window.right - window.left - len) / 2;
 	} else if (ui.alignment == TEXT_ALIGN_RIGHT) {
