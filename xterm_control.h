@@ -1,7 +1,7 @@
 // xterm control sequences
 
 // 0 parameter controls:
-#define XT_CLEAR_SCREEN			"\033[2J"
+#define XT_CLEAR_SCREEN			"\033c"
 #define XT_ERASE_LINE			"\033[2K"
 
 // 1 parameter controls:

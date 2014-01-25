@@ -112,12 +112,18 @@ int main(void) {
 	
 	xt_par0(XT_CLEAR_SCREEN);
 	ParseStat();
-	nitems = atoi(searchNvs("nitems"));
+	char *nitemsTemp;
+	if(nitemsTemp = searchNvs("nitems")) {
+		nitems = atoi(nitemsTemp);
+	} else {
+		printf("ERROR: Server returned NULL\nRestart your mystore and check db.dat for corruptions, then try again.\n");
+		exit(1);
+	}
 	
 	activeBuffer = &RLBuffer;
 	if(nitems) {
 		loadRecords(&RLBuffer,1,MAX_RECORDS_TO_DISPLAY + 1,nitems);
-
+		
 			 if( RLBuffer.top) {
 				RLBuffer.lengthfrombot = nitems - RLBuffer.bottom->num;
 				hovered = RLBuffer.top;
@@ -188,6 +194,7 @@ int main(void) {
 				}
 			}
 			redraw = TRUE;
+
 		} else if (cursorArea == UI_AREA_SEARCH) {
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (c == KEY_ENTER){
