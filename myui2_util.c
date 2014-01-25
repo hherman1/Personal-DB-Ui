@@ -21,7 +21,7 @@ extern char errmsg[80];
 
 // ----------------------------------------- ReadMystoreFromChild ---------------------------
 void addArgument(char *store,char *argv) {
-	sprintf(store,"%s %s",store,argv);
+	sprintf(store,"%s %s|",store,argv);
 }
 int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	//update
@@ -39,7 +39,6 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	//int test = open(fifo_read,O_WRONLY);
 	//fprintf(test,"|status: OK| |nitems: 0|");
 	
-	printf("|Reading: %s|\t|Writing:%s|\n",fifo_read,fifo_write);
 
 	// open the server's FIFO for writing
 	if ((fd_write = open(fifo_write, O_WRONLY)) < 0) {
@@ -48,7 +47,8 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	}
 
 	// compose and send write message to server's FIFO
-	sprintf(send_message, "return %s", fifo_read);
+	sprintf(send_message, " return|");
+	addArgument(send_message,fifo_read);
 	if(argv1) {
 		addArgument(send_message,argv1);
 		if(argv2) {
@@ -66,15 +66,12 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	close(fd_write);
 	
 	// open the client's FIFO for reading
-	printf("Awaiting response in %s...\n",fifo_read);
 	if ((fd_read = open(fifo_read, O_RDONLY)) < 0) {
 		perror("Cannot open FIFO to read from server: ");
 		return -1;
 	}
-	printf("%i\n",fd_read);
 	// read server's reply in client's FIFO
 	n_input = read(fd_read,&input,300);                   /////CHANGED read_message to input
-	printf("Received %i bytes: %s\n",n_input,input);
 	if (n_input >= 0) input[n_input] = '\0';
 	
 	// close and delete client's FIFO

@@ -229,6 +229,8 @@ int parseArgsUtil(int argc, char *argv[]){
 }
 
 int runCommand(int argc, char *argv[]){
+		printf("Beep\n");
+
 	if (!readData()) {
 		if (errmsg[0] != '\0')
 			printf("|status: ERROR: %s|\n", errmsg);
@@ -236,8 +238,8 @@ int runCommand(int argc, char *argv[]){
 			printf("|status: ERROR: Error reading mystore.dat\n\n%s|\n", Usage);
 		return 1;
 	}
-	
-	if (command == ADD && !add(argv[2],argv[3])) {
+
+	if (command == ADD && !add(argv[1],argv[2])) {
 		if (errmsg[0] != '\0')
 			printf("|status: ERROR: %s|\n", errmsg);
 		else
@@ -248,34 +250,35 @@ int runCommand(int argc, char *argv[]){
 		printf("running stat\n");
 		status();
 	}
-	if (command == SEARCH && !search(argv[2])) {
+	if (command == SEARCH && !search(argv[1])) {
 		if (errmsg[0] != '\0')
 			printf("|status: ERROR: %s|\n", errmsg);
 		else
-			printf("|status: ERROR: Cannot search %s|\n",argv[2]);
+			printf("|status: ERROR: Cannot search %s|\n",argv[1]);
 		return 1;
 	}
-	if (command == DISPLAY && !display(argv[2])) {
+
+	if (command == DISPLAY && !display(argv[1])) {
 		if (errmsg[0] != '\0')
 			printf("|status: ERROR: %s|\n", errmsg);
 		else
-			printf("|status: ERROR: Cannot display %s|\n",argv[2]);
-		return 1;
-	}
-	
-	if (command == DELETE && !delete(argv[2])) {
-		if (errmsg[0] != '\0')
-			printf("|status: ERROR: %s|\n", errmsg);
-		else
-			printf("|status: ERROR: Cannot delete %s|\n", argv[2]);
+			printf("|status: ERROR: Cannot display %s|\n",argv[1]);
 		return 1;
 	}
 	
-	if (command == EDIT && !edit(argv[2])) {
+	if (command == DELETE && !delete(argv[1])) {
 		if (errmsg[0] != '\0')
 			printf("|status: ERROR: %s|\n", errmsg);
 		else
-			printf("|status: ERROR: cannot edit %s|\n",argv[2]);
+			printf("|status: ERROR: Cannot delete %s|\n", argv[1]);
+		return 1;
+	}
+	
+	if (command == EDIT && !edit(argv[1])) {
+		if (errmsg[0] != '\0')
+			printf("|status: ERROR: %s|\n", errmsg);
+		else
+			printf("|status: ERROR: cannot edit %s|\n",argv[1]);
 		return 1;
 	}
 	
@@ -367,7 +370,7 @@ int add(char *subject, char *body) {
 		last->next = current_carrier;
 		last = current_carrier;
 	}
-	
+	printf("adding\n");
 	++nitems;
 	rewrite = TRUE;
 	char* message = "|status: OK|\n";
@@ -462,8 +465,6 @@ void status(void) {
 	}
 
 	// make sure fd_write is opened already
-	printf("%i\n",fd_write);
-	printf("%i\n",fd_read);
 	write(fd_write,ans,strlen(ans));
 
 	free(statusS);
@@ -503,7 +504,9 @@ int display(char *sn) {
 	struct carrier *ptr;
 	struct data this_data;
 	struct tm *tp;
-	
+		printf("Beep\n");
+
+
 	if (n > nitems) {
 		sprintf(errmsg, "Cannot display item %d.  Item numbers range from 1 to %d",n,nitems);
 		return FALSE;
@@ -562,7 +565,7 @@ int delete(char *sn) {
 	
 	--nitems;
 	rewrite = TRUE;
-	char* message = "|status: OK|\n";
+	char* message = "|status: OK|";
 	write(fd_write,message,strlen(message));
 	return TRUE;
 
@@ -654,15 +657,17 @@ int search(char *subject) {
 */
 	// ================================ Process ===========================
 int Process(char *s) {
+	printf("\n\n");
 	char *fields[10];
 	int nfields;
 	//debug
 	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
 	// do the commands:
+
 	if (strcmp(fields[0],"quit") == 0){ 
 		return -1;
 	}else if (strcmp(fields[0],"return") == 0 && nfields <= 10) {
-		printf("\n|%s|\n",fields[1]);
+		printf("|%s|\n",fields[1]);
 
 		if ((fd_write = open(fields[1],O_WRONLY)) < 0) {
 			printf("Cannot write to %s\n", fields[1]);
@@ -679,9 +684,15 @@ int Process(char *s) {
 	return 0;
 }
 // ================================ SeparateIntoFields ===================================
+char *findToken(char *s,char token) {
+	if(*s != token) {
+		while(*s && *s != token && s++);
+	}
+	return s;
+}
 int SeparateIntoFields(char *s, char **fields, int max_fields) {
 	int i;
-	static char null_c = '\0';
+	/*static char null_c = '\0';
 	
 	for (i = 0; i < max_fields; ++i) fields[i] = &null_c;
 	//this code is illegible & glitchy
@@ -695,14 +706,31 @@ int SeparateIntoFields(char *s, char **fields, int max_fields) {
 		while (*s && *s != ' ' && *s != '\t' && *s != '\n') ++s;	// skip non-whitespace
 		if (!*s) return i+1;
 		*s++ = '\0';
+	}*/
+	for(i = 0; i < max_fields; ++i) {
+		s =findToken(s,' ');
+		fields[i] = ++s;
+		s = findToken(s,'|');
+		*s = '\0';
+		if(!*(++s)) {
+			break;
+		}
 	}
-	return -1;
+	i += 1;
+	int t = 0;
+	printf("[%i:",i);
+	for(t = 0;t < i; t++) {
+		printf(" %s,",fields[t]);
+	}
+	printf("\n");
+	return i;
 }
 // ============================ the_handler ==================
 static void the_handler(int sig) {
 	printf("Signal caught: fifo_server terminated by signal %d\n",sig);
 	close(fd_read);
 	close(fd_write);
+	close(fd_writeTEMP);
 	unlink(fifo_read);
 	exit(0);
 }
