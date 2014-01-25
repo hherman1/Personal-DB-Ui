@@ -20,6 +20,9 @@ extern char errmsg[80];
 
 
 // ----------------------------------------- ReadMystoreFromChild ---------------------------
+void addArgument(char *store,char *argv) {
+	sprintf(store,"%s %s",store,argv);
+}
 int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	//update
 	char *fifo_write = "/tmp/fifo_server.dat";
@@ -33,6 +36,11 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 		perror("client mkfifo failed, returns: ");
 		return -1;
 	}
+	//int test = open(fifo_read,O_WRONLY);
+	//fprintf(test,"|status: OK| |nitems: 0|");
+	
+	printf("|Reading: %s|\t|Writing:%s|\n",fifo_read,fifo_write);
+
 	// open the server's FIFO for writing
 	if ((fd_write = open(fifo_write, O_WRONLY)) < 0) {
 		perror("Cannot open FIFO to server: ");
@@ -40,19 +48,33 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	}
 
 	// compose and send write message to server's FIFO
-	sprintf(send_message, "return %s %s %s %s %s", fifo_read, argv1, argv2, argv3, argv4);
+	sprintf(send_message, "return %s", fifo_read);
+	if(argv1) {
+		addArgument(send_message,argv1);
+		if(argv2) {
+			addArgument(send_message,argv2);
+			if(argv3) {
+				addArgument(send_message,argv3);
+				if(argv4) {
+					addArgument(send_message,argv4);
+				}
+			}
+		}
+	}
 
 	write(fd_write,send_message,strlen(send_message));
 	close(fd_write);
 	
 	// open the client's FIFO for reading
+	printf("Awaiting response in %s...\n",fifo_read);
 	if ((fd_read = open(fifo_read, O_RDONLY)) < 0) {
 		perror("Cannot open FIFO to read from server: ");
 		return -1;
 	}
-	
+	printf("%i\n",fd_read);
 	// read server's reply in client's FIFO
-	n_input = read(fd_read,input,300);                   /////CHANGED read_message to input
+	n_input = read(fd_read,&input,300);                   /////CHANGED read_message to input
+	printf("Received %i bytes: %s\n",n_input,input);
 	if (n_input >= 0) input[n_input] = '\0';
 	
 	// close and delete client's FIFO
@@ -67,7 +89,7 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 int ParseInput(char *in, int n_in) {
 	int num_nvs, i_nvs;
 	char *p;
-	
+	printf("%s\n",in);
 	if (nvs != NULL) free(nvs);
 	nvs = NULL;
 	n_nvs = 0;

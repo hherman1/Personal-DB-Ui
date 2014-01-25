@@ -58,7 +58,7 @@ int SeparateIntoFields(char *s, char **fields, int max_fields);
 static void the_handler(int sig);
 
 //
-int fd_read, fd_write;
+int fd_read, fd_writeTEMP, fd_write;
 char *fifo_read = "/tmp/fifo_server.dat";
 
 // Command line arguments processed:
@@ -126,22 +126,24 @@ int parseArgs(int argc, char *argv[]) {
 	}
 	// open it for reading:
 	fd_read = open(fifo_read, O_RDONLY);
+	printf("Initialized fifo at %s\nAwaiting input\n",fifo_read);
 	if (fd_read < 0) {
 		printf("open(fifo_read) failed, returns: %d\n", fd_read);
 		return fd_read;
 	}
 	
 	// also open it for writing, but don't write anything to it (this is to prevent its closure when a client has finished writing to it).
-	if ((fd_write = open(fifo_read, O_WRONLY)) < 0) {
+	if ((fd_writeTEMP = open(fifo_read, O_WRONLY)) < 0) {
 		perror("Cannot open fifo_read for writing. ");
 		return fd_write;
 	}
-	printf("running fifo server. send message instructions to mystore\n");
 	while (1) {
+
 		how_much = read(fd_read,input,BUFSIZ);
+		printf("Received: %s\n",input);
 		if (how_much > 0) {
 			input[how_much]='\0';
-			if (Process(input) == -1) { //process will do runcomman
+			if (Process(input) == -1) { 
 				printf("fifo_server quitting...\n");
 				close(fd_read);
 				unlink(fifo_read);
@@ -242,8 +244,8 @@ int runCommand(int argc, char *argv[]){
 			printf("|status: ERROR: Failure to add new item|\n");
 		return 1;
 	}
-	
 	if (command == STAT) {
+		printf("running stat\n");
 		status();
 	}
 	if (command == SEARCH && !search(argv[2])) {
@@ -277,7 +279,8 @@ int runCommand(int argc, char *argv[]){
 		return 1;
 	}
 	
-	if (rewrite)
+	if (rewrite) {
+		printf("rewriting\n");
 		if (!writeData()) {
 			if (errmsg[0] != '\0')
 				printf("|status: ERROR: %s|\n", errmsg);
@@ -285,6 +288,7 @@ int runCommand(int argc, char *argv[]){
 				printf("|status: ERROR: Could not write the data, file may be destroyed|\n");
 			return 1;
 		}
+	}
 	return 0;
 }
 
@@ -436,41 +440,48 @@ int writeData(void) {
 // ------------------------------------- status ------------------------------
 void status(void) {
 	struct tm *tp;
-	if (nitems == 0) return;
-	char *statusS = saveFormatted("|status: OK|\n");
-	char *versionS = saveFormatted("|version: %s|\n",version);
-	char *authorS = saveFormatted("|author: %s|\n",author);
-	char *nitemsS = saveFormatted("|nitems: %d|\n", nitems);
-	tp = localtime(&(first->theData.theTime));
-	char *timeSS = saveFormatted("|first-time: %d-%02d-%02d %02d:%02d:%02d|\n",
-		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
-	tp = localtime(&(last->theData.theTime));
-	char *timeES = saveFormatted("|last-time: %d-%02d-%02d %02d:%02d:%02d|\n",
-		tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 
-	char *ans = saveFormatted("%s%s%s%s%s%s",statusS,versionS,authorS,nitemsS,timeSS,timeES);
+	char *statusS = saveFormatted("|status: OK| ");
+	char *versionS = saveFormatted("|version: %s| ",version);
+	char *authorS = saveFormatted("|author: %s| ",author);
+
+	char *nitemsS = saveFormatted("|nitems: %i| ", nitems);
+	char *ans = saveFormatted("%s%s%s%s",statusS,versionS,authorS,nitemsS);
+
+	if(nitems > 0) {
+		tp = localtime(&(first->theData.theTime));
+		char *timeSS = saveFormatted("|first-time: %d-%02d-%02d %02d:%02d:%02d| ",
+			tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+		tp = localtime(&(last->theData.theTime));
+
+		char *timeES = saveFormatted("|last-time: %d-%02d-%02d %02d:%02d:%02d| ",
+			tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
+		ans = saveFormatted("%s%s%s",ans,timeSS,timeES);
+		free(timeSS);
+		free(timeES);
+	}
+
 	// make sure fd_write is opened already
-	printf("Writing:\n%s\n",ans);
+	printf("%i\n",fd_write);
+	printf("%i\n",fd_read);
 	write(fd_write,ans,strlen(ans));
-	
+
 	free(statusS);
 	free(versionS);
 	free(authorS);
 	free(nitemsS);
-	free(timeSS);
-	free(timeES);
+
 	free(ans);
 	return;
 }
 char *saveFormatted(char *format, ...) { //hunter
-	char *ans = malloc(sizeof(char));
-	int spaceRequired = 0;
+	int init = 1;
+	char *ans;
+
 	va_list args;
 	va_start(args,format);
-	spaceRequired = vsnprintf(ans,1,format,args);
-	free(ans);
-	ans = malloc(sizeof(char) * spaceRequired + 1);
-	vsnprintf(ans,spaceRequired + 1,format,args);
+
+	vasprintf(&ans,format,args);
 	va_end(args); 
 	return ans;
 }
@@ -605,7 +616,6 @@ int search(char *subject) {
 	struct data this_data;
 	struct tm *tp;
 	for(i = 1, ptr = first; i <= nitems; i++) { // change 1 to nitems
-		printf("%s\n",ptr->theData.theSubject);
 		if(containsLC(ptr->theData.theSubject,subject)) {	
 			this_data = ptr->theData;
 
@@ -631,19 +641,32 @@ int search(char *subject) {
 }
 
 //-----------------------FIFO update-----------------------------
+/*
+||======\\	
+||       ||	
+||		 //	
+||======//	
+||			
+||			
+||			
+||			
+
+*/
 	// ================================ Process ===========================
 int Process(char *s) {
 	char *fields[10];
-	int nfields, fd_write;
+	int nfields;
 	//debug
 	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
 	// do the commands:
-	printf("%s %s %s\n",fields[0], fields[1], fields[2]);
 	if (strcmp(fields[0],"quit") == 0){ 
 		return -1;
 	}else if (strcmp(fields[0],"return") == 0 && nfields <= 10) {
-		if ((fd_write = open(fields[1],O_WRONLY)) < 0)
+		printf("\n|%s|\n",fields[1]);
+
+		if ((fd_write = open(fields[1],O_WRONLY)) < 0) {
 			printf("Cannot write to %s\n", fields[1]);
+		}
 		else {
 			parseArgsUtil(nfields - 2, &fields[2]);
 			runCommand(nfields - 2,&fields[2]);
@@ -661,7 +684,9 @@ int SeparateIntoFields(char *s, char **fields, int max_fields) {
 	static char null_c = '\0';
 	
 	for (i = 0; i < max_fields; ++i) fields[i] = &null_c;
-	
+	//this code is illegible & glitchy
+		//please dont write like this
+		//its awful
 	for (i = 0; i < max_fields; ++i) {
 		while (*s && (*s == ' ' || *s == '\t' || *s == '\n')) ++s;	// skip whitespace
 		if (!*s) return i;
