@@ -22,7 +22,7 @@ Area windowArea;
 
 //
 struct displayText DBInfo = {
-	1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"Version " db_var_col(" %-*.2g") "\t||\t" db_var_col(" %-*s") "\t||\t" f_color("Author: ",XT_CH_CYAN) db_var_col(" %-*s") "\t||\t" f_color("Total Cards: ",XT_CH_CYAN) db_var_col(" %-*i")
+	1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"Version: " db_var_col(" %-*.2g") "\t||\t" f_color("DBName: ",XT_CH_CYAN) db_var_col(" %-*s") "\t||\t" f_color("Author: ",XT_CH_CYAN) db_var_col(" %-*s") "\t||\t" f_color("Total Cards: ",XT_CH_CYAN) db_var_col(" %-*i")
 };
 
 
