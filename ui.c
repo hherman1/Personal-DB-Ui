@@ -211,9 +211,9 @@ int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, char *su
 			redraw = init_search(subject,cursor,cursorArea);
 		}
 		else if (KEY_MODE_EDIT(c)) {
-			redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
+			if(*hovered) redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
 		} else if(KEY_MODE_DELETE(c)) {
-			redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
+			if(*hovered) redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
 		}
 	}
 	return redraw;
