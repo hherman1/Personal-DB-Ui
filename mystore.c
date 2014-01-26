@@ -601,6 +601,8 @@ int search(char *subject) {
 	struct data this_data;
 	struct tm *tp;
 	char *ans = NULL;
+	char **noResults = NULL;
+	printf("prepare to search\n");
 	for(i = 1, ptr = first; i <= nitems; i++) { // change 1 to nitems
 		if(containsLC(ptr->theData.theSubject,subject)) {	
 			this_data = ptr->theData;
@@ -621,8 +623,16 @@ int search(char *subject) {
 		}
 		ptr = ptr->next;
 	}
+	printf("writing %p\n",ans);
+	if(!ans) {
+		ans = malloc(sizeof(char));
+		*ans = '\0';
+		noResults = ans;
+	}
 	printf("Writing %i bytes: %s\n(%i written)\n",strlen(ans),ans,write(fd_write,ans,strlen(ans)));
-
+	if(noResults) {
+		free(*noResults);
+	}
 	return TRUE;
 }
 
