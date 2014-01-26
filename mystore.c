@@ -95,6 +95,10 @@ char errmsg[100] = "";
 
 // ---------------------------------- main() --------------------------------
 int main(int argc, char *argv[]) {
+	struct sigaction sigHandler;
+	sigHandler.sa_handler = the_handler;
+	sigaction(SIGINT,&sigHandler,NULL);
+
 	if (!parseArgs(argc, argv)) {
 		if (errmsg[0] != '\0')
 			printf("%s\n",errmsg);

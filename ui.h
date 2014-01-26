@@ -23,6 +23,8 @@
 
 #define UI_MODE_LABEL_WIDTH 15
 
+#define DB_INFO_FIELD_WIDTH 15
+
 struct displayText {
 	int verticalMargin;
 	int alignment;

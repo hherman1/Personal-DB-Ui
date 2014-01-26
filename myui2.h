@@ -81,3 +81,5 @@ void ParseRecord(int numRec);
 void addRecord(char *subject, char* body);
 
 void message(char *msg, ...);
+void destroy();
+void sig_handler(int signal);

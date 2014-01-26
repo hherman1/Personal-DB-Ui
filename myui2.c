@@ -1,3 +1,4 @@
+#include <signal.h>
 #include "myui2.h"
 #include "record.h"
 #include "ui.h"
@@ -21,7 +22,7 @@ Area windowArea;
 
 //
 struct displayText DBInfo = {
-	1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"mystore.dat | MAX CARDS: %i"
+	1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"Version " db_var_col(" %-*.2g") "\t||\t" db_var_col(" %-*s") "\t||\t" f_color("Author: ",XT_CH_CYAN) db_var_col(" %-*s") "\t||\t" f_color("Total Cards: ",XT_CH_CYAN) db_var_col(" %-*i")
 };
 
 struct displayText UI[] = {
@@ -97,6 +98,12 @@ void debug(struct RecordList *buffer) { // worthless function for debug purposes
 int main(void) {
 	int c;
 	
+	struct sigaction sigHandler;
+	sigHandler.sa_handler = sig_handler;
+
+	sigaction(SIGINT,&sigHandler,NULL);
+
+
 	ioctl(STDOUT_FILENO,TIOCGWINSZ, &window);
 	windowArea = windowToArea(window);
 
@@ -115,13 +122,7 @@ int main(void) {
 	
 	xt_par0(XT_CLEAR_SCREEN);
 	ParseStat();
-	char *nitemsTemp;
-	if((nitemsTemp = searchNvs("nitems"))) {
-		nitems = atoi(nitemsTemp);
-	} else {
-		printf("ERROR: Server returned NULL\nRestart your mystore and check db.dat for corruptions, then try again.\n");
-		exit(1);
-	}
+
 	
 	activeBuffer = &RLBuffer;
 	if(nitems) {
@@ -152,8 +153,7 @@ int main(void) {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
 			xt_par2(XT_SET_ROW_COL_POS,1,1);
-			getkey_terminate();
-			exit(0);
+			destroy();
 		}
 
 		if(cursorArea == UI_AREA_RECORDS) {
@@ -204,6 +204,7 @@ int main(void) {
 				cursorArea = UI_AREA_RECORDS;
 				if(searchBuffer.top) freeBuffer(&searchBuffer);
 				ParseSearch(subject,&searchBuffer);
+				ParseStat();
 				fill(subject,30,'\0');
 				cursor.x = 0;
 				cursor.y = 0;
@@ -226,11 +227,13 @@ int main(void) {
 					cursor.y ++;
 				} else {
 					edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
+
 				}
 			}else if (cursorArea == UI_AREA_EDIT_BODY){
 				if(c == KEY_ENTER) {
 					cursorArea = UI_AREA_RECORDS;
 					editRecord(hovered->num,hovered->subject,hovered->body);
+					ParseStat();
 					cursor.x = 0;
 					cursor.y = 0;
 				} else {
@@ -249,6 +252,7 @@ int main(void) {
 				if(hovered->prev) selectNext = hovered->prev;
 				else if(hovered->next) selectNext = hovered->next;
 				deleteRecord(hovered,activeBuffer);
+				ParseStat();
 				hovered = selectNext;
 				selectRecord(-1);
 				cursorArea = UI_AREA_RECORDS;
@@ -285,11 +289,12 @@ void draw() {
 
 	resize();
 	//perform operations on stat
-	ParseStat();
-	nitems = atoi(searchNvs("nitems"));
 	// display basic elements
-
-	displayUIElement(windowArea,DBInfo,nitems);
+	if(!author || !version) {
+		ParseStat();
+	}
+	int w = DB_INFO_FIELD_WIDTH;
+	displayUIElement(windowArea,DBInfo,w,version,w,"mystore.dat",w,author,w,nitems);
 	for (i = 0; i < nUI; ++i) {
 		displayUIElement(windowArea,UI[i]);
 	}
@@ -353,6 +358,25 @@ void fill(char *s, int n, char c) {
 void ParseStat(void){
 	ReadMystoreFromChild("stat",NULL,NULL,NULL);
 	ParseInput(input,n_input);
+	char *nitemsTemp;
+	int change = nitems;
+
+	if((nitemsTemp = searchNvs("nitems"))) {
+		nitems = atoi(nitemsTemp);
+	} else {
+		printf("ERROR: Server returned NULL\nRestart your mystore and check db.dat for corruptions, then try again.\n");
+		destroy();
+	}
+	change -= nitems;
+	RLBuffer.lengthfrombot += change;
+	version = atof(searchNvs("version"));
+	char *temp = searchNvs("author");
+	if(author) {
+		free(author);
+	}
+	author = malloc(sizeof(char) * strlen(temp));
+	strcpy(author,temp);
+
 }
 void ParseRecord(int numRec){
 	char str[15];
@@ -445,4 +469,20 @@ Area windowToArea(struct winsize window) {
 	ans.bot = window.ws_row;
 	ans.right = window.ws_col;
 	return ans;
+}
+void destroy() {
+	if(searchBuffer.top || searchBuffer.bottom) {
+		freeBuffer(&searchBuffer);
+	}
+	if(RLBuffer.top || RLBuffer.bottom) {
+		freeBuffer(&RLBuffer);
+	}
+	if(author) free(author);
+	getkey_terminate();
+	exit(0);
+}
+void sig_handler(int signal){
+	xt_par0(XT_CLEAR_SCREEN);
+	printf("\nCAUGHT SIGNAL: %i\nExiting...\n",signal);
+	destroy();
 }

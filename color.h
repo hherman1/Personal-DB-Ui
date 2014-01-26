@@ -40,6 +40,8 @@
 #define R_DELETE_TEXT_STYLE XT_CH_BOLD XT_CH_BLINK
 #define R_DELETE_BODY_STYLE XT_CH_NORMAL XT_CH_BLINK
 
+#define DB_VARIABLE_DATA_STYLE XT_CH_BOLD XT_CH_RED XT_BG_WHITE
+#define db_var_col(string) f_color(string,DB_VARIABLE_DATA_STYLE)
 
 #define UI_MODE_BAR_TEXT_COLOR XT_CH_YELLOW
 #define UI_MODE_BAR_TEXT_STYLE XT_CH_NORMAL
@@ -47,7 +49,7 @@
 
 #define UI_MODE_BAR_SELECTED_TEXT_STYLE XT_CH_BOLD
 
-#define f_color(string,color) color##stringXT_CH_NORMAL
+#define f_color(string,color) color string XT_CH_NORMAL
 
 #define colorScheme(base,index) 
 
