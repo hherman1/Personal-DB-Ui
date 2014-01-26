@@ -30,7 +30,7 @@ void trimBuffer(struct RecordList *buffer, Record *cutoff);
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea);
 int getRecordY(Record *r,struct RecordList *buffer,Area rArea);
 int requiredSpace(Record r,int width);
-void selectRecord(Record record,struct RecordList buffer);
+void selectRecord(int record);
 void wrapText(int left,int width, char *text);
 void loadRecords(struct RecordList *buffer,int low,int high,int number);
 

@@ -142,7 +142,7 @@ int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 			message("%p<-[[%p]]->%p",(*activeBuffer)->top->prev,(*activeBuffer)->top,(*activeBuffer)->top->next);
 		}
 		if (c == KEY_ENTER) {
-			selectRecord(*(*hovered),*(*activeBuffer));
+			selectRecord((*hovered)->num);
 			redraw = TRUE;
 		}
 		if (c == KEY_DOWN) {
@@ -235,7 +235,7 @@ int init_search(char *subject,Cursor *cursor,int *cursorArea) {
 int init_edit(int recordSelected,int *cursorLeft,int *cursorArea, Cursor *cursor,Area rArea,Record *hovered,struct RecordList *activeBuffer) {
 	*cursorArea = UI_AREA_EDIT_SUBJECT;
 	if(hovered->num != recordSelected) {
-		selectRecord(*hovered,*activeBuffer);
+		selectRecord(hovered->num);
 	}
 	*cursorLeft = RECORD_NUM_SPACE +1;
 	cursor->x = strlen(hovered->subject);
@@ -246,7 +246,7 @@ int init_delete(int recordSelected,int *cursorArea,Record *hovered,struct Record
 	*cursorArea = UI_AREA_DELETE;
 	setColor(R_COLOR_SCHEME_CLASSIC_DELETE);
 	if(hovered->num != recordSelected) {
-		selectRecord(*hovered,*activeBuffer);
+		selectRecord(hovered->num);
 	}
 	message(UI_DELETE_CONFIRM(hovered));
 	return TRUE;

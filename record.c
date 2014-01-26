@@ -6,7 +6,7 @@ extern int n_nvs;
 
 extern struct ColorScheme defaultColors;
 
-int recordSelected = 2;
+int recordSelected = -1;
 //--------------------------Display----------------------------
 void displayRecords(Record hovered,struct RecordList *buffer,Area rArea,struct RecordColorScheme *scheme) {
 
@@ -204,8 +204,8 @@ void wrapText(int left,int width, char *text) {
 	}
 
 }
-void selectRecord(Record record,struct RecordList buffer){
-	int rNum = record.num;
+void selectRecord(int record){
+	int rNum = record;
 	if(rNum == recordSelected) {
 		recordSelected = 0;
 	} else {

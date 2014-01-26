@@ -245,8 +245,12 @@ int main(void) {
 					Record *RLhovered = findRecord(RLBuffer,hovered->num);
 					if(RLhovered) removeRecordFromBuffer(hovered,&RLBuffer);
 				}
+				struct Record *selectNext = NULL;
+				if(hovered->prev) selectNext = hovered->prev;
+				else if(hovered->next) selectNext = hovered->next;
 				deleteRecord(hovered,activeBuffer);
-				hovered = activeBuffer->top;
+				hovered = selectNext;
+				selectRecord(-1);
 				cursorArea = UI_AREA_RECORDS;
 				setColor(R_COLOR_SCHEME_CLASSIC);
 			} else if (KEY_MODE_DELETE_DENY(c)) {
