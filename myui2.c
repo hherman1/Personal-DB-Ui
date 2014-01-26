@@ -363,6 +363,7 @@ void ParseRecord(int numRec){
 void ParseSearch(char *search,struct RecordList *sBuffer) {
 	ReadMystoreFromChild("search",search,NULL,NULL);
 	ParseInput(input,n_input);
+
 	struct NameValue *startPos = nvs;
 	while(n_nvs) {
 		Record *result = popRecord();

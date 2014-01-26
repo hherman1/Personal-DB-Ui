@@ -71,7 +71,11 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 		return -1;
 	}
 	// read server's reply in client's FIFO
-	n_input = read(fd_read,&input,300);                   /////CHANGED read_message to input
+	int next = 1000;
+	do {
+		n_input = read(fd_read,&input,1000); /////CHANGED read_message to input		
+	} while(n_input == 1000);
+	
 	if (n_input >= 0) input[n_input] = '\0';
 	
 	// close and delete client's FIFO
@@ -86,7 +90,8 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 int ParseInput(char *in, int n_in) {
 	int num_nvs, i_nvs;
 	char *p;
-	printf("%s\n",in);
+	//printf("%s\n",in);
+	//sleep(9999999);
 	if (nvs != NULL) free(nvs);
 	nvs = NULL;
 	n_nvs = 0;

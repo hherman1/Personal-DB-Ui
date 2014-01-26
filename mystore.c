@@ -231,7 +231,6 @@ int parseArgsUtil(int argc, char *argv[]){
 }
 
 int runCommand(int argc, char *argv[]){
-		printf("Beep\n");
 
 	if (!readData()) {
 		if (errmsg[0] != '\0')
@@ -597,22 +596,29 @@ int search(char *subject) {
 	struct carrier *ptr;
 	struct data this_data;
 	struct tm *tp;
+	char *ans = NULL;
 	for(i = 1, ptr = first; i <= nitems; i++) { // change 1 to nitems
 		if(containsLC(ptr->theData.theSubject,subject)) {	
 			this_data = ptr->theData;
 
-			char *statusS = saveFormatted("|status: OK|\n");
-			char *itemS = saveFormatted("|item: %d|\n",i);
+			char *statusS = saveFormatted("|status: OK|");
+			char *itemS = saveFormatted("|item: %d|",i);
 			tp = localtime(&this_data.theTime);
-			char *timeS = saveFormatted("|time: %d-%02d-%02d %02d:%02d:%02d|\n",
+			char *timeS = saveFormatted("|time: %d-%02d-%02d %02d:%02d:%02d|",
 				tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
-			char *subjectS = saveFormatted("|subject: %s|\n",this_data.theSubject);
-			char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
-			char *ans = saveFormatted("%s%s%s%s%s",statusS,itemS,timeS,subjectS,bodyS);
-			write(fd_write,ans,strlen(ans));
+			char *subjectS = saveFormatted("|subject: %s|",this_data.theSubject);
+			char *bodyS = saveFormatted("|body: %s|",this_data.theBody);
+			char *out = saveFormatted("%s%s%s%s%s\n",statusS,itemS,timeS,subjectS,bodyS);
+			if(ans) {
+				ans = saveFormatted("%s%s",ans,out);
+			} else {
+				ans = saveFormatted(out);
+			}
 		}
 		ptr = ptr->next;
 	}
+	printf("Writing %i bytes: %s\n(%i written)\n",strlen(ans),ans,write(fd_write,ans,strlen(ans)));
+
 	return TRUE;
 }
 
