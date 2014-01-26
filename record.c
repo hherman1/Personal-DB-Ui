@@ -4,37 +4,40 @@
 extern struct NameValue *nvs;
 extern int n_nvs;
 
+extern struct ColorScheme defaultColors;
+
 int recordSelected = 2;
 //--------------------------Display----------------------------
-void displayRecords(Record hovered,struct RecordList *buffer,Area rArea,int colorScheme) {
+void displayRecords(Record hovered,struct RecordList *buffer,Area rArea,struct RecordColorScheme *scheme) {
 
 	Record *bot = adjustBufferForArea(hovered,buffer,rArea);
-	printViewBuffer(hovered,buffer,rArea,colorScheme);
+	printViewBuffer(hovered,buffer,rArea,scheme);
 
 }
 
-void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,int colorScheme) {
+void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,struct RecordColorScheme *scheme) {
 	int i = 0;
 	int width = rArea.right - rArea.left;
 	char *color = "";
-	Record *temp = buffer->top;			
+	Record *temp = buffer->top;		
+	struct RecordColorScheme currentCS = *scheme;	
 	while(temp && temp->num <= buffer->bottom->num){
 
 		//color = R_TEXT_COLOR;
-		setColor(R_COLOR_SCHEME_TEXT);
+		displayColor(currentCS.normal.subject);
 		int row = i + rArea.top;
 		char numString[RECORD_NUM_SPACE+1];
 		numString[RECORD_NUM_SPACE] = '\0';
 		snprintf(numString,RECORD_NUM_SPACE,"%i.",temp->num);
 
 		if(temp->num == hovered.num) {
-			setColor(R_COLOR_SCHEME_HOVERED);
+			displayColor(currentCS.hovered.subject);
 		}	
 
 		if(temp->num == recordSelected) {
-			setColor(colorScheme);
+			displayColor(currentCS.selected.subject);
 			if(temp->num == hovered.num) {
-				setColor(colorScheme+1);
+				displayColor(currentCS.selectedHovered.subject);
 			}
 			DisplayAt(row,rArea.left,color,RECORD_NUM_SPACE,numString);
 			DisplayAt(row,rArea.left+RECORD_NUM_SPACE,color,MAX_SUBJECT_LEN,temp->subject);
@@ -43,7 +46,10 @@ void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,int c
 			i += spaceNeeded;
 
 			xt_par2(XT_SET_ROW_COL_POS,row,rArea.left);
-			setColor(colorScheme+2);
+			displayColor(currentCS.selected.body);
+			if(temp->num == hovered.num) {
+				displayColor(currentCS.selectedHovered.body);
+			}
 			wrapText(RECORD_NUM_SPACE,width,temp->body);
 		}
 		else if(row <= rArea.bot) {
@@ -54,7 +60,7 @@ void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,int c
 
 
 		temp = temp->next;
-		setColor(R_COLOR_SCHEME_DEFAULT);
+		displayColor(defaultColors);
 		i++;	
 
 

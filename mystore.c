@@ -25,6 +25,8 @@ V 0.90: implements edit
 #include <stdlib.h>
 #include <time.h>
 
+#include "memory.h"
+
 char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 	mystore stat\n\
 	mystore display {item-no}\n\
@@ -460,32 +462,15 @@ void status(void) {
 		char *timeES = saveFormatted("|last-time: %d-%02d-%02d %02d:%02d:%02d| ",
 			tp->tm_year+1900,tp->tm_mon+1,tp->tm_mday,tp->tm_hour,tp->tm_min,tp->tm_sec);
 		ans = saveFormatted("%s%s%s",ans,timeSS,timeES);
-		free(timeSS);
-		free(timeES);
 	}
 
 	// make sure fd_write is opened already
 	write(fd_write,ans,strlen(ans));
 
-	free(statusS);
-	free(versionS);
-	free(authorS);
-	free(nitemsS);
 
-	free(ans);
 	return;
 }
-char *saveFormatted(char *format, ...) { //hunter
-	int init = 1;
-	char *ans;
 
-	va_list args;
-	va_start(args,format);
-
-	vasprintf(&ans,format,args);
-	va_end(args); 
-	return ans;
-}
 // ------------------------------------- rstrip ------------------------------
 // removes the trailing whitespace 
 char *rstrip(char *s) {
@@ -528,12 +513,6 @@ int display(char *sn) {
 	char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
 	char *ans = saveFormatted("%s%s%s%s%s",statusS,itemS,timeS,subjectS,bodyS);
 	write(fd_write,ans,strlen(ans));
-	free(statusS);
-	free(itemS);
-	free(timeS);
-	free(subjectS);
-	free(bodyS);
-	free(ans);
 	return TRUE;
 }
 
@@ -631,12 +610,6 @@ int search(char *subject) {
 			char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
 			char *ans = saveFormatted("%s%s%s%s%s",statusS,itemS,timeS,subjectS,bodyS);
 			write(fd_write,ans,strlen(ans));
-			free(statusS);
-			free(itemS);
-			free(timeS);
-			free(subjectS);
-			free(bodyS);
-			free(ans);
 		}
 		ptr = ptr->next;
 	}
@@ -677,6 +650,7 @@ int Process(char *s) {
 			runCommand(nfields - 2,&fields[2]);
 			//write(fd_write,Capital(fields[2]),strlen(fields[2]));
 			close(fd_write);
+			flushPool();
 		}
 	}
 	else

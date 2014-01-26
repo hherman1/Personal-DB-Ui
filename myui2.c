@@ -3,6 +3,7 @@
 #include "ui.h"
 #include "bindings.h"
 #include "color.h"
+#include "memory.h"
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
 extern int recordSelected;
@@ -13,7 +14,7 @@ Area rArea = {1,120,7,7 + MAX_RECORDS_TO_DISPLAY - 1,"",TRUE};
 Area newSubjectArea = {15,120,44,44,"",TRUE};
 Area newBodyArea = {12,120,45,47,"",TRUE};
 
-int colorScheme = R_COLOR_SCHEME_SELECTED;
+extern struct RecordColorScheme scheme;
 struct winsize window;
 Area windowArea;
 
@@ -24,7 +25,7 @@ struct displayText DBInfo = {
 };
 
 struct displayText UI[] = {
-	{5,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"Search:"},
+	{UI_AREA_SEARCH_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"Search:"},
 	{UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
 	{UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
 	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
@@ -57,17 +58,18 @@ Record *hovered = NULL;
 
 
 int nitems = 0;  //numRecords
-
+float version = 0;
+char *author = NULL;
 
 
 char subject[MAX_SUBJECT_LEN+1]; //used for new sub and new body additions
 struct displayText UIInputSubject = {
-	UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_CENTER,XT_CH_NORMAL,subject
+	UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_NORMAL,subject
 };
 
 char body[MAX_BODY_LEN+1];
 struct displayText UIInputBody = {
-	UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_CENTER,XT_CH_NORMAL,body
+	UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_NORMAL,body
 };
 
 
@@ -106,6 +108,7 @@ int main(void) {
 	rArea.right = window.ws_col - rArea.left;
 	rArea.bot = window.ws_row - rArea.top;
 
+	initScheme();
 	
 	fill(subject,30,'\0');
 	fill(body,140,'\0');
@@ -113,7 +116,7 @@ int main(void) {
 	xt_par0(XT_CLEAR_SCREEN);
 	ParseStat();
 	char *nitemsTemp;
-	if(nitemsTemp = searchNvs("nitems")) {
+	if((nitemsTemp = searchNvs("nitems"))) {
 		nitems = atoi(nitemsTemp);
 	} else {
 		printf("ERROR: Server returned NULL\nRestart your mystore and check db.dat for corruptions, then try again.\n");
@@ -164,12 +167,12 @@ int main(void) {
 				redraw = TRUE;
 			}
 			redraw = scroll(&hovered,&activeBuffer,c) || redraw;
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 
 		}
 		else if (cursorArea == UI_AREA_ADD_SUBJECT || cursorArea == UI_AREA_ADD_BODY){
 			cursor.y = newSubjectArea.top + (cursorArea - UI_AREA_ADD_SUBJECT);
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (cursorArea == UI_AREA_ADD_SUBJECT){
 				if (c == KEY_ENTER){
 					cursorArea = UI_AREA_ADD_BODY;
@@ -196,7 +199,7 @@ int main(void) {
 			redraw = TRUE;
 
 		} else if (cursorArea == UI_AREA_SEARCH) {
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (c == KEY_ENTER){
 				cursorArea = UI_AREA_RECORDS;
 				if(searchBuffer.top) freeBuffer(&searchBuffer);
@@ -215,7 +218,7 @@ int main(void) {
 		}
 
 		else if (cursorArea == UI_AREA_EDIT_SUBJECT || cursorArea == UI_AREA_EDIT_BODY){
-			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,&colorScheme,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (cursorArea == UI_AREA_EDIT_SUBJECT){
 				if(c == KEY_ENTER) {
 					cursorArea = UI_AREA_EDIT_BODY;
@@ -245,10 +248,10 @@ int main(void) {
 				deleteRecord(hovered,activeBuffer);
 				hovered = activeBuffer->top;
 				cursorArea = UI_AREA_RECORDS;
-				colorScheme = R_COLOR_SCHEME_SELECTED;				
+				setColor(R_COLOR_SCHEME_CLASSIC);
 			} else if (KEY_MODE_DELETE_DENY(c)) {
 				cursorArea = UI_AREA_RECORDS;
-				colorScheme = R_COLOR_SCHEME_SELECTED;				
+				setColor(R_COLOR_SCHEME_CLASSIC);
 			} else {
 				message(UI_DELETE_CONFIRM(hovered));
 			}
@@ -257,6 +260,7 @@ int main(void) {
 		if(redraw)
 			draw();
 
+		flushPool();
 	}
 	
 	return 1;
@@ -293,15 +297,24 @@ void draw() {
 	if(cursorArea == UI_AREA_ADD_BODY || cursorArea == UI_AREA_ADD_SUBJECT){
 		//DisplayAt(newSubjectArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_CYAN,MAX_SUBJECT_LEN,subject);
 		//DisplayAt(newBodyArea.top,ENTRY_FIELD_LABEL_SPACE,XT_CH_WHITE,MAX_BODY_LEN,body);
-		subjectArea.left = ENTRY_FIELD_LABEL_SPACE;
+		int pos = ENTRY_FIELD_LABEL_SPACE;
+		subjectArea.left = pos;
 		UIInputSubject.verticalMargin = UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN;
 		UIInputBody.verticalMargin = UI_AREA_ADD_BODY_VERTICAL_MARGIN;
-		displayUIElement(subjectArea,UIInputSubject);
-		displayUIElement(subjectArea,UIInputBody);
+		
+		cursor.y = displayUIElement(subjectArea,UIInputSubject);
+		int t2 = displayUIElement(subjectArea,UIInputBody);
+		if(cursorArea == UI_AREA_ADD_BODY) {
+			cursor.y = t2;
+		}
+		cursorLeft = pos;
 		//cursorLeft = ENTRY_FIELD_LABEL_SPACE;
 	} else if (cursorArea == UI_AREA_SEARCH) {
-		cursorLeft = ENTRY_FIELD_LABEL_SPACE;
-		DisplayAt(5,ENTRY_FIELD_LABEL_SPACE,XT_CH_DEFAULT,MAX_SUBJECT_LEN,subject);
+		int pos = ENTRY_FIELD_LABEL_SPACE;
+		subjectArea.left = pos;
+		UIInputSubject.verticalMargin = UI_AREA_SEARCH_SUBJECT_VERTICAL_MARGIN;
+		cursor.y = displayUIElement(subjectArea,UIInputSubject);
+		cursorLeft = pos;
 	} else if (cursorArea == UI_AREA_RECORDS) {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
@@ -315,10 +328,9 @@ void draw() {
 			hovered = activeBuffer->top;
 		}
 		if(activeBuffer->top) {
-			displayRecords(*hovered,activeBuffer,rArea,colorScheme);			
+			displayRecords(*hovered,activeBuffer,rArea,&scheme);			
 		}
 	}
-	message("test");
 	displayUIElement(windowArea,UIMessage);
 	//DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');

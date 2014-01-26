@@ -23,8 +23,9 @@ struct RecordList
 	Record *bottom;
 	int lengthfrombot;
 };
-void displayRecords(Record hovered,struct RecordList *buffer,Area rArea,int colorScheme);
-void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,int colorScheme);
+struct RecordColorScheme;
+void displayRecords(Record hovered,struct RecordList *buffer,Area rArea,struct RecordColorScheme *scheme);
+void printViewBuffer(Record hovered, struct RecordList *buffer, Area rArea,struct RecordColorScheme *scheme);
 void trimBuffer(struct RecordList *buffer, Record *cutoff);
 Record* adjustBufferForArea(Record hovered,struct RecordList *buffer, Area rArea);
 int getRecordY(Record *r,struct RecordList *buffer,Area rArea);

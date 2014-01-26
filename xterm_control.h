@@ -17,6 +17,7 @@
 #define XT_CH_BOLD			"\033[1m"
 #define XT_CH_UNDERLINE		"\033[4m"
 #define XT_CH_INVERSE		"\033[7m"
+#define XT_CH_BLINK			"\033[5m"
 #define XT_CH_BLACK			"\033[30m"
 #define XT_CH_RED			"\033[31m"
 #define XT_CH_GREEN			"\033[32m"

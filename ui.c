@@ -3,16 +3,18 @@
 #include "record.h"
 #include "bindings.h"
 #include "color.h"
+#include "memory.h"
 
+extern struct RecordColor classicModeBar;
 //display functions
-void displayUIElement(Area window,struct displayText ui, ...) {
+int displayUIElement(Area window,struct displayText ui, ...) {
 	int row = 0;
 	int col = 0;
 	int len = strlen(ui.text);
 	va_list args;
 	va_start(args,ui);
 
-
+	row = verticalMargin(ui.verticalMargin,window);
 	if(ui.verticalMargin > 0) {
 		row = window.top + ui.verticalMargin;
 	} else if (ui.verticalMargin < 0) {
@@ -31,10 +33,48 @@ void displayUIElement(Area window,struct displayText ui, ...) {
 	xt_par0(ui.color);
 	vprintf(ui.text,args);
 	va_end(args);
+	return row;
 }
 
 void displayModeBar(int cursorArea,Area window,struct modeBar modeBar){
-	int i = 0;
+	int i;
+	int totalLength = modeBar.nModes * UI_MODE_LABEL_WIDTH;
+	char *next = "%s%s";
+	char *format = "%s%-*s";
+	char *formatSelected = "[%s]";
+	int col = window.top;
+	int row = window.left;
+	char *output = '\0';
+	for(i = 0; i < modeBar.nModes;i++) {
+		char *input = modeBar.modes[i].text;
+
+		char * color = getColor(classicModeBar.subject);
+		if(isMode(cursorArea,modeBar.modes[i])) {
+			color = getColor(classicModeBar.body);
+			input = saveFormatted(formatSelected,input);
+		}
+		input = saveFormatted(format,color,UI_MODE_LABEL_WIDTH,input);
+		if(output) {
+			output = saveFormatted(next,output,input);
+		} else {
+			output = saveFormatted(input);
+		}
+		//message(output);
+	}
+	/*for(i = 0; i < modeBar.nModes;i++) {
+		totalLength += strlen(modeBar.modes[i].text);
+		totalLength += 2;
+	}*/
+	col = (window.right - totalLength) / 2;
+	if(col < window.left) {
+		col = window.left;
+	}
+	row = verticalMargin(modeBar.verticalMargin,window);
+
+	xt_par2(XT_SET_ROW_COL_POS,row,col);
+	printf(output);
+	flushPool();
+	/*int i = 0;
 	int totalLength = 2;
 	int col = window.top;
 	int row = window.left;
@@ -46,11 +86,7 @@ void displayModeBar(int cursorArea,Area window,struct modeBar modeBar){
 	if(col < window.left) {
 		col = window.left;
 	}
-	if(modeBar.verticalMargin > 0) {
-		row = window.top + modeBar.verticalMargin;
-	} else if (modeBar.verticalMargin < 0) {
-		row = window.bot + modeBar.verticalMargin;
-	}
+	row = verticalMargin(modeBar.verticalMargin,window);
 
 	xt_par2(XT_SET_ROW_COL_POS,row,col);
 
@@ -62,8 +98,9 @@ void displayModeBar(int cursorArea,Area window,struct modeBar modeBar){
 			setColor(UI_COLOR_SCHEME_MODE_BAR);
 			printf(" %s ",modeBar.modes[i].text);
 		}
-	}
+	}*/
 }
+// display utilities
 int isMode(int mode,struct modeText mt) {
 	int ans = 0;
 	int i = 0;
@@ -74,7 +111,19 @@ int isMode(int mode,struct modeText mt) {
 	}
 	return ans;
 }
-
+int verticalMargin(int marg, Area ar) {
+	return margin(marg,ar.top,ar.bot);
+}
+int horizontalMargin(int marg, Area ar) {
+	return margin(marg,ar.left,ar.right);
+}
+int margin(int marg, int low, int high) {
+	if(marg < 0) {
+		return high + marg;
+	} else {
+		return low + marg;
+	}
+}
 
 //Mode Functions
 int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
@@ -143,7 +192,7 @@ void edit(char *str,int maxLength,Cursor *cursor,char c) {
 
 }
 
-int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, int *colorScheme,char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
+int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, char *subject,Cursor *cursor,Area rArea,Record **hovered,struct RecordList **activeBuffer,  struct RecordList *RLBuffer) {
 	int redraw = FALSE;
 	if(commandMode(*cursorArea)) {
 		if(KEY_MODE_RECORDS(c) || KEY_MODE_ESCAPE(c)) {
@@ -158,7 +207,7 @@ int modeCheck(int c,int recordSelected,int *cursorLeft,int *cursorArea, int *col
 		else if (KEY_MODE_EDIT(c)) {
 			redraw = init_edit(recordSelected,cursorLeft,cursorArea,cursor,rArea,*hovered,*activeBuffer);
 		} else if(KEY_MODE_DELETE(c)) {
-			redraw = init_delete(recordSelected,cursorArea,colorScheme,*hovered,*activeBuffer);
+			redraw = init_delete(recordSelected,cursorArea,*hovered,*activeBuffer);
 		}
 	}
 	return redraw;
@@ -193,9 +242,9 @@ int init_edit(int recordSelected,int *cursorLeft,int *cursorArea, Cursor *cursor
 	cursor->y = getRecordY(hovered,activeBuffer,rArea);
 	return TRUE;
 }
-int init_delete(int recordSelected,int *cursorArea,int *colorScheme,Record *hovered,struct RecordList *activeBuffer) {
+int init_delete(int recordSelected,int *cursorArea,Record *hovered,struct RecordList *activeBuffer) {
 	*cursorArea = UI_AREA_DELETE;
-	*colorScheme = R_COLOR_SCHEME_DELETE;
+	setColor(R_COLOR_SCHEME_CLASSIC_DELETE);
 	if(hovered->num != recordSelected) {
 		selectRecord(*hovered,*activeBuffer);
 	}
