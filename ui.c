@@ -153,9 +153,9 @@ void shiftLeft(char *str) {
 	}
 	*str = '\0';
 } 
-void shiftRight(char newChar,char *s) {
+void shiftRight(char newChar,int max,char *s) {
 	char nextChar;
-	while(*s) {
+	while(*s && max--) {
 		nextChar = *s;
 		*(s++) = newChar;
 		newChar = nextChar;
@@ -187,9 +187,9 @@ void edit(char *str,int maxLength,Cursor *cursor,char c) {
 	}
 	//to do: check if c a letter
 	if(c >= ' ' && c <= '~') {
-		if(cursor->x <= maxLength) {	
+		if(cursor->x < maxLength) {	
 			//str[cursor->x++] = c; 
-			shiftRight(c,str + cursor->x++);
+			shiftRight(c,maxLength - cursor->x,str + cursor->x++);
 			if(cursor->x > maxLength) {
 				cursor->x = maxLength;
 			}
