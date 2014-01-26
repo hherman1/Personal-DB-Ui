@@ -76,31 +76,7 @@ void displayModeBar(int cursorArea,Area window,struct modeBar modeBar){
 	xt_par2(XT_SET_ROW_COL_POS,row,col);
 	printf(output);
 	flushPool();
-	/*int i = 0;
-	int totalLength = 2;
-	int col = window.top;
-	int row = window.left;
-	for(i = 0; i < modeBar.nModes;i++) {
-		totalLength += strlen(modeBar.modes[i].text);
-		totalLength += 2;
-	}
-	col = (window.right - totalLength) / 2;
-	if(col < window.left) {
-		col = window.left;
-	}
-	row = verticalMargin(modeBar.verticalMargin,window);
 
-	xt_par2(XT_SET_ROW_COL_POS,row,col);
-
-	for(i = 0; i < modeBar.nModes;i++) {
-		if(isMode(cursorArea,modeBar.modes[i])) {
-			setColor(UI_COLOR_SCHEME_MODE_BAR_SELECTED);
-			printf(" [%s] ",modeBar.modes[i].text);
-		} else {
-			setColor(UI_COLOR_SCHEME_MODE_BAR);
-			printf(" %s ",modeBar.modes[i].text);
-		}
-	}*/
 }
 // display utilities
 int isMode(int mode,struct modeText mt) {
@@ -170,22 +146,50 @@ int scroll(Record **hovered, struct RecordList **activeBuffer,char c) {
 	return redraw;
 }
 
+void shiftLeft(char *str) {
+	while(*str && *(str+1)) {
+		*str = *(str+1);
+		str++;
+	}
+	*str = '\0';
+} 
+void shiftRight(char newChar,char *s) {
+	char nextChar;
+	while(*s) {
+		nextChar = *s;
+		*(s++) = newChar;
+		newChar = nextChar;
+	}
+	*s = newChar;
+	*(s+1) = '\0';
+}
+
 void edit(char *str,int maxLength,Cursor *cursor,char c) {
+	int strLen = strlen(str);
+	if(cursor->x >strLen) {
+		cursor->x = strLen;
+	}
 	if(c == KEY_LEFT){
 		if(cursor->x > 0) cursor->x--;
 	}
 	if (c == KEY_RIGHT){
-		if(cursor->x <maxLength)
+		if(cursor->x < maxLength && cursor->x < strLen)
 			cursor->x++;
 	}
 	if (c==KEY_BACKSPACE) {
-		str[cursor->x-1] = (str[cursor->x] && str[cursor->x] != ' ')?' ':'\0';
-		cursor->x--;
+		//str[cursor->x-1] = (str[cursor->x] && str[cursor->x] != ' ')?' ':'\0';
+		//cursor->x--;
+		printf("%c",'\b');
+		if(cursor->x > 0) {
+			(cursor->x)--;
+			shiftLeft(str + cursor->x);
+		}
 	}
 	//to do: check if c a letter
 	if(c >= ' ' && c <= '~') {
 		if(cursor->x <= maxLength) {	
-			str[cursor->x++] = c; 
+			//str[cursor->x++] = c; 
+			shiftRight(c,str + cursor->x++);
 			if(cursor->x > maxLength) {
 				cursor->x = maxLength;
 			}

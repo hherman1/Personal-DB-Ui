@@ -176,15 +176,25 @@ int main(void) {
 			cursor.y = newSubjectArea.top + (cursorArea - UI_AREA_ADD_SUBJECT);
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
 			if (cursorArea == UI_AREA_ADD_SUBJECT){
+				if(c == KEY_DOWN) {
+					cursorArea = UI_AREA_ADD_BODY;
+					cursor.y++;
+					redraw = TRUE;
+				}
 				if (c == KEY_ENTER){
 					cursorArea = UI_AREA_ADD_BODY;
 					cursor.x = 0;
 					cursor.y ++;
 				}
 				else {
-					edit(subject,MAX_BODY_LEN,&cursor,c);
+					redraw = TRUE;
 				}
 			} else if (cursorArea == UI_AREA_ADD_BODY){
+				if(c == KEY_UP) {
+					cursorArea = UI_AREA_ADD_SUBJECT;
+					cursor.y--;
+					redraw = TRUE;
+				}
 				if (c == KEY_ENTER){
 					cursorArea = UI_AREA_RECORDS;
 					addRecord(subject,body);
@@ -192,10 +202,11 @@ int main(void) {
 					cursor.x = 0;
 					cursor.y = 0;
 				}
-				else {
-					edit(body,MAX_BODY_LEN,&cursor,c);
-				}
 			}
+			if(cursorArea == UI_AREA_ADD_SUBJECT) edit(subject,MAX_SUBJECT_LEN,&cursor,c);
+			else if(cursorArea == UI_AREA_ADD_BODY) edit(body,MAX_BODY_LEN,&cursor,c);
+
+
 			redraw = TRUE;
 
 		} else if (cursorArea == UI_AREA_SEARCH) {
@@ -218,27 +229,37 @@ int main(void) {
 		}
 
 		else if (cursorArea == UI_AREA_EDIT_SUBJECT || cursorArea == UI_AREA_EDIT_BODY){
+
 			redraw = modeCheck(c,recordSelected,&cursorLeft,&cursorArea,subject,&cursor,rArea,&hovered,&activeBuffer,&RLBuffer) || redraw;
+
+
 			if (cursorArea == UI_AREA_EDIT_SUBJECT){
-				if(c == KEY_ENTER) {
+				if(c == KEY_DOWN) {
 					cursorArea = UI_AREA_EDIT_BODY;
-					cursor.x = 0;
+					cursor.y++;
+					redraw = TRUE;
+				} else if(c == KEY_ENTER) {
+					cursorArea = UI_AREA_EDIT_BODY;
 					cursor.y ++;
 				} else {
-					edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
 
 				}
 			}else if (cursorArea == UI_AREA_EDIT_BODY){
-				if(c == KEY_ENTER) {
+				if(c == KEY_UP) {
+					cursorArea = UI_AREA_EDIT_SUBJECT;
+					cursor.y--;
+					redraw = TRUE;
+				} else if(c == KEY_ENTER) {
 					cursorArea = UI_AREA_RECORDS;
 					editRecord(hovered->num,hovered->subject,hovered->body);
 					ParseStat();
 					cursor.x = 0;
 					cursor.y = 0;
-				} else {
-					edit(hovered->body,MAX_BODY_LEN,&cursor,c);
-				}
+				} 
 			}
+			if(cursorArea == UI_AREA_EDIT_SUBJECT) edit(hovered->subject,MAX_SUBJECT_LEN,&cursor,c);
+			else if(cursorArea == UI_AREA_EDIT_BODY) edit(hovered->body,MAX_BODY_LEN,&cursor,c);
+
 			redraw = TRUE;
 		}
 		else if (cursorArea == UI_AREA_DELETE) {
