@@ -155,6 +155,8 @@ int main(void) {
 			xt_par0(XT_CLEAR_SCREEN);
 			xt_par0(XT_CH_NORMAL);
 			xt_par2(XT_SET_ROW_COL_POS,1,1);
+			if(c == 'q') printf("Exited with keypress: %c\n",c);
+			else printf("Exited with keycode: %i\n",c);
 			destroy();
 		}
 
