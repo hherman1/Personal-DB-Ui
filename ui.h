@@ -19,7 +19,7 @@
 #define TEXT_ALIGN_CENTER 1
 #define TEXT_ALIGN_RIGHT 2
 
-#define UI_DELETE_CONFIRM(r) "Are you sure you want to delete record %i, %s? color([y/N],UI_DELETE_CONFIRM_COLOR)",r->num,r->subject
+#define UI_DELETE_CONFIRM(r) f_color("Are you sure you want to delete record %i, %s? " f_color("[y/N]", UI_DELETE_CONFIRM_COLOR),XT_CH_BLACK XT_CH_BOLD),r->num,r->subject
 
 #define UI_MODE_LABEL_WIDTH 15
 

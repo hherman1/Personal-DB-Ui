@@ -49,6 +49,8 @@
 
 #define UI_MODE_BAR_SELECTED_TEXT_STYLE XT_CH_BOLD
 
+#define UI_DELETE_CONFIRM_COLOR XT_CH_BOLD XT_CH_RED
+
 #define f_color(string,color) color string XT_CH_NORMAL
 
 #define colorScheme(base,index) 
