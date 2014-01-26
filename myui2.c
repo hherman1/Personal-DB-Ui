@@ -31,7 +31,7 @@ struct displayText UI[] = {
 	{UI_AREA_SEARCH_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_RIGHT,XT_CH_RED,"F2 to return from search"},
 	{UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
 	{UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
-	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
+	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:\tF9 or 'q' at any time to quit"}, //pls save to commit changes.
 };
 int nUI = sizeof(UI)/sizeof(UI[0]);
 ///
