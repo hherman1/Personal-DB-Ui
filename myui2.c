@@ -25,8 +25,10 @@ struct displayText DBInfo = {
 	1,TEXT_ALIGN_LEFT,XT_CH_CYAN,"Version " db_var_col(" %-*.2g") "\t||\t" db_var_col(" %-*s") "\t||\t" f_color("Author: ",XT_CH_CYAN) db_var_col(" %-*s") "\t||\t" f_color("Total Cards: ",XT_CH_CYAN) db_var_col(" %-*i")
 };
 
+
 struct displayText UI[] = {
 	{UI_AREA_SEARCH_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"Search:"},
+	{UI_AREA_SEARCH_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_RIGHT,XT_CH_RED,"F2 to return from search"},
 	{UI_AREA_ADD_SUBJECT_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Subject: "},																				
 	{UI_AREA_ADD_BODY_VERTICAL_MARGIN,TEXT_ALIGN_LEFT,XT_CH_YELLOW,"new Body: "},
 	{-2,TEXT_ALIGN_LEFT,XT_CH_RED,"Note:     F9 to quit"}, //pls save to commit changes.
@@ -187,8 +189,6 @@ int main(void) {
 					cursorArea = UI_AREA_RECORDS;
 					addRecord(subject,body);
 					RLBuffer.lengthfrombot++;
-					fill(subject,30,'\0');
-					fill(body,140,'\0');
 					cursor.x = 0;
 					cursor.y = 0;
 				}
@@ -205,7 +205,6 @@ int main(void) {
 				if(searchBuffer.top) freeBuffer(&searchBuffer);
 				ParseSearch(subject,&searchBuffer);
 				ParseStat();
-				fill(subject,30,'\0');
 				cursor.x = 0;
 				cursor.y = 0;
 				activeBuffer = &searchBuffer;
@@ -318,12 +317,15 @@ void draw() {
 		}
 		cursorLeft = pos;
 		//cursorLeft = ENTRY_FIELD_LABEL_SPACE;
-	} else if (cursorArea == UI_AREA_SEARCH) {
+	} else if (activeBuffer == &searchBuffer || cursorArea == UI_AREA_SEARCH ) {
 		int pos = ENTRY_FIELD_LABEL_SPACE;
 		subjectArea.left = pos;
 		UIInputSubject.verticalMargin = UI_AREA_SEARCH_SUBJECT_VERTICAL_MARGIN;
-		cursor.y = displayUIElement(subjectArea,UIInputSubject);
-		cursorLeft = pos;
+		int t = displayUIElement(subjectArea,UIInputSubject);
+		if(cursorArea == UI_AREA_SEARCH) {
+			cursor.y = t;
+			cursorLeft = pos;
+		}
 	} else if (cursorArea == UI_AREA_RECORDS) {
 		cursorLeft = RECORD_NUM_SPACE;
 	}
@@ -340,6 +342,7 @@ void draw() {
 			displayRecords(*hovered,activeBuffer,rArea,&scheme);			
 		}
 	}
+
 	displayUIElement(windowArea,UIMessage);
 	//DisplayAt(51,0,XT_CH_DEFAULT,strlen(errmsg),errmsg);
 	fill(errmsg,ERROR_MESSAGE_BUFFER_LENGTH,'\0');

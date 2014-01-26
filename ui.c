@@ -6,6 +6,8 @@
 #include "memory.h"
 
 extern struct RecordColor classicModeBar;
+extern char subject[30];
+extern char body[140];
 //display functions
 int displayUIElement(Area window,struct displayText ui, ...) {
 	int row = 0;
@@ -222,6 +224,9 @@ int check_record(int *cursorArea, Record **hovered,struct RecordList **activeBuf
 }
 int init_add(int *cursorArea, Cursor* cursor) {
 	*cursorArea = UI_AREA_ADD_SUBJECT;
+	fill(subject,30,'\0');
+	fill(body,140,'\0');
+
 	cursor->x = 0;
 	return TRUE;
 }
@@ -238,6 +243,9 @@ int init_edit(int recordSelected,int *cursorLeft,int *cursorArea, Cursor *cursor
 		selectRecord(hovered->num);
 	}
 	*cursorLeft = RECORD_NUM_SPACE +1;
+	fill(subject,30,'\0');
+	fill(body,140,'\0');
+
 	cursor->x = strlen(hovered->subject);
 	cursor->y = getRecordY(hovered,activeBuffer,rArea);
 	return TRUE;
