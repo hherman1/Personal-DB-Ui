@@ -705,7 +705,7 @@ static void the_handler(int sig) {
 void server_start() {
 	socklen_t client_len;
 	struct sockaddr_in serv_addr, client_addr;
-	char buffer[1001], c;
+	char buffer[301], c;
 	int nread, i;
 	
 	// Create master socket:
@@ -740,7 +740,7 @@ void server_start() {
 			exit(1);
 		}
 		
-		nread = read(current_sockfd, buffer, 1000);
+		nread = read(current_sockfd, buffer, 300);
 		if (nread > 0) {
 			buffer[nread] = "\0"
 			// Quit command received?

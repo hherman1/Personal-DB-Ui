@@ -5,6 +5,10 @@
 #include "bindings.h"
 #include "color.h"
 #include "memory.h"
+////sockets update
+extern server_ip = "localhost";
+extern portno = 51000;
+//----
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
 extern int recordSelected;
@@ -97,9 +101,18 @@ void debug(struct RecordList *buffer) { // worthless function for debug purposes
 	return;
 }
 // ------------------------------------------------ main --------------------
-int main(void) {
+int main(int argc, char *argv[]) {
 	int c;
+	//sockets
+	if (argc < 3){
+		printf("Sockets client, usage:\n");
+		printf("sockets_client  {IP-address} {port}\n");
+		return 0;
+	}
 	
+	portno = atoi(argv[2]);
+	server_ip = argv[1]
+	////-----------------------------
 	struct sigaction sigHandler;
 	sigHandler.sa_handler = sig_handler;
 
