@@ -10,10 +10,10 @@ V 0.90: implements edit
 	display
 	delete
 	edit
-*/
+*/ 
 
-#define version "0.92"
-#define author "PBrooks"
+#define version "0.92" //base version
+#define author "PBrooks" 
 
 #include <string.h>
 #include <stdio.h>
@@ -27,6 +27,29 @@ V 0.90: implements edit
 
 #include "memory.h"
 
+//sockets start
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
+#define PORT_NUMBER		51000		// the server's default port number
+
+// Messages sent to client:
+#define HUH			"Huh?\n"
+#define EMPTY_MSG	"Empty message received\n"
+#define QUITTING	"Server agrees to quit\n"
+
+int portno = PORT_NUMBER;
+int master_sockfd, current_sockfd;
+// Prototypes:
+void server_start();
+void server_stop();
+int send_to_server(char *server_name, int portno, char *send_buffer, char *receive_buffer, int max_buf);
+//----------------------------------------------------------------------------------------------------------------------sockets end
+#define MAX_BUF		10000
+void gather_message(char *buffer, char **args, int nargs, int max_buf);
+int send_to_server(char *server, int portno, char *send_buffer, char *receive_buffer, int max_buf);
+/////////////////////
 char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 	mystore stat\n\
 	mystore display {item-no}\n\
@@ -44,7 +67,6 @@ char *Usage = "Usage:\tmystore add \"subject\" \"body\"\n\
 #define TRUE	1
 #define FALSE	0
 // Prototypes:
-int parseArgs(int argc, char *argv[]); //changed and
 int parseArgsUtil(int argc, char *argv[]); //moved by Tianci Lin
 int isPositive(char *s);
 int readData(void);
@@ -99,73 +121,29 @@ int main(int argc, char *argv[]) {
 	sigHandler.sa_handler = the_handler;
 	sigaction(SIGINT,&sigHandler,NULL);
 
-	if (!parseArgs(argc, argv)) {
-		if (errmsg[0] != '\0')
-			printf("%s\n",errmsg);
-		else
-			printf("|status: ERROR: No command-line arguments, or error in arguments\n\nVersion: %s\n%s|\n",
-			version,Usage);
-		return 1;
+	//sockets
+	if (strcmp(argv[argc-1],"start") != 0 && strcmp(argv[argc-1],"stop") != 0) {		// print help
+		printf("Creates or controls a server on this computer at port %d\n",PORT_NUMBER);
+		printf("Usage: sockets_server {start | stop}\n   or   sockets_server {portno} {start | stop}\n");
+		printf("Send a string to the server, (whose first char is \"u\") and get it back in UPPER-CASE\n");
+		printf("If first char is \"q\", then we're telling the server to quit\n");
+		printf("For any other string, server returns \"Huh?\"\n");
+		return 0;
 	}
 	
-	//run comand
-	
-	
+	if (argc == 3)
+		portno = atoi(argv[1]);
+		
+	if (strcmp(argv[argc-1],"start") == 0)
+		server_start();
+	else
+		server_stop();
+
 	return 0;
 }
 
 // ------------------------------- parseArgs() -------------------------------
-// parse the command-line arguments, and assign the global variables from them
-// return FALSE if any problem with the command-line arguments
-int parseArgs(int argc, char *argv[]) {
-	//----------------using fifo-----------
-	//if (argc < 2) {
-	int how_much;
-	char input[BUFSIZ];
-	// remove the FIFO in case it exists
-	unlink(fifo_read);
-	
-	// create the FIFO pseudo-file
-	if (mkfifo(fifo_read,0666) != 0) {
-		perror("mkfifo error: ");
-		return -1;
-	}
-	// open it for reading:
-	fd_read = open(fifo_read, O_RDONLY);
-	printf("Initialized fifo at %s\nAwaiting input\n",fifo_read);
-	if (fd_read < 0) {
-		printf("open(fifo_read) failed, returns: %d\n", fd_read);
-		return fd_read;
-	}
-	
-	// also open it for writing, but don't write anything to it (this is to prevent its closure when a client has finished writing to it).
-	if ((fd_writeTEMP = open(fifo_read, O_WRONLY)) < 0) {
-		perror("Cannot open fifo_read for writing. ");
-		return fd_write;
-	}
-	while (1) {
-
-		how_much = read(fd_read,input,BUFSIZ);
-		printf("Received: %s\n",input);
-		if (how_much > 0) {
-			input[how_much]='\0';
-			if (Process(input) == -1) { 
-				printf("fifo_server quitting...\n");
-				close(fd_read);
-				unlink(fifo_read);
-				return 0;
-			}
-		}
-	}
-	return 0;
-	
-	/*
-	}else {  //no fifo
-		parseArgsUtil(argc, argv);
-		runCommand(argc,argv);
-	}
-	*/
-}
+//note parsargs has been replaced by server_start in this new socket version
 
 //use before runcommand
 int parseArgsUtil(int argc, char *argv[]){   
@@ -379,7 +357,7 @@ int add(char *subject, char *body) {
 	++nitems;
 	rewrite = TRUE;
 	char* message = "|status: OK|\n";
-	write(fd_write,message,strlen(message));
+	write(current_sockfd,message,strlen(message));
 	
 	return TRUE;
 }
@@ -409,7 +387,7 @@ int edit(char *sn) {
 	
 	rewrite = TRUE;
 	char* message = "|status: OK|\n";
-	write(fd_write,message,strlen(message));
+	write(current_sockfd,message,strlen(message));
 	return TRUE;
 }
 	
@@ -468,7 +446,7 @@ void status(void) {
 	}
 
 	// make sure fd_write is opened already
-	write(fd_write,ans,strlen(ans));
+	write(current_sockfd,ans,strlen(ans));
 
 
 	return;
@@ -515,7 +493,7 @@ int display(char *sn) {
 	char *subjectS = saveFormatted("|subject: %s|\n",this_data.theSubject);
 	char *bodyS = saveFormatted("|body: %s|\n",this_data.theBody);
 	char *ans = saveFormatted("%s%s%s%s%s",statusS,itemS,timeS,subjectS,bodyS);
-	write(fd_write,ans,strlen(ans));
+	write(current_sockfd,ans,strlen(ans));
 	return TRUE;
 }
 
@@ -548,7 +526,7 @@ int delete(char *sn) {
 	--nitems;
 	rewrite = TRUE;
 	char* message = "|status: OK|";
-	write(fd_write,message,strlen(message));
+	write(current_sockfd,message,strlen(message));
 	return TRUE;
 
 }
@@ -629,7 +607,7 @@ int search(char *subject) {
 		*ans = '\0';
 		noResults = ans;
 	}
-	printf("Writing %i bytes: %s\n(%i written)\n",strlen(ans),ans,write(fd_write,ans,strlen(ans)));
+	printf("Writing %i bytes: %s\n(%i written)\n",strlen(ans),ans,write(current_sockfd,ans,strlen(ans)));
 	if(noResults) {
 		free(*noResults);
 	}
@@ -662,16 +640,9 @@ int Process(char *s) {
 	}else if (strcmp(fields[0],"return") == 0 && nfields <= 10) {
 		printf("|%s|\n",fields[1]);
 
-		if ((fd_write = open(fields[1],O_WRONLY)) < 0) {
-			printf("Cannot write to %s\n", fields[1]);
-		}
-		else {
-			parseArgsUtil(nfields - 2, &fields[2]);
-			runCommand(nfields - 2,&fields[2]);
-			//write(fd_write,Capital(fields[2]),strlen(fields[2]));
-			close(fd_write);
-			flushPool();
-		}
+		parseArgsUtil(nfields - 2, &fields[2]);
+		runCommand(nfields - 2,&fields[2]);
+		flushPool();
 	}
 	else
 		printf("Unrecognized command: %s %s %s\n", fields[0],fields[1],fields[2]);
@@ -727,4 +698,71 @@ static void the_handler(int sig) {
 	close(fd_writeTEMP);
 	unlink(fifo_read);
 	exit(0);
+}
+
+//==================================SOCKETS==================================================
+// ---------------------------------------- server_start -------------------------------------------
+void server_start() {
+	socklen_t client_len;
+	struct sockaddr_in serv_addr, client_addr;
+	char buffer[1001], c;
+	int nread, i;
+	
+	// Create master socket:
+	if ((master_sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("Server: Cannot create master socket.");
+		exit(-1);
+	}
+	
+	// create socket structure
+	bzero((char *) &serv_addr, sizeof(serv_addr));
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	serv_addr.sin_port = htons(portno);
+	
+	// bind the socket to the local port
+	if (bind(master_sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+		perror("Server: Error on binding");
+		exit(1);
+	}
+	
+	// listen
+	listen(master_sockfd, 5);
+	
+	client_len = sizeof(client_addr);
+	printf("Server listening on port %d\n", portno);
+	
+	// master loop
+	while(TRUE) {
+		// block until a client connects
+		if ((current_sockfd = accept(master_sockfd, (struct sockaddr *) &client_addr, &client_len)) < 0) {
+			perror("Server: Error on accept()");
+			exit(1);
+		}
+		
+		nread = read(current_sockfd, buffer, 1000);
+		if (nread > 0) {
+			buffer[nread] = "\0"
+			// Quit command received?
+			if (Process(buffer) == -1) { 
+				write(current_sockfd, QUITTING, sizeof(QUITTING));
+				close(current_sockfd);
+				close(master_sockfd);
+				printf("Server quitting...\n");
+				exit(0);
+			}
+		}
+		else {	// zero length message?
+			write(current_sockfd, EMPTY_MSG, sizeof(EMPTY_MSG));
+			close(current_sockfd);
+			printf("Server: empty message received\n");
+		}
+	}
+}
+
+// ------------------------------------------- server_stop ------------------------------------------
+void server_stop() {
+	char receive_buffer[100];
+	
+	send_to_server("localhost",portno,"q", receive_buffer, 100);
 }
