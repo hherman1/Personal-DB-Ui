@@ -692,7 +692,7 @@ int SeparateIntoFields(char *s, char **fields, int max_fields) {
 }
 // ============================ the_handler ==================
 static void the_handler(int sig) {
-	printf("Signal caught: fifo_server terminated by signal %d\n",sig);
+	printf("Signal caught: server terminated by signal %d\n",sig);
 	server_stop();
 	exit(0);
 }
