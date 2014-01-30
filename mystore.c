@@ -632,7 +632,7 @@ int Process(char *s) {
 	char *fields[10];
 	int nfields;
 	//debug
-	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfiled from 3 to 10
+	nfields = SeparateIntoFields(s, fields, 10); //tian : changed maxfield from 3 to 10
 	// do the commands:
 
 	if (strcmp(fields[0],"quit") == 0){ 
@@ -640,8 +640,8 @@ int Process(char *s) {
 	}else if (strcmp(fields[0],"return") == 0 && nfields <= 10) {
 		printf("|%s|\n",fields[1]);
 
-		parseArgsUtil(nfields - 2, &fields[2]);
-		runCommand(nfields - 2,&fields[2]);
+		parseArgsUtil(nfields - 1, &fields[1]); //take out the "return" keyword
+		runCommand(nfields - 1,&fields[1]);
 		flushPool();
 	}
 	else
