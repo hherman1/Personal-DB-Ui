@@ -28,8 +28,8 @@ extern char subject[31];
 extern char body[141];
 extern char errmsg[80];
 
-extern server_ip;
-extern portno;
+extern char* server_ip;
+extern int portno;
 // ----------------------------------------- ReadMystoreFromChild ---------------------------
 void addArgument(char *store,char *argv) {
 	sprintf(store,"%s %s|",store,argv);

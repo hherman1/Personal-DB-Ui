@@ -6,8 +6,8 @@
 #include "color.h"
 #include "memory.h"
 ////sockets update
-extern server_ip = "localhost";
-extern portno = 51000;
+extern char* server_ip; 
+extern int portno; 
 //----
 struct NameValue *nvs = NULL; //namevalues storage i think
 int n_nvs = 0;
