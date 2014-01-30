@@ -742,7 +742,7 @@ void server_start() {
 		
 		nread = read(current_sockfd, buffer, 300);
 		if (nread > 0) {
-			buffer[nread] = "\0"
+			buffer[nread] = "\0";
 			// Quit command received?
 			if (Process(buffer) == -1) { 
 				write(current_sockfd, QUITTING, sizeof(QUITTING));
