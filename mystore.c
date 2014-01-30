@@ -81,9 +81,8 @@ int Process(char *s);
 int SeparateIntoFields(char *s, char **fields, int max_fields);
 static void the_handler(int sig);
 
-//
-int fd_read, fd_writeTEMP, fd_write;
-char *fifo_read = "/tmp/fifo_server.dat";
+
+//char *fifo_read = "/tmp/fifo_server.dat";
 
 // Command line arguments processed:
 int command = NOTHING;
@@ -445,7 +444,6 @@ void status(void) {
 		ans = saveFormatted("%s%s%s",ans,timeSS,timeES);
 	}
 
-	// make sure fd_write is opened already
 	write(current_sockfd,ans,strlen(ans));
 
 
@@ -615,18 +613,8 @@ int search(char *subject) {
 }
 
 //-----------------------FIFO update-----------------------------
-/*
-||======\\	
-||       ||	
-||		 //	
-||======//	
-||			
-||			
-||			
-||			
 
-*/
-	// ================================ Process ===========================
+// ================================ Process ===========================
 int Process(char *s) {
 	printf("\n\n");
 	char *fields[10];
@@ -694,7 +682,6 @@ int SeparateIntoFields(char *s, char **fields, int max_fields) {
 static void the_handler(int sig) {
 	printf("Signal caught: server terminated by signal %d\n",sig);
 	server_stop();
-	exit(0);
 }
 
 //==================================SOCKETS==================================================
@@ -739,9 +726,10 @@ void server_start() {
 		
 		nread = read(current_sockfd, buffer, 300);
 		if (nread > 0) {
+
 			buffer[nread] = '\0';
 			// Quit command received?
-			if (Process(buffer) == -1) { 
+			if (buffer[0] == 'q' || Process(buffer) == -1) { 
 				write(current_sockfd, QUITTING, sizeof(QUITTING));
 				close(current_sockfd);
 				close(master_sockfd);
