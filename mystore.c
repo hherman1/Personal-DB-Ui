@@ -681,7 +681,10 @@ int SeparateIntoFields(char *s, char **fields, int max_fields) {
 // ============================ the_handler ==================
 static void the_handler(int sig) {
 	printf("Signal caught: server terminated by signal %d\n",sig);
-	server_stop();
+	close(current_sockfd);
+	close(master_sockfd);
+	printf("Server quitting...\n");
+	exit(0);
 }
 
 //==================================SOCKETS==================================================
