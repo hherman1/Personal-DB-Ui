@@ -1,6 +1,11 @@
 updated: 1/29/14
-myui4
-sockets 
+myui4 with sockets 
+to run:
+
+./mystore start
+
+and in another terminal
+./myui2 localhost 51000
 
 /////////////--------------------------------------------
 
