@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	portno = atoi(argv[2]);
-	server_ip = argv[1]
+	server_ip = argv[1];
 	////-----------------------------
 	struct sigaction sigHandler;
 	sigHandler.sa_handler = sig_handler;
