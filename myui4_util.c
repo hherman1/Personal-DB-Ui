@@ -35,7 +35,7 @@ void addArgument(char *store,char *argv) {
 }
 int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	//updated for sockets. removed fifo
-	char send_message[MAX_BUF+1]
+	char send_message[MAX_BUF+1];
 	
 	// compose messageforserver
 	sprintf(send_message, " return|");
