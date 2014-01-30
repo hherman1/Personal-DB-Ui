@@ -5,7 +5,7 @@ to run:
 ./mystore start
 
 and in another terminal
-./myui2 localhost 51000
+./myui4 localhost 51000
 
 /////////////--------------------------------------------
 
