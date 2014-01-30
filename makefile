@@ -1,7 +1,7 @@
 all: mystore myui4
 
-myui4:	myui4.o ui.o record.o memory.o color.o myui4_util.o keyboard.o xterm_control.o
-	gcc -g -Wall myui4.o ui.o record.o memory.o color.o myui4_util.o keyboard.o xterm_control.o -o myui4
+myui4:	myui4.o ui.o record.o memory.o color.o myui4_util.o keyboard.o xterm_control.o sockets_send.o
+	gcc -g -Wall myui4.o ui.o record.o memory.o color.o myui4_util.o keyboard.o xterm_control.o sockets_send.o -o myui4
 	
 myui4.o:	myui4.c myui4.h record.h memory.h bindings.h color.h ui.h
 	gcc -g -Wall -c myui4.c
@@ -18,8 +18,8 @@ memory.o:	memory.c memory.h
 color.o:	color.c color.h xterm_control.h memory.h
 	gcc -g -Wall -c color.c
 
-myui4_util.o:	myui4_util.c myui4.h sockets_send.o
-	gcc -g -Wall -c myui4_util.c sockets_send.o
+myui4_util.o:	myui4_util.c myui4.h 
+	gcc -g -Wall -c myui4_util.c
 	
 keyboard.o:	keyboard.c keyboard.h
 	gcc -g -Wall -c keyboard.c

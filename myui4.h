@@ -83,3 +83,6 @@ void addRecord(char *subject, char* body);
 void message(char *msg, ...);
 void destroy();
 void sig_handler(int signal);
+
+//sockets
+int send_to_server(char *server, int portno, char *send_buffer, char *receive_buffer, int max_buf);

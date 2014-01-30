@@ -14,13 +14,12 @@
 #define MAX_BUF		300
 
 void gather_message(char *buffer, char **args, int nargs, int max_buf);
-int send_to_server(char *server, int portno, char *send_buffer, char *receive_buffer, int max_buf);
-int send_to_server(char *server, int portno, char *send_buffer, char *receive_buffer, int max_buf);
+
 //----------
 extern struct NameValue *nvs;
 extern int n_nvs;
 
-extern char input[1000];
+extern char input[MAX_BUF+1];
 extern int n_input;
 
 extern int nitems;
@@ -36,7 +35,7 @@ void addArgument(char *store,char *argv) {
 }
 int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 	//updated for sockets. removed fifo
-	char send_message[MAX_BUF+1], read_message[MAX_BUF+1];
+	char send_message[MAX_BUF+1]
 	
 	// compose messageforserver
 	sprintf(send_message, " return|");
@@ -52,14 +51,14 @@ int ReadMystoreFromChild(char *argv1, char *argv2, char *argv3, char *argv4) {
 			}
 		}
 	}
-	read_message[0] = '\0'; 
+	input[0] = '\0'; 
 	
-	if (send_to_server(server_ip, portno, send_message, read_message, MAX_BUF) < 0) {
+	if (send_to_server(server_ip, portno, send_message, input, MAX_BUF) < 0) {
 		printf("Client: ERROR in send_to_server\n");
 		return -1;
 	}
 
-	return read_message;
+	return n_input = sizeof(input);
 }
 
 
